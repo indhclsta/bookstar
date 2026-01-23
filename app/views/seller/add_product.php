@@ -7,7 +7,8 @@
         <!-- ALERT -->
         <?php if (!empty($_SESSION['error'])): ?>
             <div class="alert alert-danger">
-                <?= $_SESSION['error']; unset($_SESSION['error']); ?>
+                <?= $_SESSION['error'];
+                unset($_SESSION['error']); ?>
             </div>
         <?php endif; ?>
 
@@ -24,8 +25,8 @@
 
         <!-- FORM -->
         <form method="POST"
-              action="<?= BASE_URL ?>/?c=sellerProduct&m=store"
-              enctype="multipart/form-data">
+            action="<?= BASE_URL ?>/?c=sellerProduct&m=store"
+            enctype="multipart/form-data">
 
             <div class="row">
                 <!-- LEFT -->
@@ -37,28 +38,28 @@
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">Product Name</label>
                                 <input type="text"
-                                       name="name"
-                                       class="form-control"
-                                       required>
+                                    name="name"
+                                    class="form-control"
+                                    required>
                             </div>
 
                             <!-- DESCRIPTION -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">Description</label>
                                 <textarea name="description"
-                                          class="form-control"
-                                          rows="5"
-                                          required></textarea>
+                                    class="form-control"
+                                    rows="5"
+                                    required></textarea>
                             </div>
 
                             <!-- IMAGE -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">Product Image</label>
                                 <input type="file"
-                                       name="image"
-                                       class="form-control"
-                                       accept="image/png,image/jpeg"
-                                       required>
+                                    name="image"
+                                    class="form-control"
+                                    accept="image/png,image/jpeg"
+                                    required>
                             </div>
 
                         </div>
@@ -72,11 +73,11 @@
                     <div class="card mb-3">
                         <div class="card-body d-flex gap-2">
                             <a href="<?= BASE_URL ?>/?c=sellerProduct"
-                               class="btn btn-outline-danger flex-fill">
+                                class="btn btn-outline-danger flex-fill">
                                 Cancel
                             </a>
                             <button type="submit"
-                                    class="btn btn-primary flex-fill">
+                                class="btn btn-primary flex-fill">
                                 Publish
                             </button>
                         </div>
@@ -90,9 +91,10 @@
                             <!-- CATEGORY -->
                             <div class="mb-3">
                                 <label class="form-label">Category</label>
+
                                 <select name="category_id"
-                                        class="form-select"
-                                        required>
+                                    class="form-select"
+                                    required>
                                     <option value="">-- Select Category --</option>
                                     <?php foreach ($categories as $cat): ?>
                                         <option value="<?= $cat['id'] ?>">
@@ -106,30 +108,30 @@
                             <div class="mb-3">
                                 <label class="form-label">Stock</label>
                                 <input type="number"
-                                       name="stock"
-                                       class="form-control"
-                                       min="0"
-                                       required>
+                                    name="stock"
+                                    class="form-control"
+                                    min="0"
+                                    required>
                             </div>
 
                             <!-- COST PRICE -->
                             <div class="mb-3">
                                 <label class="form-label">Regular Price (Harga Modal)</label>
                                 <input type="number"
-                                       name="cost_price"
-                                       class="form-control"
-                                       step="0.01"
-                                       required>
+                                    name="cost_price"
+                                    class="form-control"
+                                    step="0.01"
+                                    required>
                             </div>
 
                             <!-- SALE PRICE -->
                             <div class="mb-3">
                                 <label class="form-label">Sale Price (Harga Jual)</label>
                                 <input type="number"
-                                       name="price"
-                                       class="form-control"
-                                       step="0.01"
-                                       required>
+                                    name="price"
+                                    class="form-control"
+                                    step="0.01"
+                                    required>
                             </div>
 
                         </div>

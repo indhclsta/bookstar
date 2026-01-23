@@ -11,7 +11,7 @@ class CategoryModel
 
     public function getAll()
     {
-        $stmt = $this->db->query("SELECT * FROM categories ORDER BY id DESC");
+        $stmt = $this->db->query("SELECT * FROM categories ORDER BY id ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -76,18 +76,22 @@ class CategoryModel
     }
 
     /* ================= SELLER ================= */
-    // Ambil kategori admin + seller login
     public function getSellerCategories($sellerId)
     {
         $sql = "SELECT * FROM categories
-                WHERE created_by IS NULL
-                   OR created_by = :seller_id
-                ORDER BY owner_role ASC, name ASC";
+            WHERE owner_role = 'admin'
+               OR (owner_role = 'seller' AND created_by = :seller_id)
+            ORDER BY owner_role ASC, name ASC";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->execute(['seller_id' => $sellerId]);
+        $stmt->execute([
+            'seller_id' => $sellerId
+        ]);
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
 
     public function isSellerCategory($id, $sellerId)
     {

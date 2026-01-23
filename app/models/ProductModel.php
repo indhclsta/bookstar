@@ -16,7 +16,7 @@ class ProductModel
             FROM products p
             JOIN categories c ON c.id = p.category_id
             WHERE p.seller_id = ?
-            ORDER BY p.id DESC
+            ORDER BY p.id ASC
         ");
         $stmt->execute([$sellerId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

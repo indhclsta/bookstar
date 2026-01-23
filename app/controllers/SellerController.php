@@ -1,7 +1,7 @@
 <?php
 
 require_once APP_PATH . '/core/auth.php';
-require_once APP_PATH . '/models/UserModels.php';
+require_once APP_PATH . '/models/UserModel.php';
 
 class SellerController
 {
@@ -11,7 +11,7 @@ class SellerController
     {
         Auth::check();
         Auth::role('seller');
-        
+
 
         $this->userModel = new UserModel();
     }
@@ -44,10 +44,12 @@ class SellerController
     public function profile()
     {
         $sellerId = $_SESSION['user']['id'];
-        $seller = $this->userModel->findById($sellerId);
+        $user = $this->userModel->findById($sellerId);
 
         require APP_PATH . '/views/seller/profile.php';
     }
+
+
 
     public function updateProfile()
     {
@@ -65,7 +67,7 @@ class SellerController
 
         // upload photo
         if (!empty($_FILES['photo']['name'])) {
-            $allowed = ['jpg','jpeg','png'];
+            $allowed = ['jpg', 'jpeg', 'png'];
             $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
 
             if (!in_array($ext, $allowed)) {
@@ -84,7 +86,7 @@ class SellerController
 
             // hapus foto lama kecuali default
             $oldPhoto = $_SESSION['user']['photo'] ?? null;
-            if ($oldPhoto && !in_array($oldPhoto, ['admin.png','seller.png','customer.png'])) {
+            if ($oldPhoto && !in_array($oldPhoto, ['admin.png', 'seller.png', 'customer.png'])) {
                 $oldPath = $uploadDir . $oldPhoto;
                 if (file_exists($oldPath)) unlink($oldPath);
             }

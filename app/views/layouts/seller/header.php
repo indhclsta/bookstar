@@ -1,3 +1,12 @@
+<?php
+$user  = $_SESSION['user'] ?? null;
+
+$name  = $user['name']  ?? '';
+$email = $user['email'] ?? '';
+$photo = !empty($user['photo'])
+    ? BASE_URL . '/uploads/profile/' . $user['photo']
+    : 'https://placehold.co/100x100/png';
+?>
 <!doctype html>
 <html lang="en" data-bs-theme="blue-theme">
 <head>
@@ -287,25 +296,32 @@
         </li>
 
         <li class="nav-item dropdown">
-          <a href="javascrpt:;" class="dropdown-toggle dropdown-toggle-nocaret" data-bs-toggle="dropdown">
-             <img src="https://placehold.co/110x110/png" class="rounded-circle p-1 border" width="45" height="45" alt="">
-          </a>
-          <div class="dropdown-menu dropdown-user dropdown-menu-end shadow">
-            <a class="dropdown-item  gap-2 py-2" href="javascript:;">
-              <div class="text-center">
-                <img src="https://placehold.co/110x110/png" class="rounded-circle p-1 shadow mb-3" width="90" height="90"
-                  alt="">
-                <h5 class="user-name mb-0 fw-bold">Hello, Jhon</h5>
-              </div>
+            <a href="javascript:;" class="dropdown-toggle dropdown-toggle-nocaret" data-bs-toggle="dropdown">
+              <img src="<?= $photo ?>" class="rounded-circle p-1 border" width="45" height="45" alt="User">
             </a>
+
+            <div class="dropdown-menu dropdown-user dropdown-menu-end shadow">
+
+              <div class="dropdown-item text-center">
+                <img src="<?= $photo ?>" class="rounded-circle p-1 shadow mb-2" width="80" height="80">
+                <?php if ($email): ?>
+                  <small class="text-muted"><h6><?= htmlspecialchars($name ?? '') ?></h6></small>
+                <?php endif; ?>
+              </div>
             <hr class="dropdown-divider">
-            <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
-              class="material-icons-outlined">person_outline</i>Profile</a>
-            <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
-              class="material-icons-outlined">local_bar</i>Setting</a>
-            <hr class="dropdown-divider">
-            <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
-            class="material-icons-outlined">power_settings_new</i>Logout</a>
+            <a class="dropdown-item d-flex align-items-center gap-2 py-2"
+                href="<?= BASE_URL ?>/?c=seller&m=profile">
+                <i class="material-icons-outlined">person_outline</i>
+                Profile
+              </a>
+
+              <hr class="dropdown-divider">
+
+              <a class="dropdown-item d-flex align-items-center gap-2 py-2"
+                href="<?= BASE_URL ?>/?c=auth&m=logout">
+                <i class="material-icons-outlined">power_settings_new</i>
+                Logout
+              </a>
           </div>
         </li>
       </ul>

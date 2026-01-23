@@ -53,9 +53,9 @@
             <div class="menu-title">eCommerce</div>
           </a>
           <ul>
-            <li><a href="<?= BASE_URL ?>/?c=seller&m=addProduct"><i class="material-icons-outlined">arrow_right</i>Add Product</a>
+            <li><a href="<?= BASE_URL ?>/?c=sellerProduct&m=create"><i class="material-icons-outlined">arrow_right</i>Add Product</a>
             </li>
-            <li><a href="<?= BASE_URL ?>/?c=seller&m=product"><i class="material-icons-outlined">arrow_right</i>Products</a>
+            <li><a href="<?= BASE_URL ?>/?c=sellerProduct&m=index"><i class="material-icons-outlined">arrow_right</i>Products</a>
             </li>
             <li><a href="ecommerce-customers.html"><i class="material-icons-outlined">arrow_right</i>Customers</a>
             </li>

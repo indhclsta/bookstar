@@ -1,7 +1,7 @@
 <?php
 
 require_once APP_PATH . '/core/auth.php';
-require_once APP_PATH . '/models/UserModels.php';
+require_once APP_PATH . '/models/UserModel.php';
 
 class AdminController
 {
