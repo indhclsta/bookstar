@@ -12,8 +12,6 @@ class AuthController
 
     public function loginProcess()
     {
-        session_start();
-
         $email = $_POST['email'];
         $password = $_POST['password'];
 

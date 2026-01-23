@@ -13,6 +13,7 @@
   <!--plugins-->
   <link href="<?= BASE_URL ?>/assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="<?= BASE_URL ?>/assets/plugins/metismenu/metisMenu.min.css">
+  <link href="<?= BASE_URL ?>/assets/plugins/fancy-file-uploader/fancy_fileupload.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="<?= BASE_URL ?>/assets/plugins/metismenu/mm-vertical.css">
   <link rel="stylesheet" type="text/css" href="<?= BASE_URL ?>/assets/plugins/simplebar/css/simplebar.css">
   <!--bootstrap css-->

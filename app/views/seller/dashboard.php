@@ -8,11 +8,6 @@
       <div class="breadcrumb-title pe-3">Dashboard</div>
 
       <div class="ms-auto">
-        <div class="btn-group">
-          <button type="button" class="btn btn-outline-primary">Settings</button>
-
-          </button>
-        </div>
       </div>
     </div>
     <!--end breadcrumb-->

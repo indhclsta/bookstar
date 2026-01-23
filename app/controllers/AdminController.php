@@ -20,11 +20,6 @@ class AdminController
         require APP_PATH . '/views/admin/dashboard.php';
     }
 
-    public function category()
-    {
-        require APP_PATH . '/views/admin/category.php';
-    }
-
     public function faq()
     {
         require APP_PATH . '/views/admin/faq.php';

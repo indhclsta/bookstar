@@ -1,72 +1,179 @@
 <?php
-
 require_once APP_PATH . '/models/Database.php';
-
 class CategoryModel
 {
     private $db;
 
     public function __construct()
     {
-        $this->db = Database::getInstance();
+        $this->db = Database::getInstance()->getConnection();
     }
 
     public function getAll()
     {
-        $stmt = $this->db->prepare("SELECT * FROM categories ORDER BY id DESC");
+        $stmt = $this->db->query("SELECT * FROM categories ORDER BY id DESC");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    /* ================= ADMIN ================= */
+    public function getAdminCategories()
+    {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM categories 
+             WHERE owner_role='admin' 
+             ORDER BY id ASC"
+        );
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function create($name)
+    public function storeAdmin($name)
     {
-        $stmt = $this->db->prepare("INSERT INTO categories (name) VALUES (:name)");
-        return $stmt->execute(['name' => $name]);
+        $check = $this->db->prepare(
+            "SELECT id FROM categories 
+             WHERE name=? AND owner_role='admin'"
+        );
+        $check->execute([$name]);
+
+        if ($check->rowCount() > 0) {
+            return false;
+        }
+
+        $stmt = $this->db->prepare(
+            "INSERT INTO categories (name, owner_role) 
+             VALUES (?, 'admin')"
+        );
+        return $stmt->execute([$name]);
     }
 
-    public function find($id)
+    public function updateAdmin($id, $name)
     {
-        $stmt = $this->db->prepare("SELECT * FROM categories WHERE id = :id");
-        $stmt->execute(['id' => $id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $check = $this->db->prepare(
+            "SELECT id FROM categories 
+             WHERE name=? AND owner_role='admin' AND id!=?"
+        );
+        $check->execute([$name, $id]);
+
+        if ($check->rowCount() > 0) {
+            return false;
+        }
+
+        $stmt = $this->db->prepare(
+            "UPDATE categories SET name=? 
+             WHERE id=? AND owner_role='admin'"
+        );
+        return $stmt->execute([$name, $id]);
     }
 
-    public function update($id, $name)
+    public function deleteAdmin($id)
     {
         $stmt = $this->db->prepare(
-            "UPDATE categories SET name = :name WHERE id = :id"
+            "DELETE FROM categories 
+             WHERE id=? AND owner_role='admin'"
         );
+        return $stmt->execute([$id]);
+    }
+
+    /* ================= SELLER ================= */
+    // Ambil kategori admin + seller login
+    public function getSellerCategories($sellerId)
+    {
+        $sql = "SELECT * FROM categories
+                WHERE created_by IS NULL
+                   OR created_by = :seller_id
+                ORDER BY owner_role ASC, name ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['seller_id' => $sellerId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function isSellerCategory($id, $sellerId)
+    {
+        $stmt = $this->db->prepare(
+            "SELECT id FROM categories
+         WHERE id = :id AND created_by = :seller_id"
+        );
+        $stmt->execute([
+            'id' => $id,
+            'seller_id' => $sellerId
+        ]);
+        return (bool)$stmt->fetch();
+    }
+
+
+    // Tambah kategori seller
+    public function storeSeller($name, $sellerId)
+    {
+        // cek duplikat per seller
+        $check = $this->db->prepare(
+            "SELECT id FROM categories
+             WHERE name = :name AND created_by = :seller_id"
+        );
+        $check->execute([
+            'name' => $name,
+            'seller_id' => $sellerId
+        ]);
+
+        if ($check->fetch()) {
+            return false;
+        }
+
+        $stmt = $this->db->prepare(
+            "INSERT INTO categories (name, created_by, owner_role)
+             VALUES (:name, :created_by, 'seller')"
+        );
+
         return $stmt->execute([
-            'id'   => $id,
-            'name' => $name
+            'name' => $name,
+            'created_by' => $sellerId
         ]);
     }
 
-    public function delete($id)
+    // Update kategori seller
+    public function updateSeller($id, $name, $sellerId)
     {
-        $stmt = $this->db->prepare("DELETE FROM categories WHERE id = :id");
-        return $stmt->execute(['id' => $id]);
-    }
+        $check = $this->db->prepare(
+            "SELECT id FROM categories
+             WHERE name = :name
+               AND created_by = :seller_id
+               AND id != :id"
+        );
+        $check->execute([
+            'name' => $name,
+            'seller_id' => $sellerId,
+            'id' => $id
+        ]);
 
-    public function existsByName($name, $excludeId = null)
-    {
-        if ($excludeId) {
-            $stmt = $this->db->prepare(
-                "SELECT COUNT(*) FROM categories 
-             WHERE LOWER(name) = LOWER(:name) AND id != :id"
-            );
-            $stmt->execute([
-                'name' => $name,
-                'id'   => $excludeId
-            ]);
-        } else {
-            $stmt = $this->db->prepare(
-                "SELECT COUNT(*) FROM categories 
-             WHERE LOWER(name) = LOWER(:name)"
-            );
-            $stmt->execute(['name' => $name]);
+        if ($check->fetch()) {
+            return false;
         }
 
-        return $stmt->fetchColumn() > 0;
+        $stmt = $this->db->prepare(
+            "UPDATE categories
+             SET name = :name
+             WHERE id = :id AND created_by = :seller_id"
+        );
+
+        return $stmt->execute([
+            'name' => $name,
+            'id' => $id,
+            'seller_id' => $sellerId
+        ]);
+    }
+
+    // Hapus kategori seller
+    public function deleteSeller($id, $sellerId)
+    {
+        $stmt = $this->db->prepare(
+            "DELETE FROM categories
+             WHERE id = :id AND created_by = :seller_id"
+        );
+
+        return $stmt->execute([
+            'id' => $id,
+            'seller_id' => $sellerId
+        ]);
     }
 }

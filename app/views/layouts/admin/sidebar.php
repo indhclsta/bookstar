@@ -25,7 +25,7 @@
             </a>
           </li> 
            <li>
-            <a href="<?= BASE_URL ?>/?c=admin&m=category">
+            <a href="<?= BASE_URL ?>/?c=adminCategory&m=index">
               <div class="parent-icon"><i class="material-icons-outlined">category</i>
               </div>
               <div class="menu-title">Manage Category</div>
