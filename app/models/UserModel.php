@@ -46,11 +46,22 @@ class UserModel
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function updateLastActivity($userId)
+    {
+        $db = Database::getInstance()->getConnection();
+        $stmt = $db->prepare("UPDATE users SET last_activity = NOW() WHERE id = ?");
+        $stmt->execute([$userId]);
+    }
+
+
+
+    /* ===== REGISTER (UMUM) ===== */
     public function create($data)
     {
         $stmt = $this->db->prepare("
-            INSERT INTO users (role_id, name, email, password, nik, address)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO users 
+            (role_id, name, email, password, nik, address, no_rekening, qris_image)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
         return $stmt->execute([
@@ -59,7 +70,9 @@ class UserModel
             $data['email'],
             password_hash($data['password'], PASSWORD_DEFAULT),
             $data['nik'],
-            $data['address']
+            $data['address'],
+            $data['no_rekening'] ?? null,
+            $data['qris_image'] ?? null
         ]);
     }
 
@@ -124,14 +137,15 @@ class UserModel
     public function getAllCustomer()
     {
         $stmt = $this->db->prepare("
-            SELECT id, name, email, nik, address, photo, is_online
-            FROM users
-            WHERE role_id = 3
-            ORDER BY id DESC
-        ");
+        SELECT id, name, email, nik, address, photo, is_online, last_activity
+        FROM users
+        WHERE role_id = 3
+        ORDER BY id DESC
+    ");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
     public function updateCustomer($data)
     {
@@ -172,9 +186,12 @@ class UserModel
 
     public function getAllSeller($excludeId = null)
     {
-        $sql = "SELECT id, name, email, nik, address, photo, is_online
+        $sql = "
+            SELECT id, name, email, nik, address, no_rekening, qris_image, photo, is_online, last_activity
             FROM users
-            WHERE role_id = 2";
+            WHERE role_id = 2
+        ";
+
         if ($excludeId) $sql .= " AND id != :id";
         $sql .= " ORDER BY id ASC";
 
@@ -185,45 +202,45 @@ class UserModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-
     public function createSeller($data)
     {
         $stmt = $this->db->prepare("
-        INSERT INTO users 
-        (name, email, password, role_id, nik, address, photo, is_online, created_at)
-        VALUES
-        (:name, :email, :password, 2, :nik, :address, :photo, 0, NOW())
-    ");
+            INSERT INTO users 
+            (name, email, password, role_id, nik, address, no_rekening, qris_image, photo, is_online, created_at)
+            VALUES
+            (:name, :email, :password, 2, :nik, :address, :no_rekening, :qris_image, :photo, 0, NOW())
+        ");
 
         return $stmt->execute([
-            ':name'     => $data['name'],
-            ':email'    => $data['email'],
-            ':password' => $data['password'],
-            ':nik'      => $data['nik'],
-            ':address'  => $data['address'],
-            ':photo'    => $data['photo']
+            ':name'        => $data['name'],
+            ':email'       => $data['email'],
+            ':password'    => $data['password'],
+            ':nik'         => $data['nik'],
+            ':address'     => $data['address'],
+            ':no_rekening' => $data['no_rekening'],
+            ':qris_image'  => $data['qris_image'],
+            ':photo'       => $data['photo']
         ]);
     }
-
 
     public function emailExists($email, $excludeId = null)
     {
         if ($excludeId) {
             $stmt = $this->db->prepare("
-            SELECT id FROM users 
-            WHERE email = :email AND id != :id
-            LIMIT 1
-        ");
+                SELECT id FROM users 
+                WHERE email = :email AND id != :id
+                LIMIT 1
+            ");
             $stmt->execute([
                 ':email' => $email,
                 ':id'    => $excludeId
             ]);
         } else {
             $stmt = $this->db->prepare("
-            SELECT id FROM users 
-            WHERE email = :email
-            LIMIT 1
-        ");
+                SELECT id FROM users 
+                WHERE email = :email
+                LIMIT 1
+            ");
             $stmt->execute([
                 ':email' => $email
             ]);
@@ -231,8 +248,6 @@ class UserModel
 
         return $stmt->fetch(PDO::FETCH_ASSOC) ? true : false;
     }
-
-
 
     public function updateSeller($data)
     {
@@ -242,18 +257,22 @@ class UserModel
                 email = :email,
                 nik = :nik,
                 address = :address,
+                no_rekening = :no_rekening,
+                qris_image = :qris_image,
                 photo = :photo
             WHERE id = :id AND role_id = 2
         ";
 
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            ':name'    => $data['name'],
-            ':email'   => $data['email'],
-            ':nik'     => $data['nik'],
-            ':address' => $data['address'],
-            ':photo'   => $data['photo'],
-            ':id'      => $data['id']
+            ':name'        => $data['name'],
+            ':email'       => $data['email'],
+            ':nik'         => $data['nik'],
+            ':address'     => $data['address'],
+            ':no_rekening' => $data['no_rekening'],
+            ':qris_image'  => $data['qris_image'],
+            ':photo'       => $data['photo'],
+            ':id'          => $data['id']
         ]);
     }
 
@@ -274,10 +293,12 @@ class UserModel
     public function updateProfile($id, $data)
     {
         $fields = [
-            'name'    => $data['name'],
-            'email'   => $data['email'],
-            'nik'     => $data['nik'],
-            'address' => $data['address']
+            'name'        => $data['name'],
+            'email'       => $data['email'],
+            'nik'         => $data['nik'],
+            'address'     => $data['address'],
+            'no_rekening' => $data['no_rekening'] ?? null,
+            'qris_image'  => $data['qris_image'] ?? null
         ];
 
         if (!empty($data['password'])) {

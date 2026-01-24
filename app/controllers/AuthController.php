@@ -4,6 +4,9 @@ require_once '../app/models/UserModel.php';
 
 class AuthController
 {
+    /* =======================
+       LOGIN
+    ======================== */
 
     public function login()
     {
@@ -12,7 +15,7 @@ class AuthController
 
     public function loginProcess()
     {
-        $email = $_POST['email'];
+        $email    = $_POST['email'];
         $password = $_POST['password'];
 
         $userModel = new UserModel();
@@ -27,18 +30,17 @@ class AuthController
         }
 
         $_SESSION['user'] = [
-            'id'        => $user['id'],
-            'name'      => $user['name'],
-            'email'     => $user['email'],
-            'role_id'   => $user['role_id'],
-            'role_name' => $user['role_name'],
-            'photo'     => $user['photo'],
-            'nik'       => $user['nik']   // tambahkan ini
+            'id'           => $user['id'],
+            'name'         => $user['name'],
+            'email'        => $user['email'],
+            'role_id'      => $user['role_id'],
+            'role_name'    => $user['role_name'],
+            'photo'        => $user['photo'],
+            'nik'          => $user['nik'],
+            'no_rekening'  => $user['no_rekening'] ?? null
         ];
 
-
-
-        switch ($_SESSION['user']['role_name']) {
+        switch ($user['role_name']) {
             case 'admin':
                 header('Location: ' . BASE_URL . '/?c=admin&m=dashboard');
                 break;
@@ -51,6 +53,10 @@ class AuthController
         }
         exit;
     }
+
+    /* =======================
+       REGISTER
+    ======================== */
 
     public function register()
     {
@@ -67,39 +73,66 @@ class AuthController
             die('Password minimal 6 karakter');
         }
 
-        $data = [
-            'role_id'  => $_POST['role_id'],
-            'name'     => trim($_POST['name']),
-            'email'    => trim($_POST['email']),
-            'password' => $_POST['password'],
-            'nik'      => trim($_POST['nik']),
-            'address'  => trim($_POST['address'])
-        ];
+        $qrisFileName = null;
 
+        // 🔥 HANDLE UPLOAD QRIS (SELLER)
+        if ((int)$_POST['role_id'] === 2 && isset($_FILES['qris_image'])) {
+
+            if ($_FILES['qris_image']['error'] === 0) {
+                $ext = pathinfo($_FILES['qris_image']['name'], PATHINFO_EXTENSION);
+                $allowed = ['jpg', 'jpeg', 'png'];
+
+                if (!in_array(strtolower($ext), $allowed)) {
+                    die('Format QRIS harus JPG / PNG');
+                }
+
+                $qrisFileName = 'qris_' . time() . '.' . $ext;
+                $path = APP_PATH . '/../public/uploads/qris/' . $qrisFileName;
+
+                move_uploaded_file($_FILES['qris_image']['tmp_name'], $path);
+            } else {
+                die('QRIS wajib diupload untuk seller');
+            }
+        }
+
+        $data = [
+            'role_id'     => (int) $_POST['role_id'],
+            'name'        => trim($_POST['name']),
+            'email'       => trim($_POST['email']),
+            'password'    => $_POST['password'],
+            'nik'         => trim($_POST['nik']),
+            'address'     => trim($_POST['address']),
+            'no_rekening' => $_POST['no_rekening'] ?? null,
+            'qris_image'  => $qrisFileName
+        ];
 
         $userModel = new UserModel();
 
-        // Role hanya seller & customer
         if (!in_array($data['role_id'], [2, 3])) {
             die('Role tidak valid');
         }
 
-        // Cek email
+        if ($data['role_id'] === 2 && empty($data['no_rekening'])) {
+            die('No rekening wajib untuk seller');
+        }
+
         if ($userModel->findByEmail($data['email'])) {
             die('Email sudah terdaftar');
         }
 
-        // Cek NIK
-        if ($data['nik'] && $userModel->findByNik($data['nik'])) {
+        if (!empty($data['nik']) && $userModel->findByNik($data['nik'])) {
             die('NIK sudah terdaftar');
         }
 
-        // Simpan user
         $userModel->create($data);
 
         header('Location: ' . BASE_URL . '/?c=auth&m=login');
         exit;
     }
+
+    /* =======================
+       FORGOT PASSWORD
+    ======================== */
 
     public function forgot()
     {
@@ -117,7 +150,7 @@ class AuthController
             die('Email tidak ditemukan');
         }
 
-        $token = bin2hex(random_bytes(32));
+        $token   = bin2hex(random_bytes(32));
         $expired = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
         $userModel->saveResetToken($email, $token, $expired);
@@ -127,10 +160,10 @@ class AuthController
         require_once '../app/helpers/Mailer.php';
 
         $body = "
-        <h3>Reset Password</h3>
-        <p>Klik link berikut untuk reset password:</p>
-        <a href='$link'>$link</a>
-        <p>Link berlaku 1 jam.</p>
+            <h3>Reset Password</h3>
+            <p>Klik link berikut untuk reset password:</p>
+            <a href='$link'>$link</a>
+            <p>Link berlaku 1 jam.</p>
         ";
 
         Mailer::send($email, 'Reset Password BookStar', $body);
@@ -159,7 +192,6 @@ class AuthController
         }
 
         $token = $_POST['token'];
-        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
         $userModel = new UserModel();
         $user = $userModel->findByResetToken($token);
@@ -168,13 +200,16 @@ class AuthController
             die('Token tidak valid');
         }
 
-        $userModel->updatePassword($user['id'], $password);
+        $userModel->updatePassword($user['id'], $_POST['password']);
 
         header('Location: ' . BASE_URL . '/?c=auth&m=login');
+        exit;
     }
 
+    /* =======================
+       LOGOUT
+    ======================== */
 
-    // Logout
     public function logout()
     {
         session_destroy();

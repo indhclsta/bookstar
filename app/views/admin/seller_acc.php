@@ -43,9 +43,16 @@
                         ? BASE_URL . '/uploads/profile/' . $seller['photo']
                         : 'https://placehold.co/400x300/png';
 
-                    $isOnline   = (int)$seller['is_online'] === 1;
+                    $isOnline = false;
+
+                    if (!empty($seller['last_activity'])) {
+                        $last = strtotime($seller['last_activity']);
+                        $isOnline = (time() - $last) <= 180; // 3 menit
+                    }
+
                     $badgeBg    = $isOnline ? 'bg-success' : 'bg-danger';
                     $statusText = $isOnline ? 'ONLINE' : 'OFFLINE';
+
                     ?>
 
                     <div class="col">

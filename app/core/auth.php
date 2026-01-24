@@ -1,8 +1,9 @@
 <?php
 
+require_once APP_PATH . '/models/UserModel.php';
+
 class Auth
 {
-    // Cek apakah user sudah login
     public static function check()
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -13,9 +14,13 @@ class Auth
             header('Location: ' . BASE_URL . '/?c=auth&m=login');
             exit;
         }
+
+        // 🔥 UPDATE LAST ACTIVITY SETIAP REQUEST
+        $userId = $_SESSION['user']['id'];
+        $userModel = new UserModel();
+        $userModel->updateLastActivity($userId);
     }
 
-    // Cek role user
     public static function role($roleName)
     {
         if (!isset($_SESSION['user'])) {
@@ -29,7 +34,6 @@ class Auth
         }
     }
 
-    // Ambil data user login
     public static function user()
     {
         return $_SESSION['user'] ?? null;

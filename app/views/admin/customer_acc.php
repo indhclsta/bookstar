@@ -8,7 +8,7 @@
         <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
             <div class="breadcrumb-title pe-3">Customer Account</div>
         </div>
-        
+
 
         <!-- Alert -->
         <?php if (!empty($_SESSION['error'])): ?>
@@ -36,7 +36,13 @@
                         ? BASE_URL . '/uploads/profile/' . $customer['photo']
                         : 'https://placehold.co/400x300/png';
 
-                    $isOnline   = (int)$customer['is_online'] === 1;
+                    $isOnline = false;
+
+                    if (!empty($customer['last_activity'])) {
+                        $last = strtotime($customer['last_activity']);
+                        $isOnline = (time() - $last) <= 180; // 3 menit
+                    }
+
                     $badgeBg    = $isOnline ? 'bg-success' : 'bg-danger';
                     $statusText = $isOnline ? 'ONLINE' : 'OFFLINE';
                     ?>

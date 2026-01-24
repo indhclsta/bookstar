@@ -12,54 +12,57 @@ class SellerController
         Auth::check();
         Auth::role('seller');
 
-
         $this->userModel = new UserModel();
+        $this->userModel->updateLastActivity($_SESSION['user']['id']);
     }
 
     public function index()
     {
-        // proteksi login (opsional)
-        if (!isset($_SESSION['user'])) {
-            header("Location: " . BASE_URL . "/?c=auth&m=login");
-            exit;
-        }
+        $sellerId = $_SESSION['user']['id'];
+        $this->userModel->updateLastActivity($sellerId);
 
-        $userModel = new UserModel();
-        $sellers = $this->userModel->getAllSeller($_SESSION['user']['id']);
-
+        $sellers = $this->userModel->getAllSeller($sellerId);
         require APP_PATH . '/views/seller/list_seller.php';
     }
 
     public function dashboard()
     {
         $sellerId = $_SESSION['user']['id'];
-
-        // kalau kamu punya kolom status online/offline di users:
-        // $this->userModel->updateStatus($sellerId, 'online');
+        $this->userModel->updateLastActivity($sellerId);
 
         require APP_PATH . '/views/seller/dashboard.php';
     }
 
     public function product()
     {
+        $sellerId = $_SESSION['user']['id'];
+        $this->userModel->updateLastActivity($sellerId);
+
         require APP_PATH . '/views/seller/product.php';
     }
 
     public function addProduct()
     {
+        $sellerId = $_SESSION['user']['id'];
+        $this->userModel->updateLastActivity($sellerId);
+
         require APP_PATH . '/views/seller/add_product.php';
     }
 
     public function faq()
     {
+        $sellerId = $_SESSION['user']['id'];
+        $this->userModel->updateLastActivity($sellerId);
+
         require APP_PATH . '/views/seller/faq.php';
     }
 
     public function profile()
     {
         $sellerId = $_SESSION['user']['id'];
-        $user = $this->userModel->findById($sellerId);
+        $this->userModel->updateLastActivity($sellerId);
 
+        $user = $this->userModel->findById($sellerId);
         require APP_PATH . '/views/seller/profile.php';
     }
 
@@ -70,45 +73,43 @@ class SellerController
         $sellerId = $_SESSION['user']['id'];
 
         $data = [
-            'name'    => trim($_POST['name'] ?? ''),
-            'email'   => trim($_POST['email'] ?? ''), // optional kalau email boleh diganti
-            'nik'     => trim($_POST['nik'] ?? ''),
-            'address' => trim($_POST['address'] ?? ''),
-            'password' => !empty($_POST['password']) ? $_POST['password'] : null,
+            'name'        => trim($_POST['name'] ?? ''),
+            'email'       => trim($_POST['email'] ?? ''),
+            'nik'         => trim($_POST['nik'] ?? ''),
+            'address'     => trim($_POST['address'] ?? ''),
+            'no_rekening' => trim($_POST['no_rekening'] ?? ''),
+            'password'    => !empty($_POST['password']) ? $_POST['password'] : null,
         ];
 
-        // upload photo
+        // FOTO PROFILE
         if (!empty($_FILES['photo']['name'])) {
-            $allowed = ['jpg', 'jpeg', 'png'];
             $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
-
-            if (!in_array($ext, $allowed)) {
-                $_SESSION['error'] = 'Format foto tidak valid';
-                header('Location: ' . BASE_URL . '/?c=seller&m=profile');
-                exit;
-            }
-
             $uploadDir = APP_PATH . '/../public/uploads/profile/';
             if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
             $photoName = 'seller_' . $sellerId . '_' . time() . '.' . $ext;
             move_uploaded_file($_FILES['photo']['tmp_name'], $uploadDir . $photoName);
-
             $data['photo'] = $photoName;
+        }
 
-            // hapus foto lama kecuali default
-            $oldPhoto = $_SESSION['user']['photo'] ?? null;
-            if ($oldPhoto && !in_array($oldPhoto, ['admin.png', 'seller.png', 'customer.png'])) {
-                $oldPath = $uploadDir . $oldPhoto;
-                if (file_exists($oldPath)) unlink($oldPath);
-            }
+        // QRIS
+        if (!empty($_FILES['qris_image']['name'])) {
+            $ext = strtolower(pathinfo($_FILES['qris_image']['name'], PATHINFO_EXTENSION));
+            $uploadDir = APP_PATH . '/../public/uploads/qris/';
+            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+
+            $qrisName = 'qris_' . $sellerId . '_' . time() . '.' . $ext;
+            move_uploaded_file($_FILES['qris_image']['tmp_name'], $uploadDir . $qrisName);
+            $data['qris_image'] = $qrisName;
         }
 
         $ok = $this->userModel->updateProfile($sellerId, $data);
 
         if ($ok) {
-            $_SESSION['user']['name'] = $data['name'];
-            if (!empty($data['photo'])) $_SESSION['user']['photo'] = $data['photo'];
+            $_SESSION['user'] = array_merge(
+                $_SESSION['user'],
+                $this->userModel->findById($sellerId)
+            );
             $_SESSION['success'] = 'Profile berhasil diperbarui';
         } else {
             $_SESSION['error'] = 'Gagal memperbarui profile';

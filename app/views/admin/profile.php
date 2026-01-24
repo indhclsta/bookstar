@@ -91,6 +91,10 @@ $photo = !empty($user['photo'])
                                 <span class="material-icons-outlined">code</span>
                                 <p class="mb-0">Role: <?= htmlspecialchars($role) ?></p>
                             </div>
+                            <div class="info-list-item d-flex align-items-center gap-3">
+                                <span class="material-icons-outlined">email</span>
+                                <p class="mb-0">Email: <?= htmlspecialchars($email) ?></p>
+                            </div>
                         </div>
                     </div>
                 </div>
