@@ -16,6 +16,20 @@ class SellerController
         $this->userModel = new UserModel();
     }
 
+    public function index()
+    {
+        // proteksi login (opsional)
+        if (!isset($_SESSION['user'])) {
+            header("Location: " . BASE_URL . "/?c=auth&m=login");
+            exit;
+        }
+
+        $userModel = new UserModel();
+        $sellers = $this->userModel->getAllSeller($_SESSION['user']['id']);
+
+        require APP_PATH . '/views/seller/list_seller.php';
+    }
+
     public function dashboard()
     {
         $sellerId = $_SESSION['user']['id'];
@@ -48,8 +62,6 @@ class SellerController
 
         require APP_PATH . '/views/seller/profile.php';
     }
-
-
 
     public function updateProfile()
     {

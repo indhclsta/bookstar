@@ -58,7 +58,7 @@ class UserModel
             $data['name'],
             $data['email'],
             password_hash($data['password'], PASSWORD_DEFAULT),
-            $data['nik'] ?? null,
+            $data['nik'],
             $data['address']
         ]);
     }
@@ -170,63 +170,67 @@ class UserModel
        SELLER
     ======================== */
 
-    public function getAllSeller()
+    public function getAllSeller($excludeId = null)
     {
-        $stmt = $this->db->prepare("
-            SELECT id, name, email, nik, address, photo, is_online
+        $sql = "SELECT id, name, email, nik, address, photo, is_online
             FROM users
-            WHERE role_id = 2
-            ORDER BY id DESC
-        ");
-        $stmt->execute();
+            WHERE role_id = 2";
+        if ($excludeId) $sql .= " AND id != :id";
+        $sql .= " ORDER BY id ASC";
+
+        $stmt = $this->db->prepare($sql);
+        if ($excludeId) $stmt->execute([':id' => $excludeId]);
+        else $stmt->execute();
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-   public function createSeller($data)
-{
-    $stmt = $this->db->prepare("
+
+    public function createSeller($data)
+    {
+        $stmt = $this->db->prepare("
         INSERT INTO users 
         (name, email, password, role_id, nik, address, photo, is_online, created_at)
         VALUES
         (:name, :email, :password, 2, :nik, :address, :photo, 0, NOW())
     ");
 
-    return $stmt->execute([
-        ':name'     => $data['name'],
-        ':email'    => $data['email'],
-        ':password' => $data['password'],
-        ':nik'      => $data['nik'],
-        ':address'  => $data['address'],
-        ':photo'    => $data['photo']
-    ]);
-}
+        return $stmt->execute([
+            ':name'     => $data['name'],
+            ':email'    => $data['email'],
+            ':password' => $data['password'],
+            ':nik'      => $data['nik'],
+            ':address'  => $data['address'],
+            ':photo'    => $data['photo']
+        ]);
+    }
 
 
     public function emailExists($email, $excludeId = null)
-{
-    if ($excludeId) {
-        $stmt = $this->db->prepare("
+    {
+        if ($excludeId) {
+            $stmt = $this->db->prepare("
             SELECT id FROM users 
             WHERE email = :email AND id != :id
             LIMIT 1
         ");
-        $stmt->execute([
-            ':email' => $email,
-            ':id'    => $excludeId
-        ]);
-    } else {
-        $stmt = $this->db->prepare("
+            $stmt->execute([
+                ':email' => $email,
+                ':id'    => $excludeId
+            ]);
+        } else {
+            $stmt = $this->db->prepare("
             SELECT id FROM users 
             WHERE email = :email
             LIMIT 1
         ");
-        $stmt->execute([
-            ':email' => $email
-        ]);
-    }
+            $stmt->execute([
+                ':email' => $email
+            ]);
+        }
 
-    return $stmt->fetch(PDO::FETCH_ASSOC) ? true : false;
-}
+        return $stmt->fetch(PDO::FETCH_ASSOC) ? true : false;
+    }
 
 
 

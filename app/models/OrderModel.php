@@ -1,5 +1,7 @@
 <?php
 
+require_once APP_PATH . '/models/Database.php';
+
 class OrderModel
 {
     private $db;
@@ -9,101 +11,51 @@ class OrderModel
         $this->db = Database::getInstance()->getConnection();
     }
 
-    public function getOrdersForSeller($sellerId)
+    /**
+     * Ambil daftar order milik seller beserta detail item, qty, buyer, dan alamat
+     */
+    public function getOrdersBySeller($sellerId)
     {
-        // judul & qty ringkas ambil dari item pertama + total qty
         $stmt = $this->db->prepare("
-            SELECT 
-                o.*,
-                (SELECT oi.title_snapshot FROM order_items oi WHERE oi.order_id=o.id LIMIT 1) AS title,
-                (SELECT SUM(oi.qty) FROM order_items oi WHERE oi.order_id=o.id) AS qty
+            SELECT o.id, o.order_code, o.payment_method, o.payment_proof,
+                   o.approval_status, o.order_status, o.tracking_number,
+                   u.name AS buyer_name, u.address AS buyer_address,
+                   oi.product_title, oi.quantity
             FROM orders o
+            JOIN users u ON o.customer_id = u.id
+            JOIN order_items oi ON oi.order_id = o.id
+            JOIN products p ON p.id = oi.product_id
             WHERE o.seller_id = ?
-            ORDER BY o.id DESC
+            ORDER BY o.created_at DESC
         ");
         $stmt->execute([$sellerId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getOrderDetailForSeller($orderId, $sellerId)
+    /**
+     * Update status approve order
+     */
+    public function updateApprove($orderId, $status)
     {
-        $stmt = $this->db->prepare("SELECT * FROM orders WHERE id=? AND seller_id=? LIMIT 1");
-        $stmt->execute([$orderId, $sellerId]);
-        $order = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$order) return null;
-
-        $stmt2 = $this->db->prepare("SELECT * FROM order_items WHERE order_id=?");
-        $stmt2->execute([$orderId]);
-        $order['items'] = $stmt2->fetchAll(PDO::FETCH_ASSOC);
-
-        return $order;
+        $finalStatus = $status === 'approved' ? 'menunggu resi' : 'refund';
+        $stmt = $this->db->prepare("
+            UPDATE orders 
+            SET approval_status = ?, order_status = ?
+            WHERE id = ?
+        ");
+        return $stmt->execute([$status, $finalStatus, $orderId]);
     }
 
-    public function setApproved($orderId, $sellerId)
+    /**
+     * Simpan nomor resi dan tracking
+     */
+    public function saveResi($orderId, $resi, $tracking)
     {
         $stmt = $this->db->prepare("
             UPDATE orders
-            SET status='approved', approved_at=NOW()
-            WHERE id=? AND seller_id=? AND status IN ('pending_payment','pending')
+            SET tracking_number = ?, order_status = 'dikirim'
+            WHERE id = ?
         ");
-        return $stmt->execute([$orderId, $sellerId]);
-    }
-
-    public function setRejected($orderId, $sellerId)
-    {
-        $stmt = $this->db->prepare("
-            UPDATE orders
-            SET status='rejected', rejected_at=NOW(), resi_number=NULL, tracking_url=NULL
-            WHERE id=? AND seller_id=? AND status IN ('pending_payment','pending','approved')
-        ");
-        return $stmt->execute([$orderId, $sellerId]);
-    }
-
-    public function setResiAndShipped($orderId, $sellerId, $resi, $trackingUrl)
-    {
-        $stmt = $this->db->prepare("
-            UPDATE orders
-            SET resi_number=?, tracking_url=?, status='shipped', shipped_at=NOW()
-            WHERE id=? AND seller_id=? AND status='approved'
-        ");
-        return $stmt->execute([$resi, $trackingUrl, $orderId, $sellerId]);
-    }
-
-    public function countOrdersWithResi($sellerId)
-    {
-        $stmt = $this->db->prepare("
-            SELECT COUNT(*) AS total
-            FROM orders
-            WHERE seller_id=? AND resi_number IS NOT NULL AND resi_number <> ''
-        ");
-        $stmt->execute([$sellerId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return (int)($row['total'] ?? 0);
-    }
-
-    // delete jika status refund/rejected dan sudah lewat N menit
-    public function deleteIfRejectedOrRefundAfterDelay($orderId, $sellerId, $delayMinutes = 2)
-    {
-        // ambil order
-        $stmt = $this->db->prepare("SELECT * FROM orders WHERE id=? AND seller_id=? LIMIT 1");
-        $stmt->execute([$orderId, $sellerId]);
-        $order = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$order) return false;
-
-        if (!in_array($order['status'], ['rejected','refund'])) return false;
-
-        $timeField = $order['status'] === 'rejected' ? $order['rejected_at'] : ($order['refund_at'] ?? $order['rejected_at']);
-        if (!$timeField) return false;
-
-        $allowedAt = strtotime($timeField) + ($delayMinutes * 60);
-        if (time() < $allowedAt) return false;
-
-        // hapus items dulu
-        $stmt2 = $this->db->prepare("DELETE FROM order_items WHERE order_id=?");
-        $stmt2->execute([$orderId]);
-
-        // hapus order
-        $stmt3 = $this->db->prepare("DELETE FROM orders WHERE id=? AND seller_id=?");
-        return $stmt3->execute([$orderId, $sellerId]);
+        return $stmt->execute([$resi, $orderId]);
     }
 }

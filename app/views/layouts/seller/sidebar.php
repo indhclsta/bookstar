@@ -25,17 +25,10 @@
         </a>
       </li>
       <li>
-        <a href="<?= BASE_URL ?>/?c=seller&m=seller">
-          <div class="parent-icon"><i class="material-icons-outlined">person</i>
-          </div>
-          <div class="menu-title">Seller</div>
-        </a>
-      </li>
-      <li>
-        <a href="<?= BASE_URL ?>/?c=seller&m=customer">
+        <a href="<?= BASE_URL ?>/?c=seller&m=index">
           <div class="parent-icon"><i class="material-icons-outlined">groups</i>
           </div>
-          <div class="menu-title">Customer</div>
+          <div class="menu-title">Seller</div>
         </a>
       </li>
       <li>
@@ -57,16 +50,26 @@
             </li>
             <li><a href="<?= BASE_URL ?>/?c=sellerProduct&m=index"><i class="material-icons-outlined">arrow_right</i>Products</a>
             </li>
-            <li><a href="ecommerce-customers.html"><i class="material-icons-outlined">arrow_right</i>Customers</a>
-            </li>
-            <li><a href="ecommerce-customer-details.html"><i class="material-icons-outlined">arrow_right</i>Customer Details</a>
-            </li>
-            <li><a href="ecommerce-orders.html"><i class="material-icons-outlined">arrow_right</i>Orders</a>
-            </li>
-            <li><a href="ecommerce-order-details.html"><i class="material-icons-outlined">arrow_right</i>Order Details</a>
+            <li><a href="<?= BASE_URL ?>/?c=sellerOrder&m=index"><i class="material-icons-outlined">arrow_right</i>Approve</a>
             </li>
           </ul>     
         </li>
+        
+      <li>
+        <a href="<?= BASE_URL ?>/?c=sellerCategory&m=index">
+          <div class="parent-icon"><i class="material-icons-outlined">bar_chart</i>
+          </div>
+          <div class="menu-title">Reports</div>
+        </a>
+      </li>
+      <li>
+        <a href="<?= BASE_URL ?>/?c=sellerCategory&m=index">
+          <div class="parent-icon"><i class="material-icons-outlined">chat</i>
+          </div>
+          <div class="menu-title">Chat</div>
+        </a>
+      </li>
+      <li>
 
 
 

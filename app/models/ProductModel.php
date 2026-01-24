@@ -1,5 +1,5 @@
 <?php
-
+require_once APP_PATH . '/models/Database.php';
 class ProductModel
 {
     private $db;
@@ -96,5 +96,23 @@ class ProductModel
             WHERE id=? AND seller_id=?
         ");
         return $stmt->execute([$id, $sellerId]);
+    }
+
+    public function getAll()
+    {
+        $stmt = $this->db->query("
+            SELECT p.*, c.name AS category_name
+            FROM products p
+            JOIN categories c ON c.id = p.category_id
+            ORDER BY p.created_at DESC
+        ");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function findById($id)
+    {
+        $stmt = $this->db->prepare("SELECT * FROM products WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }

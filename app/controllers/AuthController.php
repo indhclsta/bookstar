@@ -32,8 +32,10 @@ class AuthController
             'email'     => $user['email'],
             'role_id'   => $user['role_id'],
             'role_name' => $user['role_name'],
-            'photo' => $user['photo']
-        ];  
+            'photo'     => $user['photo'],
+            'nik'       => $user['nik']   // tambahkan ini
+        ];
+
 
 
         switch ($_SESSION['user']['role_name']) {
@@ -57,8 +59,6 @@ class AuthController
 
     public function registerProcess()
     {
-        session_start();
-
         if ($_POST['password'] !== $_POST['confirm_password']) {
             die('Password dan Confirm Password tidak sama');
         }
@@ -69,11 +69,11 @@ class AuthController
 
         $data = [
             'role_id'  => $_POST['role_id'],
-            'name'     => $_POST['name'],
-            'email'    => $_POST['email'],
+            'name'     => trim($_POST['name']),
+            'email'    => trim($_POST['email']),
             'password' => $_POST['password'],
-            'nik'      => $_POST['nik'] ?? null,
-            'address'  => $_POST['address']
+            'nik'      => trim($_POST['nik']),
+            'address'  => trim($_POST['address'])
         ];
 
 
