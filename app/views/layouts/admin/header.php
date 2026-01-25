@@ -15,9 +15,9 @@ $email = $user['email'] ?? '';
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Maxton | Bootstrap 5 Admin Dashboard Template</title>
+  <title>BookStar | E-Commerce</title>
 
-  <link rel="icon" href="<?= BASE_URL ?>/assets/images/favicon-32x32.png" type="image/png">
+  <link rel="icon" href="<?= BASE_URL ?>/assets/images/" type="image/png">
 
   <link href="<?= BASE_URL ?>/assets/css/pace.min.css" rel="stylesheet">
   <script src="<?= BASE_URL ?>/assets/js/pace.min.js"></script>

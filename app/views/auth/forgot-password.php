@@ -8,9 +8,9 @@ error_reporting(E_ALL);
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Maxton | Bootstrap 5 Admin Dashboard Template</title>
+  <title>BookStar | E-Commerce</title>
   <!--favicon-->
-  <link rel="icon" href="assets/images/favicon-32x32.png" type="image/png" />
+  <link rel="icon" href="assets/images/" type="image/png" />
   <!-- loader-->
   <link href="assets/css/pace.min.css" rel="stylesheet" />
   <script src="assets/js/pace.min.js"></script>
@@ -40,7 +40,7 @@ error_reporting(E_ALL);
       <div class="row g-4 align-items-center">
         <div class="col-lg-6 d-flex">
           <div class="card-body">
-            <img src="assets/images/logo1.png" class="mb-4" width="145" alt="" />
+            <img src="assets/images/logo2.png" class="mb-4" width="145" alt="" />
             <h4 class="fw-bold">Forgot Password?</h4>
             <p class="mb-0">Enter your registered email ID to reset the password</p>
 

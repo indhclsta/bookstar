@@ -6,54 +6,104 @@ class ChatModel
 
     public function __construct()
     {
+        // ambil PDO connection
         $this->db = Database::getInstance()->getConnection();
     }
 
-    public function getThreadsForSeller($sellerId)
+    // Ambil daftar chat berdasarkan seller
+    public function getChatsBySeller($sellerId)
     {
-        // daftar buyer yang pernah chat + unread count
-        $stmt = $this->db->prepare("
-            SELECT 
-                buyer_id,
-                MAX(created_at) AS last_time,
-                SUM(CASE WHEN sender_role='buyer' AND is_read=0 THEN 1 ELSE 0 END) AS unread
-            FROM chat_messages
-            WHERE seller_id=?
-            GROUP BY buyer_id
-            ORDER BY last_time DESC
-        ");
+        $sql = "
+            SELECT c.*, u.name AS customer_name
+            FROM chats c
+            JOIN users u ON u.id = c.customer_id
+            WHERE c.seller_id = ?
+            ORDER BY c.created_at DESC
+        ";
+
+        $stmt = $this->db->prepare($sql);
         $stmt->execute([$sellerId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getMessages($sellerId, $buyerId)
+    // Ambil pesan berdasarkan chat_id
+    public function getMessages($chatId)
     {
-        $stmt = $this->db->prepare("
+        $sql = "
             SELECT *
             FROM chat_messages
-            WHERE seller_id=? AND buyer_id=?
-            ORDER BY id ASC
-        ");
-        $stmt->execute([$sellerId, $buyerId]);
+            WHERE chat_id = ?
+            ORDER BY created_at ASC
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$chatId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function markReadForSeller($sellerId, $buyerId)
+    // Kirim pesan
+    public function sendMessage($chatId, $senderRole, $senderId, $message)
     {
-        $stmt = $this->db->prepare("
-            UPDATE chat_messages
-            SET is_read=1
-            WHERE seller_id=? AND buyer_id=? AND sender_role='buyer'
-        ");
-        return $stmt->execute([$sellerId, $buyerId]);
+        $sql = "
+            INSERT INTO chat_messages
+            (chat_id, sender_role, sender_id, message)
+            VALUES (?, ?, ?, ?)
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            $chatId,
+            $senderRole,
+            $senderId,
+            $message
+        ]);
     }
 
-    public function sendSellerMessage($sellerId, $buyerId, $message)
-    {
-        $stmt = $this->db->prepare("
-            INSERT INTO chat_messages (seller_id, buyer_id, sender_role, message, is_read, created_at)
-            VALUES (?, ?, 'seller', ?, 1, NOW())
-        ");
-        return $stmt->execute([$sellerId, $buyerId, $message]);
-    }
+    public function getChatsByCustomer($customerId)
+{
+    $sql = "
+        SELECT c.*, u.name AS seller_name
+        FROM chats c
+        JOIN users u ON u.id = c.seller_id
+        WHERE c.customer_id = ?
+        ORDER BY c.created_at DESC
+    ";
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$customerId]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+public function getMessagesByCustomer($chatId, $customerId)
+{
+    $sql = "
+        SELECT m.*
+        FROM chat_messages m
+        JOIN chats c ON c.id = m.chat_id
+        WHERE m.chat_id = ? AND c.customer_id = ?
+        ORDER BY m.created_at ASC
+    ";
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$chatId, $customerId]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+public function getOrCreateChat($sellerId, $customerId)
+{
+    $sql = "SELECT id FROM chats WHERE seller_id = ? AND customer_id = ?";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$sellerId, $customerId]);
+
+    $chat = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($chat) return $chat['id'];
+
+    $sql = "INSERT INTO chats (seller_id, customer_id) VALUES (?, ?)";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$sellerId, $customerId]);
+
+    return $this->db->lastInsertId();
+}
+
+
 }

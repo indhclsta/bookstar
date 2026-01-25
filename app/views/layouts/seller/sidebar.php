@@ -39,22 +39,22 @@
         </a>
       </li>
       <li>
-       <li>
-          <a href="javascript:;" class="has-arrow">
-            <div class="parent-icon"><i class="material-icons-outlined">shopping_bag</i>
-            </div>
-            <div class="menu-title">eCommerce</div>
-          </a>
-          <ul>
-            <li><a href="<?= BASE_URL ?>/?c=sellerProduct&m=create"><i class="material-icons-outlined">arrow_right</i>Add Product</a>
-            </li>
-            <li><a href="<?= BASE_URL ?>/?c=sellerProduct&m=index"><i class="material-icons-outlined">arrow_right</i>Products</a>
-            </li>
-            <li><a href="<?= BASE_URL ?>/?c=sellerOrder&m=index"><i class="material-icons-outlined">arrow_right</i>Approve</a>
-            </li>
-          </ul>     
-        </li>
-        
+      <li>
+        <a href="javascript:;" class="has-arrow">
+          <div class="parent-icon"><i class="material-icons-outlined">shopping_bag</i>
+          </div>
+          <div class="menu-title">eCommerce</div>
+        </a>
+        <ul>
+          <li><a href="<?= BASE_URL ?>/?c=sellerProduct&m=create"><i class="material-icons-outlined">arrow_right</i>Add Product</a>
+          </li>
+          <li><a href="<?= BASE_URL ?>/?c=sellerProduct&m=index"><i class="material-icons-outlined">arrow_right</i>Products</a>
+          </li>
+          <li><a href="<?= BASE_URL ?>/?c=sellerOrder&m=index"><i class="material-icons-outlined">arrow_right</i>Approve</a>
+          </li>
+        </ul>
+      </li>
+
       <li>
         <a href="<?= BASE_URL ?>/?c=sellerCategory&m=index">
           <div class="parent-icon"><i class="material-icons-outlined">bar_chart</i>
@@ -63,12 +63,14 @@
         </a>
       </li>
       <li>
-        <a href="<?= BASE_URL ?>/?c=sellerCategory&m=index">
-          <div class="parent-icon"><i class="material-icons-outlined">chat</i>
+        <a href="<?= BASE_URL ?>/?c=sellerChat&m=index">
+          <div class="parent-icon">
+            <i class="material-icons-outlined">chat</i>
           </div>
           <div class="menu-title">Chat</div>
         </a>
       </li>
+
       <li>
 
 

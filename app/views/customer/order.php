@@ -22,12 +22,17 @@ $products = $products ?? []; // Pastikan controller mengirim $products
       <?php foreach ($products as $product) : ?>
         <div class="col-md-4">
           <div class="card rounded-4 h-100">
-            <img src="<?= !empty($product['image']) ? BASE_URL.'/uploads/products/'.$product['image'] : 'https://placehold.co/400x300/png' ?>" class="card-img-top" alt="<?= $product['name'] ?>">
+            <img src="<?= !empty($product['image']) ? BASE_URL . '/uploads/products/' . $product['image'] : 'https://placehold.co/400x300/png' ?>" class="card-img-top" alt="<?= $product['name'] ?>">
             <div class="card-body d-flex flex-column">
               <h5 class="card-title"><?= htmlspecialchars($product['name']) ?></h5>
               <p class="card-text text-truncate"><?= htmlspecialchars($product['description'] ?? '-') ?></p>
               <p class="mb-1"><strong>Stock:</strong> <?= $product['stock'] ?></p>
               <h6 class="text-primary mb-3">Price: $<?= number_format($product['price'], 2) ?></h6>
+              <a href="<?= BASE_URL ?>/?c=customerChat&m=index&seller_id=<?= $product['seller_id'] ?>"
+                class="btn btn-outline-secondary w-100 mb-2 d-flex justify-content-center gap-2">
+                <i class="material-icons-outlined">chat</i>
+                Chat Seller
+              </a>
               <form action="<?= BASE_URL ?>/?c=cart&m=add" method="POST" class="mt-auto">
                 <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
                 <input type="hidden" name="quantity" value="1">

@@ -80,6 +80,10 @@
                   Input Resi
                 </button>
                 <?php endif; ?>
+                <a href="<?= BASE_URL ?>/?c=sellerChat&m=index&order_id=<?= $o['id'] ?>"
+     class="btn btn-sm btn-secondary">
+     Chat
+  </a>
               </td>
             </tr>
             <?php endforeach; ?>
