@@ -250,31 +250,36 @@ class UserModel
     }
 
     public function updateSeller($data)
-    {
-        $sql = "
-            UPDATE users SET
-                name = :name,
-                email = :email,
-                nik = :nik,
-                address = :address,
-                no_rekening = :no_rekening,
-                qris_image = :qris_image,
-                photo = :photo
-            WHERE id = :id AND role_id = 2
-        ";
+{
+    $fields = [
+        'name'        => $data['name'],
+        'email'       => $data['email'],
+        'nik'         => $data['nik'],
+        'address'     => $data['address'],
+        'no_rekening' => $data['no_rekening'],
+        'qris_image'  => $data['qris_image'],
+        'photo'       => $data['photo']
+    ];
 
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            ':name'        => $data['name'],
-            ':email'       => $data['email'],
-            ':nik'         => $data['nik'],
-            ':address'     => $data['address'],
-            ':no_rekening' => $data['no_rekening'],
-            ':qris_image'  => $data['qris_image'],
-            ':photo'       => $data['photo'],
-            ':id'          => $data['id']
-        ]);
+    // 🔥 JIKA PASSWORD DIISI
+    if (!empty($data['password'])) {
+        $fields['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
     }
+
+    $set = implode(', ', array_map(fn($k) => "$k = :$k", array_keys($fields)));
+
+    $sql = "UPDATE users SET $set WHERE id = :id AND role_id = 2";
+    $stmt = $this->db->prepare($sql);
+
+    foreach ($fields as $key => $value) {
+        $stmt->bindValue(":$key", $value);
+    }
+
+    $stmt->bindValue(':id', $data['id']);
+
+    return $stmt->execute();
+}
+
 
     public function deleteSellerIfOffline($id)
     {

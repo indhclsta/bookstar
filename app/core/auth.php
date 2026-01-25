@@ -19,6 +19,8 @@ class Auth
         $userId = $_SESSION['user']['id'];
         $userModel = new UserModel();
         $userModel->updateLastActivity($userId);
+
+        $_SESSION['user'] = $userModel->findById($userId);
     }
 
     public static function role($roleName)

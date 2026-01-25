@@ -223,6 +223,7 @@ class AdminController
             exit;
         }
 
+        /* ================= FOTO ================= */
         $photoName = $seller['photo'];
 
         if (!empty($_FILES['photo']['name'])) {
@@ -240,19 +241,48 @@ class AdminController
             }
         }
 
-        $this->userModel->updateSeller([
-            'id'      => $id,
-            'name'    => trim($_POST['name']),
-            'email'   => trim($_POST['email']),
-            'nik'     => trim($_POST['nik']),
-            'address' => trim($_POST['address']),
-            'photo'   => $photoName
-        ]);
+        /* ================= QRIS ================= */
+        $qrisName = $_POST['old_qris'] ?? $seller['qris_image'];
+
+        if (!empty($_FILES['qris_image']['name'])) {
+            $ext = strtolower(pathinfo($_FILES['qris_image']['name'], PATHINFO_EXTENSION));
+            $qrisName = 'qris_' . time() . '.' . $ext;
+
+            move_uploaded_file(
+                $_FILES['qris_image']['tmp_name'],
+                APP_PATH . '/../public/uploads/qris/' . $qrisName
+            );
+
+            if (!empty($seller['qris_image'])) {
+                $old = APP_PATH . '/../public/uploads/qris/' . $seller['qris_image'];
+                if (file_exists($old)) unlink($old);
+            }
+        }
+
+        /* ================= DATA ================= */
+        $data = [
+            'id'          => $id,
+            'name'        => trim($_POST['name']),
+            'email'       => trim($_POST['email']),
+            'nik'         => trim($_POST['nik']),
+            'address'     => trim($_POST['address']),
+            'no_rekening' => trim($_POST['no_rekening']),
+            'qris_image'  => $qrisName,
+            'photo'       => $photoName
+        ];
+
+        if (!empty($_POST['password'])) {
+            $data['password'] = $_POST['password'];
+        }
+
+
+        $this->userModel->updateSeller($data);
 
         $_SESSION['success'] = 'Data seller berhasil diperbarui';
         header('Location: ' . BASE_URL . '/?c=admin&m=seller');
         exit;
     }
+
 
     public function sellerDelete()
     {
@@ -277,37 +307,44 @@ class AdminController
             die('Invalid request');
         }
 
-        // Cek email duplikat
         if ($this->userModel->emailExists($_POST['email'])) {
             $_SESSION['error'] = 'Email sudah terdaftar';
             header('Location: ' . BASE_URL . '/?c=admin&m=seller');
             exit;
         }
 
-        /* Upload photo */
+        /* Upload FOTO */
         $photoName = null;
         if (!empty($_FILES['photo']['name'])) {
             $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
             $photoName = uniqid('seller_') . '.' . $ext;
-
-            $uploadDir = APP_PATH . '/../public/uploads/profile/';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-
             move_uploaded_file(
                 $_FILES['photo']['tmp_name'],
-                $uploadDir . $photoName
+                APP_PATH . '/../public/uploads/profile/' . $photoName
+            );
+        }
+
+        /* Upload QRIS */
+        $qrisName = null;
+        if (!empty($_FILES['qris_image']['name'])) {
+            $ext = strtolower(pathinfo($_FILES['qris_image']['name'], PATHINFO_EXTENSION));
+            $qrisName = 'qris_' . time() . '.' . $ext;
+            move_uploaded_file(
+                $_FILES['qris_image']['tmp_name'],
+                APP_PATH . '/../public/uploads/qris/' . $qrisName
             );
         }
 
         $this->userModel->createSeller([
-            'name'     => trim($_POST['name']),
-            'email'    => trim($_POST['email']),
-            'password' => password_hash($_POST['password'], PASSWORD_DEFAULT),
-            'nik'      => trim($_POST['nik']),
-            'address'  => trim($_POST['address']),
-            'photo'    => $photoName
+            'name'        => trim($_POST['name']),
+            'email'       => trim($_POST['email']),
+            'password'    => password_hash($_POST['password'], PASSWORD_DEFAULT),
+            'nik'         => trim($_POST['nik']),
+            'address'     => trim($_POST['address']),
+            'no_rekening' => trim($_POST['no_rekening']),
+            'qris_image'  => $qrisName,
+            'photo'       => $photoName,
+            'role_id'     => 2
         ]);
 
         $_SESSION['success'] = 'Seller berhasil ditambahkan';
