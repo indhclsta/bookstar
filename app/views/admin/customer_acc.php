@@ -69,6 +69,7 @@
                                         </h5>
 
                                         <p class="mb-1"><strong>Email:</strong> <?= htmlspecialchars($customer['email']) ?></p>
+                                        <p class="mb-1"><strong>Phone:</strong> <?= htmlspecialchars($customer['no_tlp'] ?? '-') ?></p>
                                         <p class="mb-1"><strong>NIK:</strong> <?= htmlspecialchars($customer['nik'] ?? '-') ?></p>
                                         <p class="mb-2"><strong>Alamat:</strong> <?= htmlspecialchars($customer['address'] ?? '-') ?></p>
 
@@ -85,6 +86,7 @@
                                                 data-id="<?= $customer['id'] ?>"
                                                 data-name="<?= htmlspecialchars($customer['name']) ?>"
                                                 data-email="<?= htmlspecialchars($customer['email']) ?>"
+                                                data-no-tlp="<?= htmlspecialchars($customer['no_tlp']) ?>"
                                                 data-nik="<?= htmlspecialchars($customer['nik']) ?>"
                                                 data-address="<?= htmlspecialchars($customer['address']) ?>"
                                                 data-photo="<?= htmlspecialchars($customer['photo']) ?>">

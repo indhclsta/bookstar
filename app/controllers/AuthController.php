@@ -33,6 +33,7 @@ class AuthController
             'id'           => $user['id'],
             'name'         => $user['name'],
             'email'        => $user['email'],
+            'no_tlp'       => $user['no_tlp'],
             'role_id'      => $user['role_id'],
             'role_name'    => $user['role_name'],
             'photo'        => $user['photo'],
@@ -99,6 +100,7 @@ class AuthController
             'role_id'     => (int) $_POST['role_id'],
             'name'        => trim($_POST['name']),
             'email'       => trim($_POST['email']),
+            'no_tlp'      => trim($_POST['no_tlp']),
             'password'    => $_POST['password'],
             'nik'         => trim($_POST['nik']),
             'address'     => trim($_POST['address']),
@@ -118,6 +120,10 @@ class AuthController
 
         if ($userModel->findByEmail($data['email'])) {
             die('Email sudah terdaftar');
+        }
+
+        if (empty($data['no_tlp'])) {
+            die('Nomor telepon wajib diisi');
         }
 
         if (!empty($data['nik']) && $userModel->findByNik($data['nik'])) {

@@ -8,6 +8,7 @@ $photo = !empty($user['photo'])
 
 $name  = $user['name'] ?? '-';
 $email = $user['email'] ?? '-';
+$no_tlp = $user['no_tlp'] ?? '-';
 $role  = ucfirst($user['role_name'] ?? 'Customer');
 $nik   = $user['nik'] ?? '-'; // ambil NIK
 ?>
@@ -61,6 +62,15 @@ $nik   = $user['nik'] ?? '-'; // ambil NIK
               </div>
 
               <div class="mb-3">
+                <label class="form-label">Phone</label>
+                <input type="text"
+                  name="no_tlp"
+                  class="form-control"
+                  value="<?= htmlspecialchars($no_tlp) ?>"
+                  required>
+              </div>
+
+              <div class="mb-3">
                 <label class="form-label">NIK</label>
                 <input type="text" class="form-control" value="<?= htmlspecialchars($nik) ?>" disabled>
               </div>
@@ -94,6 +104,7 @@ $nik   = $user['nik'] ?? '-'; // ambil NIK
             <h5 class="mb-3">About</h5>
             <p><strong>Name:</strong> <?= htmlspecialchars($name) ?></p>
             <p><strong>Email:</strong> <?= htmlspecialchars($email) ?></p>
+            <p><strong>Phone:</strong> <?= htmlspecialchars($no_tlp) ?></p>
             <p><strong>NIK:</strong> <?= htmlspecialchars($nik) ?></p>
             <p><strong>Role:</strong> <?= htmlspecialchars($role) ?></p>
           </div>

@@ -15,6 +15,7 @@ $qrisImage = (!empty($user['qris_image'])
 
 $name  = $user['name'] ?? '-';
 $email = $user['email'] ?? '-';
+$no_tlp = $user['no_tlp'] ?? '-';
 $nik = $user['nik'] ?? '-';
 $role  = ucfirst($user['role_name'] ?? 'Seller');
 ?>
@@ -62,6 +63,12 @@ $role  = ucfirst($user['role_name'] ?? 'Seller');
               </div>
 
               <div class="mb-3">
+                <label class="form-label">Phone</label>
+                <input type="text" name="no_tlp" class="form-control"
+                  value="<?= htmlspecialchars($no_tlp) ?>" required>
+              </div>  
+
+              <div class="mb-3">
                 <label class="form-label">Photo</label>
                 <input type="file" name="photo" class="form-control"
                   accept="image/png,image/jpeg">
@@ -103,6 +110,7 @@ $role  = ucfirst($user['role_name'] ?? 'Seller');
             <h5 class="mb-3">About</h5>
             <p><strong>Name:</strong> <?= htmlspecialchars($name) ?></p>
             <p><strong>Email:</strong> <?= htmlspecialchars($email) ?></p>
+            <p><strong>Phone:</strong> <?= htmlspecialchars($no_tlp) ?></p>
             <p><strong>NIK:</strong> <?= htmlspecialchars($nik) ?></p>
             <p><strong>Role:</strong> <?= htmlspecialchars($role) ?></p>
           </div>

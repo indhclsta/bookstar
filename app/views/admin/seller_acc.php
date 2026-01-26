@@ -58,6 +58,7 @@
                                     <h5><?= htmlspecialchars($seller['name']) ?></h5>
 
                                     <p><strong>Email:</strong> <?= htmlspecialchars($seller['email']) ?></p>
+                                    <p><strong>Phone:</strong> <?= htmlspecialchars($seller['no_tlp'] ?? '-') ?></p>
                                     <p><strong>NIK:</strong> <?= htmlspecialchars($seller['nik'] ?? '-') ?></p>
                                     <p><strong>Alamat:</strong> <?= htmlspecialchars($seller['address'] ?? '-') ?></p>
 
@@ -74,6 +75,7 @@
                                             data-id="<?= $seller['id'] ?>"
                                             data-name="<?= htmlspecialchars($seller['name']) ?>"
                                             data-email="<?= htmlspecialchars($seller['email']) ?>"
+                                            data-no-tlp="<?= htmlspecialchars($seller['no_tlp']) ?>"
                                             data-nik="<?= htmlspecialchars($seller['nik']) ?>"
                                             data-address="<?= htmlspecialchars($seller['address']) ?>"
                                             data-no-rekening="<?= htmlspecialchars($seller['no_rekening']) ?>"
@@ -136,6 +138,22 @@
                     </div>
 
                     <div class="col-md-6">
+                        <label class="form-label">Phone</label>
+                        <input type="text"
+                            name="no_tlp"
+                            class="form-control"
+                            required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Foto (opsional)</label>
+                        <input type="file"
+                            name="photo"
+                            class="form-control"
+                            accept="image/*">
+                    </div>
+
+                    <div class="col-md-6">
                         <label class="form-label">Password</label>
                         <div class="input-group show-hide-password">
                             <input type="password"
@@ -180,14 +198,7 @@
                     </div>
 
 
-                    <div class="col-12">
-                        <label class="form-label">Foto (opsional)</label>
-                        <input type="file"
-                            name="photo"
-                            class="form-control"
-                            accept="image/*">
-                    </div>
-
+                    
                 </div>
             </div>
 

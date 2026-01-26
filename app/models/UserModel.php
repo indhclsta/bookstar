@@ -58,16 +58,22 @@ class UserModel
     /* ===== REGISTER (UMUM) ===== */
     public function create($data)
     {
+        if ($this->phoneExists($data['no_tlp'])) {
+            $_SESSION['error'] = 'Nomor HP sudah digunakan';
+            return false;
+        }
+
         $stmt = $this->db->prepare("
             INSERT INTO users 
-            (role_id, name, email, password, nik, address, no_rekening, qris_image)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        (role_id, name, email, no_tlp, password, nik, address, no_rekening, qris_image)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
         return $stmt->execute([
             $data['role_id'],
             $data['name'],
             $data['email'],
+            $data['no_tlp'],
             password_hash($data['password'], PASSWORD_DEFAULT),
             $data['nik'],
             $data['address'],
@@ -137,7 +143,7 @@ class UserModel
     public function getAllCustomer()
     {
         $stmt = $this->db->prepare("
-        SELECT id, name, email, nik, address, photo, is_online, last_activity
+        SELECT id, name, email, no_tlp, nik, address, photo, is_online, last_activity
         FROM users
         WHERE role_id = 3
         ORDER BY id DESC
@@ -153,6 +159,7 @@ class UserModel
             UPDATE users SET
                 name = :name,
                 email = :email,
+                no_tlp = :no_tlp,
                 nik = :nik,
                 address = :address,
                 photo = :photo
@@ -163,6 +170,7 @@ class UserModel
         return $stmt->execute([
             ':name'    => $data['name'],
             ':email'   => $data['email'],
+            ':no_tlp'  => $data['no_tlp'],
             ':nik'     => $data['nik'],
             ':address' => $data['address'],
             ':photo'   => $data['photo'],
@@ -187,7 +195,7 @@ class UserModel
     public function getAllSeller($excludeId = null)
     {
         $sql = "
-            SELECT id, name, email, nik, address, no_rekening, qris_image, photo, is_online, last_activity
+            SELECT id, name, email, no_tlp, nik, address, no_rekening, qris_image, photo, is_online, last_activity
             FROM users
             WHERE role_id = 2
         ";
@@ -206,14 +214,15 @@ class UserModel
     {
         $stmt = $this->db->prepare("
             INSERT INTO users 
-            (name, email, password, role_id, nik, address, no_rekening, qris_image, photo, is_online, created_at)
+            (name, email, no_tlp, password, role_id, nik, address, no_rekening, qris_image, photo, is_online, created_at)
             VALUES
-            (:name, :email, :password, 2, :nik, :address, :no_rekening, :qris_image, :photo, 0, NOW())
+            (:name, :email, :no_tlp, :password, 2, :nik, :address, :no_rekening, :qris_image, :photo, 0, NOW())
         ");
 
         return $stmt->execute([
             ':name'        => $data['name'],
             ':email'       => $data['email'],
+            ':no_tlp'      => $data['no_tlp'],
             ':password'    => $data['password'],
             ':nik'         => $data['nik'],
             ':address'     => $data['address'],
@@ -249,36 +258,64 @@ class UserModel
         return $stmt->fetch(PDO::FETCH_ASSOC) ? true : false;
     }
 
+    public function phoneExists($no_tlp, $excludeId = null)
+    {
+        if ($excludeId) {
+            $stmt = $this->db->prepare("
+            SELECT id FROM users 
+            WHERE no_tlp = :no_tlp AND id != :id
+            LIMIT 1
+        ");
+            $stmt->execute([
+                ':no_tlp' => $no_tlp,
+                ':id'     => $excludeId
+            ]);
+        } else {
+            $stmt = $this->db->prepare("
+            SELECT id FROM users 
+            WHERE no_tlp = :no_tlp
+            LIMIT 1
+        ");
+            $stmt->execute([
+                ':no_tlp' => $no_tlp
+            ]);
+        }
+
+        return $stmt->fetch() ? true : false;
+    }
+
+
     public function updateSeller($data)
-{
-    $fields = [
-        'name'        => $data['name'],
-        'email'       => $data['email'],
-        'nik'         => $data['nik'],
-        'address'     => $data['address'],
-        'no_rekening' => $data['no_rekening'],
-        'qris_image'  => $data['qris_image'],
-        'photo'       => $data['photo']
-    ];
+    {
+        $fields = [
+            'name'        => $data['name'],
+            'email'       => $data['email'],
+            'no_tlp'      => $data['no_tlp'],
+            'nik'         => $data['nik'],
+            'address'     => $data['address'],
+            'no_rekening' => $data['no_rekening'],
+            'qris_image'  => $data['qris_image'],
+            'photo'       => $data['photo']
+        ];
 
-    // 🔥 JIKA PASSWORD DIISI
-    if (!empty($data['password'])) {
-        $fields['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        // 🔥 JIKA PASSWORD DIISI
+        if (!empty($data['password'])) {
+            $fields['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        }
+
+        $set = implode(', ', array_map(fn($k) => "$k = :$k", array_keys($fields)));
+
+        $sql = "UPDATE users SET $set WHERE id = :id AND role_id = 2";
+        $stmt = $this->db->prepare($sql);
+
+        foreach ($fields as $key => $value) {
+            $stmt->bindValue(":$key", $value);
+        }
+
+        $stmt->bindValue(':id', $data['id']);
+
+        return $stmt->execute();
     }
-
-    $set = implode(', ', array_map(fn($k) => "$k = :$k", array_keys($fields)));
-
-    $sql = "UPDATE users SET $set WHERE id = :id AND role_id = 2";
-    $stmt = $this->db->prepare($sql);
-
-    foreach ($fields as $key => $value) {
-        $stmt->bindValue(":$key", $value);
-    }
-
-    $stmt->bindValue(':id', $data['id']);
-
-    return $stmt->execute();
-}
 
 
     public function deleteSellerIfOffline($id)
@@ -300,6 +337,7 @@ class UserModel
         $fields = [
             'name'        => $data['name'],
             'email'       => $data['email'],
+            'no_tlp'      => $data['no_tlp'],
             'nik'         => $data['nik'],
             'address'     => $data['address'],
             'no_rekening' => $data['no_rekening'] ?? null,
@@ -312,6 +350,14 @@ class UserModel
 
         if (!empty($data['photo'])) {
             $fields['photo'] = $data['photo'];
+        }
+
+        if (!empty($data['no_tlp'])) {
+            if ($this->phoneExists($data['no_tlp'], $id)) {
+                $_SESSION['error'] = 'Nomor HP sudah digunakan';
+                return false;
+            }
+            $fields['no_tlp'] = $data['no_tlp'];
         }
 
         $set = implode(', ', array_map(fn($k) => "$k = :$k", array_keys($fields)));
