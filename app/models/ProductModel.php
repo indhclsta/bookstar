@@ -115,4 +115,15 @@ class ProductModel
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    // KURANGI STOK PRODUK
+    public function reduceStock($productId, $qty)
+    {
+        $stmt = $this->db->prepare("
+        UPDATE products
+        SET stock = stock - ?
+        WHERE id = ? AND stock >= ?
+    ");
+        return $stmt->execute([$qty, $productId, $qty]);
+    }
 }

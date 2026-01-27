@@ -2,10 +2,12 @@
 
 require_once APP_PATH . '/core/auth.php';
 require_once APP_PATH . '/models/ProductModel.php';
+require_once APP_PATH . '/models/CartModel.php';
 
 class CartController
 {
     private $productModel;
+    private $cartModel;
 
     public function __construct()
     {
@@ -13,19 +15,16 @@ class CartController
         Auth::role('customer');
 
         $this->productModel = new ProductModel();
+        $this->cartModel    = new CartModel();
     }
 
     // ADD TO CART
     public function add()
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            die('Invalid request');
-        }
-
+        $userId    = $_SESSION['user']['id'];
         $productId = $_POST['product_id'];
         $qty       = $_POST['quantity'] ?? 1;
 
-        // ambil produk
         $product = $this->productModel->findById($productId);
         if (!$product) {
             $_SESSION['error'] = 'Produk tidak ditemukan';
@@ -33,51 +32,38 @@ class CartController
             exit;
         }
 
-        // cek stock
         if ($qty > $product['stock']) {
             $_SESSION['error'] = 'Stock tidak mencukupi';
             header('Location: ' . BASE_URL . '/?c=customer&m=order');
             exit;
         }
 
-        // inisialisasi cart
-        if (!isset($_SESSION['cart'])) {
-            $_SESSION['cart'] = [];
-        }
-
-        // kalau produk sudah ada di cart
-        if (isset($_SESSION['cart'][$productId])) {
-            $_SESSION['cart'][$productId]['quantity'] += $qty;
-        } else {
-            $_SESSION['cart'][$productId] = [
-                'product_id' => $product['id'],
-                'name'       => $product['name'],
-                'price'      => $product['price'],
-                'image'      => $product['image'],
-                'quantity'   => $qty
-            ];
-        }
+        $this->cartModel->add($userId, $productId, $qty);
 
         $_SESSION['success'] = 'Produk ditambahkan ke cart';
         header('Location: ' . BASE_URL . '/?c=customer&m=order');
-        exit;
     }
+
 
     // VIEW CART
     public function index()
     {
-        $cart = $_SESSION['cart'] ?? [];
+        $userId = $_SESSION['user']['id'];
+        $cart = $this->cartModel->getByUser($userId);
+
         require APP_PATH . '/views/customer/cart.php';
     }
 
-    // REMOVE ITEM
+
+    // REMOVE ITEM  
     public function remove()
     {
-        $id = $_GET['id'];
-        unset($_SESSION['cart'][$id]);
+        $userId = $_SESSION['user']['id'];
+        $id     = $_GET['id'];
+
+        $this->cartModel->remove($userId, $id);
 
         $_SESSION['success'] = 'Produk dihapus dari cart';
         header('Location: ' . BASE_URL . '/?c=cart&m=index');
-        exit;
     }
 }

@@ -15,8 +15,8 @@ class CustomerController
         Auth::check();
         Auth::role('customer');
 
-        $this->userModel = new UserModel(); 
-        $this->productModel = new ProductModel(); 
+        $this->userModel = new UserModel();
+        $this->productModel = new ProductModel();
         $this->customerId = $_SESSION['user']['id'];
 
         // update last activity setiap request

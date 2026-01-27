@@ -2,6 +2,8 @@
 
 require_once APP_PATH . '/core/auth.php';
 require_once APP_PATH . '/models/OrderModel.php';
+require_once APP_PATH . '/models/OrderItemModel.php';
+require_once APP_PATH . '/models/ProductModel.php';
 
 class SellerOrderController
 {
@@ -11,7 +13,6 @@ class SellerOrderController
     {
         Auth::check();
         Auth::role('seller');
-
         $this->orderModel = new OrderModel();
     }
 
@@ -21,37 +22,74 @@ class SellerOrderController
         $sellerId = $_SESSION['user']['id'];
         $orders = $this->orderModel->getOrdersBySeller($sellerId);
 
+        // Tambahkan field buyer_name dan buyer_address supaya view bisa langsung pakai
+        foreach ($orders as &$o) {
+            $o['buyer_name'] = $o['customer_name'] ?? '-';
+            $o['buyer_address'] = $o['shipping_address'] ?? $o['customer_address'] ?? '-';
+        }
+
         require APP_PATH . '/views/seller/order.php';
     }
 
-    // APPROVE / REJECT
     public function approve()
+{
+    if (isset($_GET['id'])) {
+        $orderId = $_GET['id'];
+
+        $orderItemModel = new OrderItemModel();
+        $productModel   = new ProductModel();
+
+        // ambil semua item dalam order
+        $items = $orderItemModel->getByOrderId($orderId);
+
+        // kurangi stok per produk
+        foreach ($items as $item) {
+            $productModel->reduceStock(
+                $item['product_id'],
+                $item['quantity']
+            );
+        }
+
+        // update status order
+        $this->orderModel->updateApproval($orderId, 'approved');
+
+        $_SESSION['success'] = "Pesanan disetujui & stok otomatis berkurang";
+        header("Location: " . BASE_URL . "/?c=sellerOrder&m=index");
+    }
+}
+
+
+    public function reject()
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') die('Invalid request');
-
-        $orderId = $_POST['order_id'];
-        $status  = $_POST['approve']; // approved | rejected
-
-        $this->orderModel->updateApprove($orderId, $status);
-
-        $_SESSION['success'] = 'Status pesanan diperbarui';
-        header('Location: ' . BASE_URL . '/?c=sellerOrder&m=index');
-        exit;
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
+            $orderId = $_GET['id'];
+            $this->orderModel->updateApproval($orderId, 'rejected');
+            $_SESSION['success'] = "Pesanan ditolak";
+            header("Location: " . BASE_URL . "/?c=sellerOrder&m=index");
+        }
     }
 
     // INPUT RESI
     public function inputResi()
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') die('Invalid request');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $orderId = $_POST['order_id'];
+            $resi    = $_POST['resi'];
+            $trackingUrl = $_POST['tracking_url'] ?? null;
 
-        $orderId = $_POST['order_id'];
-        $resi    = trim($_POST['resi']);
-        $tracking = trim($_POST['tracking_url']);
+            $this->orderModel->inputResi($orderId, $resi, $trackingUrl);
+            $_SESSION['success'] = "Nomor resi berhasil disimpan";
+            header("Location: " . BASE_URL . "/?c=sellerOrder&m=index");
+        }
+    }
 
-        $this->orderModel->saveResi($orderId, $resi, $tracking);
-
-        $_SESSION['success'] = 'No resi berhasil disimpan';
-        header('Location: ' . BASE_URL . '/?c=sellerOrder&m=index');
-        exit;
+    public function delete()
+    {
+        if (isset($_GET['id'])) {
+            $orderId = $_GET['id'];
+            $this->orderModel->deleteOrder($orderId);
+            $_SESSION['success'] = "Pesanan berhasil dihapus";
+            header("Location: " . BASE_URL . "/?c=sellerOrder&m=index");
+        }
     }
 }

@@ -32,6 +32,13 @@
         </a>
       </li>
       <li>
+        <a href="<?= BASE_URL ?>/?c=customerOrder&m=index">
+          <div class="parent-icon"><i class="material-icons-outlined">receipt_long</i>
+          </div>
+          <div class="menu-title">History Order</div>
+        </a>
+      </li>
+      <li>
         <a href="<?= BASE_URL ?>/?c=cart&m=index">
           <div class="parent-icon"><i class="material-icons-outlined">shopping_cart</i>
           </div>
