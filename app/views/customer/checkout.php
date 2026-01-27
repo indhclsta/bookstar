@@ -82,7 +82,7 @@
                             <div class="mb-2">
                                 <label class="form-label small">Bukti Pembayaran</label>
                                 <input type="file"
-                                    name="payment_proof[<?= $sellerId ?>]"
+                                    name="payment_proof[<?= $sellerId ?>]" 
                                     class="form-control form-control-sm"
                                     accept="image/jpeg,image/png,image/jpg"
                                     required>
@@ -100,7 +100,7 @@
                 </div>
 
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="<?= BASE_URL ?>/?c=cart&m=index" class="btn btn-outline-secondary btn-sm">Back to Cart</a>
+                    <a href="<?= BASE_URL ?>/?c=invoice&m=show&id=ORDER_ID" class="btn btn-outline-secondary btn-sm">Back to Cart</a>
                     <button type="submit" class="btn btn-primary btn-sm">Pay & Checkout</button>
                 </div>
 

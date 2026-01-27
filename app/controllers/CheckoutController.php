@@ -1,111 +1,122 @@
 <?php
-require_once APP_PATH.'/core/auth.php';
-require_once APP_PATH.'/models/OrderModel.php';
-require_once APP_PATH.'/models/OrderItemModel.php';
-require_once APP_PATH.'/models/UserModel.php';
+require_once APP_PATH . '/core/auth.php';
+require_once APP_PATH . '/models/OrderModel.php';
+require_once APP_PATH . '/models/OrderItemModel.php';
+require_once APP_PATH . '/models/UserModel.php';
 
-class CheckoutController {
-
+class CheckoutController
+{
     private $orderModel;
     private $orderItemModel;
     private $userModel;
 
-    public function __construct() {
+    public function __construct()
+    {
         Auth::check();
         Auth::role('customer');
 
-        $this->orderModel = new OrderModel();
+        $this->orderModel     = new OrderModel();
         $this->orderItemModel = new OrderItemModel();
-        $this->userModel = new UserModel();
+        $this->userModel      = new UserModel();
     }
 
-    public function index() {
-        $customerId = $_SESSION['user']['id'];
+    public function index()
+    {
+        $customerId  = $_SESSION['user']['id'];
         $groupedCart = $this->orderModel->getCartGroupedBySeller($customerId);
-        require APP_PATH.'/views/customer/checkout.php';
+        require APP_PATH . '/views/customer/checkout.php';
     }
 
-    public function process() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            die('Invalid request');
-        }
+    public function process()
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        die('Invalid request');
+    }
 
-        $customerId = $_SESSION['user']['id'];
-        $sellerIds  = $_POST['seller_id'] ?? [];
+    $customerId = $_SESSION['user']['id'];
+    $sellerIds  = $_POST['seller_id'] ?? [];
 
-        foreach ($sellerIds as $sellerId) {
+    // 🔥 BUAT CHECKOUT CODE SEKALI SAJA
+    $checkoutCode = 'CHK-' . strtoupper(uniqid());
 
-            $paymentMethod = $_POST['payment_method'][$sellerId] ?? 'transfer';
-            $paymentProof  = null;
+    $lastOrderId = null;
 
-            // ================= UPLOAD BUKTI PEMBAYARAN =================
-            if (!empty($_FILES['payment_proof']['name'][$sellerId])) {
+    foreach ($sellerIds as $sellerId) {
 
-                $uploadDir = __DIR__ . '/../../public/uploads/payments/';
+        $paymentMethod = $_POST['payment_method'][$sellerId] ?? 'transfer';
+        $paymentProof  = null;
 
-                // pastikan folder ada
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
+        // ================= UPLOAD BUKTI PEMBAYARAN =================
+        if (!empty($_FILES['payment_proof']['name'][$sellerId])) {
 
-                $ext = pathinfo(
-                    $_FILES['payment_proof']['name'][$sellerId],
-                    PATHINFO_EXTENSION
-                );
+            $uploadDir = __DIR__ . '/../../public/uploads/payments/';
 
-                $paymentProof = 'payment_' . uniqid() . '_' . time() . '.' . $ext;
-
-                $targetPath = $uploadDir . $paymentProof;
-
-                if (!move_uploaded_file(
-                    $_FILES['payment_proof']['tmp_name'][$sellerId],
-                    $targetPath
-                )) {
-                    die('❌ Upload bukti pembayaran gagal');
-                }
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
             }
-            // ===========================================================
 
-            $orderCode = 'ORD' . strtoupper(uniqid());
-
-            $cartItems = $this->orderModel->getCartItemsBySeller(
-                $customerId,
-                $sellerId
+            $ext = pathinfo(
+                $_FILES['payment_proof']['name'][$sellerId],
+                PATHINFO_EXTENSION
             );
 
-            $totalPrice = 0;
-            foreach ($cartItems as $item) {
-                $totalPrice += $item['price'] * $item['quantity'];
+            $paymentProof = 'payment_' . uniqid() . '_' . time() . '.' . $ext;
+
+            $targetPath = $uploadDir . $paymentProof;
+
+            if (!move_uploaded_file(
+                $_FILES['payment_proof']['tmp_name'][$sellerId],
+                $targetPath
+            )) {
+                die('Upload bukti pembayaran gagal');
             }
+        }
+        // ===========================================================
 
-            $orderId = $this->orderModel->create([
-                'order_code'       => $orderCode,
-                'customer_id'      => $customerId,
-                'seller_id'        => $sellerId,
-                'total_price'      => $totalPrice,
-                'payment_method'   => $paymentMethod,
-                'payment_proof'    => $paymentProof,
-                'shipping_address' => $_SESSION['user']['address'] ?? '-',
-                'order_status'     => 'pending',
-                'approval_status'  => 'pending'
-            ]);
+        $cartItems = $this->orderModel->getCartItemsBySeller(
+            $customerId,
+            $sellerId
+        );
 
-            // simpan order items
-            foreach ($cartItems as $item) {
-                $this->orderItemModel->create([
-                    'order_id'      => $orderId,
-                    'product_id'    => $item['product_id'],
-                    'product_title' => $item['name'],
-                    'quantity'      => $item['quantity'],
-                    'price'         => $item['price']
-                ]);
-            }
-
-            // hapus cart seller ini
-            $this->orderModel->clearCartBySeller($customerId, $sellerId);
+        $totalPrice = 0;
+        foreach ($cartItems as $item) {
+            $totalPrice += $item['price'] * $item['quantity'];
         }
 
-        header('Location: ' . BASE_URL . '/?c=customerOrder&m=index');
-        exit;
+        // 🔥 SIMPAN ORDER DENGAN CHECKOUT CODE
+        $orderId = $this->orderModel->create([
+            'order_code'       => 'ORD-' . strtoupper(uniqid()),
+            'checkout_code'    => $checkoutCode,
+            'customer_id'      => $customerId,
+            'seller_id'        => $sellerId,
+            'total_price'      => $totalPrice,
+            'payment_method'   => $paymentMethod,
+            'payment_proof'    => $paymentProof,
+            'shipping_address' => $_SESSION['user']['address'] ?? '-',
+            'order_status'     => 'pending',
+            'approval_status'  => 'pending'
+        ]);
+
+        $lastOrderId = $orderId;
+
+        // ================= ORDER ITEMS =================
+        foreach ($cartItems as $item) {
+            $this->orderItemModel->create([
+                'order_id'      => $orderId,
+                'product_id'    => $item['product_id'],
+                'product_title' => $item['name'],
+                'quantity'      => $item['quantity'],
+                'price'         => $item['price']
+            ]);
+        }
+
+        // ================= CLEAR CART =================
+        $this->orderModel->clearCartBySeller($customerId, $sellerId);
     }
+
+    // 🔥 REDIRECT PAKAI CHECKOUT CODE
+    header('Location: ' . BASE_URL . '/?c=invoice&m=show&id=' . $checkoutCode);
+    exit;
+}
+
 }

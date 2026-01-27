@@ -18,11 +18,12 @@ class OrderModel
     {
         $stmt = $this->db->prepare("
         INSERT INTO orders 
-        (order_code, customer_id, seller_id, total_price, payment_method, payment_proof, shipping_address, order_status, approval_status) 
-        VALUES (?,?,?,?,?,?,?,?,?)
+(order_code, checkout_code, customer_id, seller_id, total_price, payment_method, payment_proof, shipping_address, order_status, approval_status) 
+VALUES (?,?,?,?,?,?,?,?,?,?)
     ");
         $stmt->execute([
-            $data['order_code'],
+            $data['order_code'],      // unik per seller
+            $data['checkout_code'],   // sama untuk 1 checkout
             $data['customer_id'],
             $data['seller_id'],
             $data['total_price'],
@@ -210,5 +211,65 @@ class OrderModel
     {
         $stmt = $this->db->prepare("DELETE FROM orders WHERE id = ?");
         return $stmt->execute([$orderId]);
+    }
+
+    public function getByCustomer($customerId)
+    {
+        $stmt = $this->db->prepare("
+        SELECT * FROM orders
+        WHERE customer_id = ?
+        ORDER BY created_at DESC
+    ");
+        $stmt->execute([$customerId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getByOrderCode($orderCode, $customerId)
+    {
+        $stmt = $this->db->prepare("
+        SELECT * FROM orders 
+        WHERE order_code = ? AND customer_id = ?
+    ");
+        $stmt->execute([$orderCode, $customerId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getByCheckoutCode($code, $customerId)
+    {
+        $stmt = $this->db->prepare("
+        SELECT *
+        FROM orders
+        WHERE checkout_code = ? AND customer_id = ?
+        ORDER BY id ASC
+    ");
+        $stmt->execute([$code, $customerId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getInvoiceByCheckout($checkoutCode, $customerId)
+    {
+        $stmt = $this->db->prepare("
+        SELECT 
+            o.*,
+            u.name AS seller_name
+        FROM orders o
+        JOIN users u ON o.seller_id = u.id
+        WHERE o.checkout_code = ? AND o.customer_id = ?
+        ORDER BY o.id ASC
+    ");
+        $stmt->execute([$checkoutCode, $customerId]);
+        $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($orders as &$order) {
+            $stmtItems = $this->db->prepare("
+            SELECT product_title, quantity, price
+            FROM order_items
+            WHERE order_id = ?
+        ");
+            $stmtItems->execute([$order['id']]);
+            $order['items'] = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        return $orders;
     }
 }
