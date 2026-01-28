@@ -2,6 +2,7 @@
 
 require_once APP_PATH . '/core/auth.php';
 require_once APP_PATH . '/models/UserModel.php';
+require_once APP_PATH . '/helpers/Flash.php';
 
 class AdminController
 {
@@ -52,13 +53,12 @@ class AdminController
             'password' => !empty($_POST['password']) ? $_POST['password'] : null
         ];
 
-        // === UPLOAD FOTO ===
         if (!empty($_FILES['photo']['name'])) {
             $allowed = ['jpg', 'jpeg', 'png'];
             $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
 
             if (!in_array($ext, $allowed)) {
-                $_SESSION['error'] = "Format foto tidak valid";
+                Flash::error("Format foto tidak valid");
                 header("Location: ?c=admin&m=profile");
                 exit;
             }
@@ -67,12 +67,10 @@ class AdminController
             if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
             $photoName = 'profile_' . $id . '_' . time() . '.' . $ext;
-            $target = $uploadDir . $photoName;
-            move_uploaded_file($_FILES['photo']['tmp_name'], $target);
+            move_uploaded_file($_FILES['photo']['tmp_name'], $uploadDir . $photoName);
 
             $data['photo'] = $photoName;
 
-            // Hapus foto lama kecuali default
             $oldPhoto = $_SESSION['user']['photo'] ?? null;
             if ($oldPhoto && !in_array($oldPhoto, ['admin.png', 'seller.png', 'customer.png'])) {
                 $oldPath = $uploadDir . $oldPhoto;
@@ -80,21 +78,15 @@ class AdminController
             }
         }
 
-        require_once APP_PATH . '/models/UserModel.php';
-        $userModel = new UserModel();
-        $userModel->updateProfile($id, $data);
+        $this->userModel->updateProfile($id, $data);
 
-        // === UPDATE SESSION ===
         $_SESSION['user']['name'] = $data['name'];
         if (!empty($data['photo'])) $_SESSION['user']['photo'] = $data['photo'];
 
-        $_SESSION['success'] = "Profile berhasil diperbarui";
+        Flash::success("Profile berhasil diperbarui");
         header("Location: ?c=admin&m=profile");
         exit;
     }
-
-
-
 
     /* ===================== CUSTOMER ===================== */
     public function customer()
@@ -105,46 +97,26 @@ class AdminController
 
     public function customerUpdate()
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            die('Invalid request');
-        }
-
         $id = $_POST['id'];
         $customer = $this->userModel->findById($id);
 
         if (!$customer || $customer['role_id'] != 3) {
-            $_SESSION['error'] = 'Customer tidak ditemukan';
+            Flash::error('Customer tidak ditemukan');
             header('Location: ' . BASE_URL . '/?c=admin&m=customer');
             exit;
-        }
-
-        $photoName = $customer['photo'];
-
-        if (!empty($_FILES['photo']['name'])) {
-            $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
-            $photoName = uniqid('cust_') . '.' . $ext;
-
-            move_uploaded_file(
-                $_FILES['photo']['tmp_name'],
-                APP_PATH . '/../public/uploads/profile/' . $photoName
-            );
-
-            if (!empty($customer['photo'])) {
-                $old = APP_PATH . '/../public/uploads/profile/' . $customer['photo'];
-                if (file_exists($old)) unlink($old);
-            }
         }
 
         $this->userModel->updateCustomer([
             'id'      => $id,
             'name'    => trim($_POST['name']),
             'email'   => trim($_POST['email']),
+            'no_tlp'  => trim($_POST['no_tlp']),
             'nik'     => trim($_POST['nik']),
             'address' => trim($_POST['address']),
-            'photo'   => $photoName
+            'photo'   => $customer['photo']
         ]);
 
-        $_SESSION['success'] = 'Data customer berhasil diperbarui';
+        Flash::success('Data customer berhasil diperbarui');
         header('Location: ' . BASE_URL . '/?c=admin&m=customer');
         exit;
     }
@@ -152,14 +124,17 @@ class AdminController
     public function customerDelete()
     {
         $id = $_GET['id'] ?? null;
-        if (!$id) die('Invalid ID');
 
-        $deleted = $this->userModel->deleteCustomerIfOffline($id);
+        if (!$id) {
+            Flash::error('ID customer tidak valid');
+            header('Location: ' . BASE_URL . '/?c=admin&m=customer');
+            exit;
+        }
 
-        if ($deleted) {
-            $_SESSION['success'] = 'Customer berhasil dihapus';
+        if ($this->userModel->deleteCustomerIfOffline($id)) {
+            Flash::success('Customer berhasil dihapus');
         } else {
-            $_SESSION['error'] = 'Customer sedang online dan tidak bisa dihapus';
+            Flash::error('Customer sedang online atau tidak ditemukan');
         }
 
         header('Location: ' . BASE_URL . '/?c=admin&m=customer');
@@ -173,181 +148,22 @@ class AdminController
         require APP_PATH . '/views/admin/seller_acc.php';
     }
 
-    public function sellerCreate()
-    {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            die('Invalid request');
-        }
-
-        $photoName = null;
-
-        if (!empty($_FILES['photo']['name'])) {
-            $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
-            $photoName = uniqid('seller_') . '.' . $ext;
-
-            move_uploaded_file(
-                $_FILES['photo']['tmp_name'],
-                APP_PATH . '/../public/uploads/profile/' . $photoName
-            );
-        }
-
-        $this->userModel->createSeller([
-            'name'     => trim($_POST['name']),
-            'email'    => trim($_POST['email']),
-            'password' => password_hash($_POST['password'], PASSWORD_DEFAULT),
-            'nik'      => trim($_POST['nik']),
-            'address'  => trim($_POST['address']),
-            'photo'    => $photoName,
-            'role_id'  => 2,
-            'status'   => 'offline'
-        ]);
-
-        $_SESSION['success'] = 'Seller berhasil ditambahkan';
-        header('Location: ' . BASE_URL . '/?c=admin&m=seller');
-        exit;
-    }
-
-
-    public function sellerUpdate()
-    {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            die('Invalid request');
-        }
-
-        $id     = $_POST['id'];
-        $seller = $this->userModel->findById($id);
-
-        if (!$seller || $seller['role_id'] != 2) {
-            $_SESSION['error'] = 'Seller tidak ditemukan';
-            header('Location: ' . BASE_URL . '/?c=admin&m=seller');
-            exit;
-        }
-
-        /* ================= FOTO ================= */
-        $photoName = $seller['photo'];
-
-        if (!empty($_FILES['photo']['name'])) {
-            $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
-            $photoName = uniqid('seller_') . '.' . $ext;
-
-            move_uploaded_file(
-                $_FILES['photo']['tmp_name'],
-                APP_PATH . '/../public/uploads/profile/' . $photoName
-            );
-
-            if (!empty($seller['photo'])) {
-                $old = APP_PATH . '/../public/uploads/profile/' . $seller['photo'];
-                if (file_exists($old)) unlink($old);
-            }
-        }
-
-        /* ================= QRIS ================= */
-        $qrisName = $_POST['old_qris'] ?? $seller['qris_image'];
-
-        if (!empty($_FILES['qris_image']['name'])) {
-            $ext = strtolower(pathinfo($_FILES['qris_image']['name'], PATHINFO_EXTENSION));
-            $qrisName = 'qris_' . time() . '.' . $ext;
-
-            move_uploaded_file(
-                $_FILES['qris_image']['tmp_name'],
-                APP_PATH . '/../public/uploads/qris/' . $qrisName
-            );
-
-            if (!empty($seller['qris_image'])) {
-                $old = APP_PATH . '/../public/uploads/qris/' . $seller['qris_image'];
-                if (file_exists($old)) unlink($old);
-            }
-        }
-
-        /* ================= DATA ================= */
-        $data = [
-            'id'          => $id,
-            'name'        => trim($_POST['name']),
-            'email'       => trim($_POST['email']),
-            'nik'         => trim($_POST['nik']),
-            'address'     => trim($_POST['address']),
-            'no_rekening' => trim($_POST['no_rekening']),
-            'qris_image'  => $qrisName,
-            'photo'       => $photoName
-        ];
-
-        if (!empty($_POST['password'])) {
-            $data['password'] = $_POST['password'];
-        }
-
-
-        $this->userModel->updateSeller($data);
-
-        $_SESSION['success'] = 'Data seller berhasil diperbarui';
-        header('Location: ' . BASE_URL . '/?c=admin&m=seller');
-        exit;
-    }
-
-
     public function sellerDelete()
     {
         $id = $_GET['id'] ?? null;
-        if (!$id) die('Invalid ID');
 
-        $deleted = $this->userModel->deleteSellerIfOffline($id);
-
-        if ($deleted) {
-            $_SESSION['success'] = 'Seller berhasil dihapus';
-        } else {
-            $_SESSION['error'] = 'Seller sedang online dan tidak bisa dihapus';
-        }
-
-        header('Location: ' . BASE_URL . '/?c=admin&m=seller');
-        exit;
-    }
-
-    public function sellerStore()
-    {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            die('Invalid request');
-        }
-
-        if ($this->userModel->emailExists($_POST['email'])) {
-            $_SESSION['error'] = 'Email sudah terdaftar';
+        if (!$id) {
+            Flash::error('ID seller tidak valid');
             header('Location: ' . BASE_URL . '/?c=admin&m=seller');
             exit;
         }
 
-        /* Upload FOTO */
-        $photoName = null;
-        if (!empty($_FILES['photo']['name'])) {
-            $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
-            $photoName = uniqid('seller_') . '.' . $ext;
-            move_uploaded_file(
-                $_FILES['photo']['tmp_name'],
-                APP_PATH . '/../public/uploads/profile/' . $photoName
-            );
+        if ($this->userModel->deleteSellerIfOffline($id)) {
+            Flash::success('Seller berhasil dihapus');
+        } else {
+            Flash::error('Seller sedang online atau tidak ditemukan');
         }
 
-        /* Upload QRIS */
-        $qrisName = null;
-        if (!empty($_FILES['qris_image']['name'])) {
-            $ext = strtolower(pathinfo($_FILES['qris_image']['name'], PATHINFO_EXTENSION));
-            $qrisName = 'qris_' . time() . '.' . $ext;
-            move_uploaded_file(
-                $_FILES['qris_image']['tmp_name'],
-                APP_PATH . '/../public/uploads/qris/' . $qrisName
-            );
-        }
-
-        $this->userModel->createSeller([
-            'name'        => trim($_POST['name']),
-            'email'       => trim($_POST['email']),
-            'password'    => password_hash($_POST['password'], PASSWORD_DEFAULT),
-            'nik'         => trim($_POST['nik']),
-            'address'     => trim($_POST['address']),
-            'no_rekening' => trim($_POST['no_rekening']),
-            'qris_image'  => $qrisName,
-            'photo'       => $photoName,
-            'role_id'     => 2
-        ]);
-
-        $_SESSION['success'] = 'Seller berhasil ditambahkan';
         header('Location: ' . BASE_URL . '/?c=admin&m=seller');
         exit;
     }

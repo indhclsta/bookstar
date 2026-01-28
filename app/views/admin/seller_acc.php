@@ -204,7 +204,7 @@
 
             <div class="modal-footer">
                 <button type="button"
-                    class="btn btn-secondary"
+                    class="btn-close"
                     data-bs-dismiss="modal">
                     Batal
                 </button>
@@ -249,6 +249,11 @@
                     </div>
 
                     <div class="col-md-6">
+                        <label>Phone</label>
+                        <input type="text" name="no_tlp" id="edit-phone" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6">
                         <label>Password</label>
                         <input type="password" name="password" class="form-control">
                     </div>
@@ -269,7 +274,7 @@
                         <input type="file" name="photo" class="form-control">
                     </div>
 
-                    <div class="col-12">
+                    <div class="col-md-6">
                         <label>Alamat</label>
                         <textarea name="address" id="edit-address" class="form-control"></textarea>
                     </div>
@@ -278,7 +283,6 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                 <button class="btn btn-primary">Update</button>
             </div>
 
@@ -292,6 +296,7 @@ document.querySelectorAll('.btn-edit').forEach(btn => {
         document.getElementById('edit-id').value = this.dataset.id;
         document.getElementById('edit-name').value = this.dataset.name;
         document.getElementById('edit-email').value = this.dataset.email;
+        document.getElementById('edit-phone').value = this.dataset.no_tlp;
         document.getElementById('edit-nik').value = this.dataset.nik;
         document.getElementById('edit-address').value = this.dataset.address;
         document.getElementById('edit-no-rekening').value = this.dataset.noRekening;

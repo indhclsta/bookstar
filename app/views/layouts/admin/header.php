@@ -21,6 +21,7 @@ $email = $user['email'] ?? '';
 
   <link href="<?= BASE_URL ?>/assets/css/pace.min.css" rel="stylesheet">
   <script src="<?= BASE_URL ?>/assets/js/pace.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <link href="<?= BASE_URL ?>/assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet">
   <link href="<?= BASE_URL ?>/assets/plugins/metismenu/metisMenu.min.css" rel="stylesheet">
@@ -112,7 +113,7 @@ $email = $user['email'] ?? '';
                 <img src="<?= $photo ?>" class="rounded-circle p-1 shadow mb-2" width="80" height="80">
                 <h6 class="mb-0"><?= htmlspecialchars($name) ?></h6>
                 <?php if ($email): ?>
-                  <small class="text-muted"><?= htmlspecialchars($email) ?></small>
+                  <small class="text"><?= htmlspecialchars($email) ?></small>
                 <?php endif; ?>
               </div>
 

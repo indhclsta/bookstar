@@ -86,6 +86,14 @@ class CustomerController
         exit;
     }
 
+    public function faq()
+    {
+        $customerId = $_SESSION['user']['id'];
+        $this->userModel->updateLastActivity($customerId);
+
+        require APP_PATH . '/views/customer/faq.php';
+    }
+
     public function order()
     {
         // update last activity

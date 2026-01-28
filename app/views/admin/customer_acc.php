@@ -86,7 +86,7 @@
                                                 data-id="<?= $customer['id'] ?>"
                                                 data-name="<?= htmlspecialchars($customer['name']) ?>"
                                                 data-email="<?= htmlspecialchars($customer['email']) ?>"
-                                                data-no-tlp="<?= htmlspecialchars($customer['no_tlp']) ?>"
+                                                data-no_tlp="<?= htmlspecialchars($customer['no_tlp']) ?>"
                                                 data-nik="<?= htmlspecialchars($customer['nik']) ?>"
                                                 data-address="<?= htmlspecialchars($customer['address']) ?>"
                                                 data-photo="<?= htmlspecialchars($customer['photo']) ?>">
@@ -158,12 +158,17 @@
                     </div>
 
                     <div class="col-md-6">
+                        <label class="form-label">Phone</label>
+                        <input type="text" name="no_tlp" id="edit-no_tlp" class="form-control">
+                    </div>
+
+                    <div class="col-md-6">
                         <label class="form-label">Foto</label>
                         <input type="file" name="photo" class="form-control">
                         <small class="text-muted">Kosongkan jika tidak diganti</small>
                     </div>
 
-                    <div class="col-12">
+                    <div class="col-md-6">
                         <label class="form-label">Alamat</label>
                         <textarea name="address" id="edit-address" class="form-control" rows="3"></textarea>
                     </div>
@@ -171,7 +176,6 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                 <button type="submit" class="btn btn-primary">Update</button>
             </div>
 
@@ -187,6 +191,7 @@
             document.getElementById('edit-name').value = this.dataset.name;
             document.getElementById('edit-email').value = this.dataset.email;
             document.getElementById('edit-nik').value = this.dataset.nik;
+            document.getElementById('edit-no_tlp').value = this.dataset.no_tlp;
             document.getElementById('edit-address').value = this.dataset.address;
         });
     });

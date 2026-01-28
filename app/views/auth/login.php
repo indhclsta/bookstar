@@ -2,6 +2,7 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 ?>
+
 <!doctype html>
 <html lang="en" data-bs-theme="blue-theme">
 
@@ -14,6 +15,7 @@ error_reporting(E_ALL);
   <!-- loader-->
   <link href="<?= BASE_URL ?>/assets/css/pace.min.css" rel="stylesheet">
   <script src="<?= BASE_URL ?>/assets/js/pace.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <!--plugins-->
   <link href="<?= BASE_URL ?>/assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet">
@@ -34,6 +36,8 @@ error_reporting(E_ALL);
 </head>
 
 <body>
+
+<?php Flash::render(); ?>
 
 
   <!--authentication-->

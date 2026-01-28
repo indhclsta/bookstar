@@ -29,6 +29,7 @@ $photo = !empty($user['photo'])
   <link href="<?= BASE_URL ?>/assets/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Material+Icons+Outlined" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!--main css-->
   <link href="<?= BASE_URL ?>/assets/css/bootstrap-extended.css" rel="stylesheet">
   <link href="<?= BASE_URL ?>/assets/css/main.css" rel="stylesheet">

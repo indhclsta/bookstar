@@ -36,6 +36,7 @@ $photo = !empty($user['photo'])
   <link rel="stylesheet" type="text/css" href="<?= BASE_URL ?>/assets/plugins/metismenu/mm-vertical.css">
   <link rel="stylesheet" type="text/css" href="<?= BASE_URL ?>/assets/plugins/simplebar/css/simplebar.css">
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/chat.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <!--bootstrap css-->
   <link href="<?= BASE_URL ?>/assets/css/bootstrap.min.css" rel="stylesheet">

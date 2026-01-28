@@ -1,6 +1,7 @@
 <?php
 
 require_once '../app/models/UserModel.php';
+require_once APP_PATH . '/helpers/Flash.php';
 
 class AuthController
 {
@@ -21,25 +22,18 @@ class AuthController
         $userModel = new UserModel();
         $user = $userModel->findByEmail($email);
 
-        if (!$user) {
-            die('Email tidak ditemukan');
-        }
+        Flash::success('Login berhasil, selamat datang ' . $user['name']);
 
-        if (!password_verify($password, $user['password'])) {
-            die('Password salah');
-        }
 
         $_SESSION['user'] = [
-            'id'           => $user['id'],
-            'name'         => $user['name'],
-            'email'        => $user['email'],
-            'no_tlp'       => $user['no_tlp'],
-            'role_id'      => $user['role_id'],
-            'role_name'    => $user['role_name'],
-            'photo'        => $user['photo'],
-            'nik'          => $user['nik'],
-            'no_rekening'  => $user['no_rekening'] ?? null
+            'id'        => $user['id'],
+            'name'      => $user['name'],
+            'email'     => $user['email'],
+            'role_id'   => $user['role_id'],
+            'role_name' => $user['role_name']
         ];
+
+        $_SESSION['success'] = 'Login berhasil, selamat datang ' . $user['name'];
 
         switch ($user['role_name']) {
             case 'admin':
@@ -66,34 +60,44 @@ class AuthController
 
     public function registerProcess()
     {
+        // PASSWORD MATCH
         if ($_POST['password'] !== $_POST['confirm_password']) {
-            die('Password dan Confirm Password tidak sama');
+            $_SESSION['error'] = 'Password dan konfirmasi tidak sama';
+            header('Location: ' . BASE_URL . '/?c=auth&m=register');
+            exit;
         }
 
+        // PASSWORD LENGTH
         if (strlen($_POST['password']) < 6) {
-            die('Password minimal 6 karakter');
+            $_SESSION['error'] = 'Password minimal 6 karakter';
+            header('Location: ' . BASE_URL . '/?c=auth&m=register');
+            exit;
         }
 
         $qrisFileName = null;
 
         // 🔥 HANDLE UPLOAD QRIS (SELLER)
-        if ((int)$_POST['role_id'] === 2 && isset($_FILES['qris_image'])) {
+        if ((int)$_POST['role_id'] === 2) {
 
-            if ($_FILES['qris_image']['error'] === 0) {
-                $ext = pathinfo($_FILES['qris_image']['name'], PATHINFO_EXTENSION);
-                $allowed = ['jpg', 'jpeg', 'png'];
-
-                if (!in_array(strtolower($ext), $allowed)) {
-                    die('Format QRIS harus JPG / PNG');
-                }
-
-                $qrisFileName = 'qris_' . time() . '.' . $ext;
-                $path = APP_PATH . '/../public/uploads/qris/' . $qrisFileName;
-
-                move_uploaded_file($_FILES['qris_image']['tmp_name'], $path);
-            } else {
-                die('QRIS wajib diupload untuk seller');
+            if (!isset($_FILES['qris_image']) || $_FILES['qris_image']['error'] !== 0) {
+                $_SESSION['error'] = 'QRIS wajib diupload untuk seller';
+                header('Location: ' . BASE_URL . '/?c=auth&m=register');
+                exit;
             }
+
+            $ext = pathinfo($_FILES['qris_image']['name'], PATHINFO_EXTENSION);
+            $allowed = ['jpg', 'jpeg', 'png'];
+
+            if (!in_array(strtolower($ext), $allowed)) {
+                $_SESSION['error'] = 'Format QRIS harus JPG atau PNG';
+                header('Location: ' . BASE_URL . '/?c=auth&m=register');
+                exit;
+            }
+
+            $qrisFileName = 'qris_' . time() . '.' . $ext;
+            $path = APP_PATH . '/../public/uploads/qris/' . $qrisFileName;
+
+            move_uploaded_file($_FILES['qris_image']['tmp_name'], $path);
         }
 
         $data = [
@@ -110,31 +114,54 @@ class AuthController
 
         $userModel = new UserModel();
 
+        // ROLE VALID
         if (!in_array($data['role_id'], [2, 3])) {
-            die('Role tidak valid');
+            $_SESSION['error'] = 'Role tidak valid';
+            header('Location: ' . BASE_URL . '/?c=auth&m=register');
+            exit;
         }
 
+        // SELLER WAJIB REKENING
         if ($data['role_id'] === 2 && empty($data['no_rekening'])) {
-            die('No rekening wajib untuk seller');
+            $_SESSION['error'] = 'Nomor rekening wajib diisi untuk seller';
+            header('Location: ' . BASE_URL . '/?c=auth&m=register');
+            exit;
         }
 
+        // EMAIL DUPLIKAT
         if ($userModel->findByEmail($data['email'])) {
-            die('Email sudah terdaftar');
+            $_SESSION['error'] = 'Email sudah terdaftar';
+            header('Location: ' . BASE_URL . '/?c=auth&m=register');
+            exit;
         }
 
+        // NO HP WAJIB
         if (empty($data['no_tlp'])) {
-            die('Nomor telepon wajib diisi');
+            $_SESSION['error'] = 'Nomor telepon wajib diisi';
+            header('Location: ' . BASE_URL . '/?c=auth&m=register');
+            exit;
         }
 
+        // NIK DUPLIKAT
         if (!empty($data['nik']) && $userModel->findByNik($data['nik'])) {
-            die('NIK sudah terdaftar');
+            $_SESSION['error'] = 'NIK sudah terdaftar';
+            header('Location: ' . BASE_URL . '/?c=auth&m=register');
+            exit;
         }
 
-        $userModel->create($data);
+        // CREATE USER
+        if (!$userModel->create($data)) {
+            $_SESSION['error'] = 'Registrasi gagal, silakan coba lagi';
+            header('Location: ' . BASE_URL . '/?c=auth&m=register');
+            exit;
+        }
 
+        // SUCCESS
+        $_SESSION['success'] = 'Registrasi berhasil, silakan login';
         header('Location: ' . BASE_URL . '/?c=auth&m=login');
         exit;
     }
+
 
     /* =======================
        FORGOT PASSWORD
@@ -219,6 +246,10 @@ class AuthController
     public function logout()
     {
         session_destroy();
+        session_start();
+
+        Flash::success('Logout berhasil 👋');
+
         header('Location: ' . BASE_URL . '/?c=auth&m=login');
         exit;
     }

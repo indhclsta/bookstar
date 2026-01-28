@@ -3,99 +3,190 @@
 
 <?php if (!empty($_SESSION['error'])): ?>
     <div class="alert alert-danger">
-        <?= $_SESSION['error'];
-        unset($_SESSION['error']); ?>
+        <?= $_SESSION['error']; unset($_SESSION['error']); ?>
     </div>
 <?php endif; ?>
 
 <?php if (!empty($_SESSION['success'])): ?>
     <div class="alert alert-success">
-        <?= $_SESSION['success'];
-        unset($_SESSION['success']); ?>
+        <?= $_SESSION['success']; unset($_SESSION['success']); ?>
     </div>
 <?php endif; ?>
 
-<!--start main wrapper-->
-  <main class="main-wrapper">
+<!-- start main wrapper -->
+<main class="main-wrapper">
     <div class="main-content">
-      <!--breadcrumb-->
-				<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-					<div class="breadcrumb-title pe-3">FAQ</div>
-					<div class="ps-3">
-						</nav>
-					</div>
-					<div class="ms-auto">
-					</div>
-				</div>
-				<!--end breadcrumb-->
-      
+
+        <!-- breadcrumb -->
+        <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+            <div class="breadcrumb-title pe-3">FAQ</div>
+            <div class="ms-auto"></div>
+        </div>
+        <!-- end breadcrumb -->
+
         <div class="row">
-					<div class="col-12 col-lg-9 mx-auto">
-						<div class="text-center">
-							<h5 class="mb-0 text-uppercase">Frequently asked questions (FAQ<small class="text-lowercase">s</small>)</h5>
-							<hr>
-						</div>
-						<div class="card">
-							<div class="card-body">
-								<div class="accordion" id="accordionExample">
-									<div class="accordion-item">
-										<h2 class="accordion-header" id="headingOne">
-						  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-							Just once I'd like to eat dinner with a celebrity?
-						  </button>
-						</h2>
-										<div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-											<div class="accordion-body">
-												<p>Yes, if you make it look like an electrical fire. When you do things right, people won't be sure you've done anything at all. I was having the most wonderful dream. Except you were there, and you were there, and you were there! No argument here. Goodbye, cruel world. Goodbye, cruel lamp. Goodbye, cruel velvet drapes, lined with what would appear to be some sort of cruel muslin and the cute little pom-pom curtain pull cords. Cruel though they may be.</p>
-												<p><strong>Example: </strong>Shut up and get to the point!</p>
-											</div>
-										</div>
-									</div>
-									<div class="accordion-item">
-										<h2 class="accordion-header" id="headingTwo">
-						  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-							Bender, I didn't know you liked cooking?
-						  </button>
-						</h2>
-										<div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
-											<div class="accordion-body">
-												<p>That's so cute. Can we have Bender Burgers again? Is the Space Pope reptilian!? I wish! It's a nickel. Bender! Ship! Stop bickering or I'm going to come back there and change your opinions manually!</p>
-												<p><strong>Example: </strong>Okay, I like a challenge. Is that a cooking show? No argument here.</p>
-											</div>
-										</div>
-									</div>
-									<div class="accordion-item">
-										<h2 class="accordion-header" id="headingThree">
-						  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-							My fellow Earthicans?
-						  </button>
-						</h2>
-										<div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-											<div class="accordion-body">
-												<p>As I have explained in my book 'Earth in the Balance', and the much more popular 'Harry Potter and the Balance of Earth', we need to defend our planet against pollution. Also dark wizards. Fry, you can't just sit here in the dark listening to classical music.</p>
-												<p><strong>Example: </strong>Actually, that's still true. Well, let's just dump it in the sewer and say we delivered it.</p>
-											</div>
-										</div>
-									</div>
-									<div class="accordion-item">
-										<h2 class="accordion-header" id="headingFour">
-						  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-							Who am I making this out to?
-						  </button>
-						</h2>
-										<div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
-											<div class="accordion-body">
-												<p>Morbo can't understand his teleprompter because he forgot how you say that letter that's shaped like a man wearing a hat. Also Zoidberg. Can we have Bender Burgers again? Goodbye, cruel world. Goodbye, cruel lamp. Goodbye, cruel velvet drapes, lined with what would appear to be some sort of cruel muslin and the cute little pom-pom curtain pull cords.</p>
-												<p><strong>Example: </strong>Cruel though they may be...</p>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
+            <div class="col-12 col-lg-9 mx-auto">
+                <div class="text-center">
+                    <h5 class="mb-0 text-uppercase">
+                        Frequently Asked Questions (FAQ<small class="text-lowercase">s</small>)
+                    </h5>
+                    <hr>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="accordion" id="accordionCustomerFAQ">
+
+                            <!-- QnA 1 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading1">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                                        Bagaimana cara membeli buku di BookStar?
+                                    </button>
+                                </h2>
+                                <div id="collapse1" class="accordion-collapse collapse show" data-bs-parent="#accordionCustomerFAQ">
+                                    <div class="accordion-body">
+                                        Pilih buku dari daftar → Tambahkan ke keranjang → Checkout → Upload bukti transfer → Tunggu persetujuan dari penjual.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QnA 2 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2">
+                                        Bagaimana cara mengupload bukti transfer?
+                                    </button>
+                                </h2>
+                                <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#accordionCustomerFAQ">
+                                    <div class="accordion-body">
+                                        Masuk ke menu Transaksi → Pilih pesanan → Klik Upload Bukti Transfer → Pilih file gambar → Kirim.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QnA 3 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3">
+                                        Bagaimana cara melihat status pesanan?
+                                    </button>
+                                </h2>
+                                <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#accordionCustomerFAQ">
+                                    <div class="accordion-body">
+                                        Masuk ke menu Transaksi → Status pesanan akan tampil: Menunggu Approve, Ditolak, Diproses, atau Selesai.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QnA 4 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4">
+                                        Bagaimana cara mencetak invoice?
+                                    </button>
+                                </h2>
+                                <div id="collapse4" class="accordion-collapse collapse" data-bs-parent="#accordionCustomerFAQ">
+                                    <div class="accordion-body">
+                                        Masuk ke menu Transaksi → Pilih pesanan → Klik Print Invoice → Cetak atau simpan sebagai PDF.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QnA 5 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading5">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse5">
+                                        Bagaimana cara mencari buku tertentu?
+                                    </button>
+                                </h2>
+                                <div id="collapse5" class="accordion-collapse collapse" data-bs-parent="#accordionCustomerFAQ">
+                                    <div class="accordion-body">
+                                        Gunakan kolom pencarian pada halaman buku dengan mengetik nama buku atau kategori.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QnA 6 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading6">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse6">
+                                        Apa arti status pesanan Ditolak?
+                                    </button>
+                                </h2>
+                                <div id="collapse6" class="accordion-collapse collapse" data-bs-parent="#accordionCustomerFAQ">
+                                    <div class="accordion-body">
+                                        Status Ditolak berarti bukti pembayaran tidak sesuai. Silakan upload ulang bukti transfer atau hubungi penjual.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QnA 7 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading7">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse7">
+                                        Bagaimana cara melihat notifikasi pesanan?
+                                    </button>
+                                </h2>
+                                <div id="collapse7" class="accordion-collapse collapse" data-bs-parent="#accordionCustomerFAQ">
+                                    <div class="accordion-body">
+                                        Notifikasi akan muncul otomatis ketika pesanan di-approve atau ditolak oleh penjual.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QnA 8 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading8">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse8">
+                                        Bagaimana cara menghubungi penjual?
+                                    </button>
+                                </h2>
+                                <div id="collapse8" class="accordion-collapse collapse" data-bs-parent="#accordionCustomerFAQ">
+                                    <div class="accordion-body">
+                                        Gunakan fitur Chat pada menu Pesanan untuk menghubungi penjual secara langsung.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QnA 9 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading9">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse9">
+                                        Apa arti status online dan offline penjual?
+                                    </button>
+                                </h2>
+                                <div id="collapse9" class="accordion-collapse collapse" data-bs-parent="#accordionCustomerFAQ">
+                                    <div class="accordion-body">
+                                        Warna hijau menandakan penjual online, sedangkan warna merah menandakan penjual offline.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QnA 10 -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading10">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse10">
+                                        Bagaimana cara melihat riwayat transaksi?
+                                    </button>
+                                </h2>
+                                <div id="collapse10" class="accordion-collapse collapse" data-bs-parent="#accordionCustomerFAQ">
+                                    <div class="accordion-body">
+                                        Masuk ke menu Transaksi untuk melihat semua pesanan yang sedang diproses maupun yang sudah selesai.
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div><!-- accordion -->
+
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
-  </main>
-  <!--end main wrapper-->
+</main>
+<!-- end main wrapper -->
 
-  <?php require APP_PATH . '/views/layouts/customer/footer.php'; ?>
+<?php require APP_PATH . '/views/layouts/customer/footer.php'; ?>

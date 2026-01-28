@@ -1,3 +1,19 @@
+<script>
+  function confirmLogout() {
+  Swal.fire({
+    title: 'Logout?',
+    text: 'Klik logout untuk keluar',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Ya',
+    cancelButtonText: 'Tidak'
+  }).then((res) => {
+    if (res.isConfirmed) {
+      window.location.href = "<?= BASE_URL ?>/?c=auth&m=logout";
+    }
+  });
+}
+</script> 
 <!--start sidebar-->
 <aside class="sidebar-wrapper" data-simplebar="true">
   <div class="sidebar-header">
@@ -65,15 +81,16 @@
 
       <li class="menu-label">Others</li>
       <li>
-        <a href="faq.html">
+        <a href="<?= BASE_URL ?>/?c=customer&m=faq">
           <div class="parent-icon"><i class="material-icons-outlined">help_outline</i>
           </div>
           <div class="menu-title">FAQ</div>
         </a>
       </li>
-      <li>
-        <a href="<?= BASE_URL ?>/?c=auth&m=logout">
-          <div class="parent-icon"><i class="material-icons-outlined">power_settings_new</i>
+     <li>
+        <a href="javascript:void(0)" onclick="confirmLogout()">
+          <div class="parent-icon">
+            <i class="material-icons-outlined">power_settings_new</i>
           </div>
           <div class="menu-title">Sign Out</div>
         </a>

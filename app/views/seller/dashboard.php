@@ -10,7 +10,30 @@ $photo = !empty($user['photo'])
   : 'https://placehold.co/110x110/png';
 ?>
 
+<?php if (!empty($_SESSION['success'])): ?>
+  <script>
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil',
+      text: '<?= $_SESSION['success']; ?>',
+      timer: 2500,
+      timerProgressBar: true,
+      showConfirmButton: false
+    });
+  </script>
+<?php unset($_SESSION['success']);
+endif; ?>
 
+<?php if (!empty($_SESSION['error'])): ?>
+  <script>
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal',
+      text: '<?= $_SESSION['error']; ?>'
+    });
+  </script>
+<?php unset($_SESSION['error']);
+endif; ?>
 <main class="main-wrapper">
   <div class="main-content">
     <!--breadcrumb-->
