@@ -9,22 +9,6 @@
             <div class="breadcrumb-title pe-3">Customer Account</div>
         </div>
 
-
-        <!-- Alert -->
-        <?php if (!empty($_SESSION['error'])): ?>
-            <div class="alert alert-danger">
-                <?= $_SESSION['error'];
-                unset($_SESSION['error']); ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if (!empty($_SESSION['success'])): ?>
-            <div class="alert alert-success">
-                <?= $_SESSION['success'];
-                unset($_SESSION['success']); ?>
-            </div>
-        <?php endif; ?>
-
         <!-- Customer List -->
         <div class="row row-cols-1 row-cols-xl-2 g-4">
 
@@ -96,8 +80,7 @@
                                             <!-- DELETE -->
                                             <?php if (!$isOnline): ?>
                                                 <a href="?c=admin&m=customerDelete&id=<?= $customer['id'] ?>"
-                                                    class="btn btn-outline-danger btn-sm"
-                                                    onclick="return confirm('Yakin hapus akun ini?')">
+                                                    class="btn btn-outline-danger btn-sm btn-delete-customer">
                                                     Delete
                                                 </a>
                                             <?php endif; ?>
@@ -184,6 +167,87 @@
 </div>
 
 <!-- ================= SCRIPT ================= -->
+
+<script>
+    document.querySelectorAll('.btn-delete-customer').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            const card = this.closest('.col'); // ambil parent card
+
+            Swal.fire({
+                title: 'Yakin?',
+                text: "Akun customer akan dihapus!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(href)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                card.remove(); // hapus card dari UI
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Sukses',
+                                    text: data.message,
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: data.message,
+                                    timer: 3000,
+                                    showConfirmButton: false
+                                });
+                            }
+                        })
+                        .catch(() => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Terjadi kesalahan server',
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+                        });
+                }
+            });
+        });
+    });
+
+
+    <?php if (!empty($_SESSION['success'])): ?>
+        Swal.fire({
+            icon: 'success',
+            title: 'Sukses',
+            text: '<?= $_SESSION['success'] ?>',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
+
+    <?php if (!empty($_SESSION['error'])): ?>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: '<?= $_SESSION['error'] ?>',
+            timer: 3000,
+            showConfirmButton: false
+        });
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+</script>
+
+
+
 <script>
     document.querySelectorAll('.btn-edit').forEach(btn => {
         btn.addEventListener('click', function() {

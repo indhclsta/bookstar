@@ -4,21 +4,59 @@
 
 
 <main class="main-wrapper">
-    <?php if (!empty($_SESSION['error'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show mt-5">
-            <?= $_SESSION['error'];
-            unset($_SESSION['error']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <?php if (!empty($_SESSION['success'])): ?>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil 🎉',
+                text: '<?= addslashes($_SESSION['success']) ?>',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        </script>
+        <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
 
-    <?php if (!empty($_SESSION['success'])): ?>
-        <div class="alert alert-success alert-dismissible fade show mt-5">
-            <?= $_SESSION['success'];
-            unset($_SESSION['success']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <?php if (!empty($_SESSION['error'])): ?>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal ❌',
+                text: '<?= addslashes($_SESSION['error']) ?>',
+                confirmButtonText: 'OK'
+            });
+        </script>
+        <?php unset($_SESSION['error']); ?>
     <?php endif; ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn-delete-category').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const url = this.dataset.url;
+                    const name = this.dataset.name;
+
+                    Swal.fire({
+                        title: 'Yakin mau hapus?',
+                        text: `Kategori "${name}" akan dihapus`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, hapus',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+
     <div class="main-content">
 
 
@@ -79,11 +117,13 @@
                                         </button>
 
                                         <!-- DELETE -->
-                                        <a href="<?= BASE_URL ?>/?c=adminCategory&m=delete&id=<?= $cat['id'] ?>"
-                                            class="btn btn-danger btn-sm"
-                                            onclick="return confirm('Hapus category ini?')">
+                                        <a href="#"
+                                            class="btn btn-danger btn-sm btn-delete-category"
+                                            data-url="<?= BASE_URL ?>/?c=adminCategory&m=delete&id=<?= $cat['id'] ?>"
+                                            data-name="<?= htmlspecialchars($cat['name']) ?>">
                                             Delete
                                         </a>
+
 
                                         <!-- ================= MODAL EDIT ================= -->
                                         <div class="modal fade" id="editCategory<?= $cat['id'] ?>" tabindex="-1">
@@ -110,7 +150,6 @@
                                                     </div>
 
                                                     <div class="modal-footer">
-                                                        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                                                         <button class="btn btn-warning">Update</button>
                                                     </div>
                                                 </form>

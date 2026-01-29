@@ -1,7 +1,6 @@
 <?php
 
 require_once '../app/models/UserModel.php';
-require_once APP_PATH . '/helpers/Flash.php';
 
 class AuthController
 {
@@ -22,8 +21,18 @@ class AuthController
         $userModel = new UserModel();
         $user = $userModel->findByEmail($email);
 
-        Flash::success('Login berhasil, selamat datang ' . $user['name']);
+        // ✅ Cek apakah user ada dan belum di-soft delete
+        if (!$user || $user['is_deleted'] == 1) {
+            $_SESSION['error'] = 'Email tidak ditemukan atau akun telah dihapus';
+            header('Location: ' . BASE_URL . '/?c=auth&m=login');
+            exit;
+        }
 
+        if (!password_verify($password, $user['password'])) {
+            $_SESSION['error'] = 'Password salah';
+            header('Location: ' . BASE_URL . '/?c=auth&m=login');
+            exit;
+        }
 
         $_SESSION['user'] = [
             'id'        => $user['id'],
@@ -48,6 +57,7 @@ class AuthController
         }
         exit;
     }
+
 
     /* =======================
        REGISTER
@@ -128,6 +138,14 @@ class AuthController
             exit;
         }
 
+        // ❗ NO REKENING DUPLIKAT
+        if ($data['role_id'] === 2 && $userModel->findByRekening($data['no_rekening'])) {
+            $_SESSION['error'] = 'Nomor rekening sudah terdaftar';
+            header('Location: ' . BASE_URL . '/?c=auth&m=register');
+            exit;
+        }
+
+
         // EMAIL DUPLIKAT
         if ($userModel->findByEmail($data['email'])) {
             $_SESSION['error'] = 'Email sudah terdaftar';
@@ -190,7 +208,7 @@ class AuthController
 
         $link = BASE_URL . "/?c=auth&m=resetPassword&token=$token";
 
-        require_once '../app/helpers/Mailer.php';
+        require_once '../app/helpers/mailer.php';
 
         $body = "
             <h3>Reset Password</h3>
@@ -246,10 +264,8 @@ class AuthController
     public function logout()
     {
         session_destroy();
-        session_start();
-
-        Flash::success('Logout berhasil 👋');
-
+        session_start(); // penting supaya bisa set alert
+        $_SESSION['success'] = 'Anda berhasil logout';
         header('Location: ' . BASE_URL . '/?c=auth&m=login');
         exit;
     }

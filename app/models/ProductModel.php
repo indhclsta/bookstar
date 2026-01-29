@@ -116,6 +116,14 @@ class ProductModel
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function countBySeller($sellerId)
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) AS total FROM products WHERE seller_id = ?");
+        $stmt->execute([$sellerId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['total'] ?? 0;
+    }
+
     // KURANGI STOK PRODUK
     public function reduceStock($productId, $qty)
     {

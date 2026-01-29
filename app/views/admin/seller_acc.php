@@ -1,6 +1,32 @@
 <?php require APP_PATH . '/views/layouts/admin/header.php'; ?>
 <?php require APP_PATH . '/views/layouts/admin/sidebar.php'; ?>
 
+<?php if (!empty($_SESSION['success'])): ?>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil 🎉',
+            text: '<?= addslashes($_SESSION['success']) ?>',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    </script>
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>
+
+<?php if (!empty($_SESSION['error'])): ?>
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal ❌',
+            text: '<?= addslashes($_SESSION['error']) ?>',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
+
+
 <main class="main-wrapper">
     <div class="main-content">
 
@@ -14,18 +40,6 @@
                 </button>
             </div>
         </div>
-
-        <?php if (!empty($_SESSION['error'])): ?>
-            <div class="alert alert-danger">
-                <?= $_SESSION['error']; unset($_SESSION['error']); ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if (!empty($_SESSION['success'])): ?>
-            <div class="alert alert-success">
-                <?= $_SESSION['success']; unset($_SESSION['success']); ?>
-            </div>
-        <?php endif; ?>
 
         <div class="row row-cols-1 row-cols-xl-2 g-4">
 
@@ -43,6 +57,8 @@
                 $badgeBg = $isOnline ? 'bg-success' : 'bg-danger';
                 $statusText = $isOnline ? 'ONLINE' : 'OFFLINE';
                 ?>
+                
+
 
                 <div class="col">
                     <div class="card rounded-4 h-100 shadow-sm">
@@ -55,20 +71,38 @@
                             <div class="col-md-8">
                                 <div class="card-body">
 
-                                    <h5><?= htmlspecialchars($seller['name']) ?></h5>
+                                    <!-- HEADER -->
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5 class="mb-0"><?= htmlspecialchars($seller['name']) ?></h5>
 
-                                    <p><strong>Email:</strong> <?= htmlspecialchars($seller['email']) ?></p>
-                                    <p><strong>Phone:</strong> <?= htmlspecialchars($seller['no_tlp'] ?? '-') ?></p>
-                                    <p><strong>NIK:</strong> <?= htmlspecialchars($seller['nik'] ?? '-') ?></p>
-                                    <p><strong>Alamat:</strong> <?= htmlspecialchars($seller['address'] ?? '-') ?></p>
+                                        <span class="badge <?= $badgeBg ?>">
+                                            <?= $statusText ?>
+                                        </span>
+                                    </div>
 
-                                    <!-- ✅ NO REKENING DI CARD -->
-                                    <p><strong>No Rekening:</strong> <?= htmlspecialchars($seller['no_rekening'] ?? '-') ?></p>
+                                    <!-- JUMLAH PRODUK -->
+                                    <div class="mb-2">
+                                        <span class="badge bg-info">
+                                            <?= (int)$seller['product_count'] ?> Produk
+                                        </span>
 
-                                    <span class="badge <?= $badgeBg ?>"><?= $statusText ?></span>
+                                        <a href="<?= BASE_URL ?>/?c=admin&m=sellerProducts&id=<?= $seller['id'] ?>"
+                                            class="ms-2 small text-decoration-none">
+                                            🔗 Lihat produk
+                                        </a>
+                                    </div>
 
+                                    <hr class="my-2">
+
+                                    <!-- INFO SELLER -->
+                                    <p class="mb-1"><strong>Email:</strong> <?= htmlspecialchars($seller['email']) ?></p>
+                                    <p class="mb-1"><strong>Phone:</strong> <?= htmlspecialchars($seller['no_tlp'] ?? '-') ?></p>
+                                    <p class="mb-1"><strong>NIK:</strong> <?= htmlspecialchars($seller['nik'] ?? '-') ?></p>
+                                    <p class="mb-1"><strong>Alamat:</strong> <?= htmlspecialchars($seller['address'] ?? '-') ?></p>
+                                    <p class="mb-2"><strong>No Rekening:</strong> <?= htmlspecialchars($seller['no_rekening'] ?? '-') ?></p>
+
+                                    <!-- ACTION -->
                                     <div class="mt-3 d-flex gap-2">
-
                                         <button class="btn btn-outline-primary btn-sm btn-edit"
                                             data-bs-toggle="modal"
                                             data-bs-target="#editSellerModal"
@@ -84,16 +118,17 @@
                                         </button>
 
                                         <?php if (!$isOnline): ?>
-                                            <a href="?c=admin&m=sellerDelete&id=<?= $seller['id'] ?>"
-                                                class="btn btn-outline-danger btn-sm"
-                                                onclick="return confirm('Yakin hapus seller ini?')">
+                                            <a href="#"
+                                                class="btn btn-outline-danger btn-sm btn-delete-seller"
+                                                data-url="<?= BASE_URL ?>/?c=admin&m=sellerDelete&id=<?= $seller['id'] ?>"
+                                                data-name="<?= htmlspecialchars($seller['name']) ?>">
                                                 Delete
                                             </a>
                                         <?php endif; ?>
-
                                     </div>
 
                                 </div>
+
                             </div>
 
                         </div>
@@ -198,16 +233,11 @@
                     </div>
 
 
-                    
+
                 </div>
             </div>
 
             <div class="modal-footer">
-                <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal">
-                    Batal
-                </button>
 
                 <button type="submit"
                     class="btn btn-primary">
@@ -291,18 +321,49 @@
 </div>
 
 <script>
-document.querySelectorAll('.btn-edit').forEach(btn => {
-    btn.addEventListener('click', function () {
-        document.getElementById('edit-id').value = this.dataset.id;
-        document.getElementById('edit-name').value = this.dataset.name;
-        document.getElementById('edit-email').value = this.dataset.email;
-        document.getElementById('edit-phone').value = this.dataset.no_tlp;
-        document.getElementById('edit-nik').value = this.dataset.nik;
-        document.getElementById('edit-address').value = this.dataset.address;
-        document.getElementById('edit-no-rekening').value = this.dataset.noRekening;
-        document.getElementById('edit-old-photo').value = this.dataset.photo;
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // ================= DELETE SELLER =================
+        document.querySelectorAll('.btn-delete-seller').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const url = this.dataset.url;
+                const name = this.dataset.name;
+
+                Swal.fire({
+                    title: 'Yakin hapus seller?',
+                    text: `Seller "${name}" akan dihapus permanen`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, hapus',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = url;
+                    }
+                });
+            });
+        });
+
+        // ================= EDIT SELLER =================
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.getElementById('edit-id').value = this.dataset.id;
+                document.getElementById('edit-name').value = this.dataset.name;
+                document.getElementById('edit-email').value = this.dataset.email;
+                document.getElementById('edit-phone').value = this.dataset.noTlp;
+                document.getElementById('edit-nik').value = this.dataset.nik;
+                document.getElementById('edit-address').value = this.dataset.address;
+                document.getElementById('edit-no-rekening').value = this.dataset.noRekening;
+                document.getElementById('edit-old-photo').value = this.dataset.photo;
+            });
+        });
+
     });
-});
 </script>
+
 
 <?php require APP_PATH . '/views/layouts/admin/footer.php'; ?>

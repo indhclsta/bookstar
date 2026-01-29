@@ -132,13 +132,23 @@
                           </li>
 
                           <!-- DELETE -->
+                          <!-- DELETE -->
                           <li>
-                            <a class="dropdown-item text-danger"
-                              onclick="return confirm('Hapus produk ini?')"
-                              href="<?= BASE_URL ?>/?c=sellerProduct&m=delete&id=<?= $p['id'] ?>">
-                              <i class="bi bi-trash me-2"></i> Delete
-                            </a>
+                            <?php if ($p['stock'] > 0): ?>
+                              <!-- tombol disable kalau masih ada stock -->
+                              <button class="dropdown-item text-danger"
+                                title="Produk masih memiliki stock, tidak bisa dihapus">
+                                <i class="bi bi-trash me-2"></i> Delete
+                              </button>
+                            <?php else: ?>
+                              <a class="dropdown-item text-danger"
+                                onclick="return confirm('Hapus produk ini?')"
+                                href="<?= BASE_URL ?>/?c=sellerProduct&m=delete&id=<?= $p['id'] ?>">
+                                <i class="bi bi-trash me-2"></i> Delete
+                              </a>
+                            <?php endif; ?>
                           </li>
+
                         </ul>
                       </div>
                     </td>

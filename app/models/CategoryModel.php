@@ -69,11 +69,26 @@ class CategoryModel
     public function deleteAdmin($id)
     {
         $stmt = $this->db->prepare(
-            "DELETE FROM categories 
-             WHERE id=? AND owner_role='admin'"
+            "UPDATE categories 
+         SET is_active = 0 
+         WHERE id = ? AND owner_role = 'admin'"
         );
         return $stmt->execute([$id]);
     }
+
+
+    public function hasProducts($categoryId)
+    {
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*) 
+         FROM products 
+         WHERE category_id = ?"
+        );
+        $stmt->execute([$categoryId]);
+
+        return $stmt->fetchColumn() > 0;
+    }
+
 
     /* ================= SELLER ================= */
     public function getSellerCategories($sellerId)
@@ -166,6 +181,24 @@ class CategoryModel
             'seller_id' => $sellerId
         ]);
     }
+
+    public function hasSellerProducts($categoryId, $sellerId)
+    {
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*) 
+         FROM products 
+         WHERE category_id = :category_id
+           AND seller_id = :seller_id"
+        );
+
+        $stmt->execute([
+            'category_id' => $categoryId,
+            'seller_id'   => $sellerId
+        ]);
+
+        return $stmt->fetchColumn() > 0;
+    }
+
 
     // Hapus kategori seller
     public function deleteSeller($id, $sellerId)

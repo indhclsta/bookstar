@@ -46,6 +46,14 @@ class UserModel
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function findByRekening($no_rekening)
+    {
+        $stmt = $this->db->prepare("SELECT id FROM users WHERE no_rekening = ?");
+        $stmt->execute([$no_rekening]);
+        return $stmt->fetch();
+    }
+
+
     public function updateLastActivity($userId)
     {
         $db = Database::getInstance()->getConnection();
@@ -145,7 +153,7 @@ class UserModel
         $stmt = $this->db->prepare("
         SELECT id, name, email, no_tlp, nik, address, photo, is_online, last_activity
         FROM users
-        WHERE role_id = 3
+        WHERE role_id = 3 AND is_deleted = 0
         ORDER BY id DESC
     ");
         $stmt->execute();
@@ -153,18 +161,50 @@ class UserModel
     }
 
 
+
     public function updateCustomer($data)
     {
+        $id = $data['id'];
+
+        // Cek email duplikat
+        if ($this->emailExists($data['email'], $id)) {
+            $_SESSION['error'] = 'Email sudah digunakan';
+            return false;
+        }
+
+        // Cek nomor HP duplikat
+        if ($this->phoneExists($data['no_tlp'], $id)) {
+            $_SESSION['error'] = 'Nomor HP sudah digunakan';
+            return false;
+        }
+
+        // Cek NIK duplikat
+        if (!empty($data['nik'])) {
+            $stmt = $this->db->prepare("
+            SELECT id FROM users 
+            WHERE nik = :nik AND id != :id
+            LIMIT 1
+        ");
+            $stmt->execute([
+                ':nik' => $data['nik'],
+                ':id'  => $id
+            ]);
+            if ($stmt->fetch()) {
+                $_SESSION['error'] = 'NIK sudah digunakan';
+                return false;
+            }
+        }
+
         $sql = "
-            UPDATE users SET
-                name = :name,
-                email = :email,
-                no_tlp = :no_tlp,
-                nik = :nik,
-                address = :address,
-                photo = :photo
-            WHERE id = :id AND role_id = 3
-        ";
+        UPDATE users SET
+            name = :name,
+            email = :email,
+            no_tlp = :no_tlp,
+            nik = :nik,
+            address = :address,
+            photo = :photo
+        WHERE id = :id AND role_id = 3
+    ";
 
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
@@ -178,6 +218,23 @@ class UserModel
         ]);
     }
 
+
+
+    public function customerHasCartProducts($userId)
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM carts WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        return $stmt->fetchColumn() > 0;
+    }
+
+    public function customerHasOrders($userId)
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM orders WHERE customer_id = ?");
+        $stmt->execute([$userId]);
+        return $stmt->fetchColumn() > 0;
+    }
+
+
     public function deleteCustomerIfOffline($id)
     {
         $stmt = $this->db->prepare("
@@ -188,6 +245,51 @@ class UserModel
         return $stmt->rowCount() > 0;
     }
 
+    // Cek apakah customer bisa dihapus
+    public function canDeleteCustomer($id)
+    {
+        // Ambil status online
+        $stmt = $this->db->prepare("SELECT is_online FROM users WHERE id = ? AND role_id = 3 AND is_deleted = 0");
+        $stmt->execute([$id]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$user) return ['can_delete' => false, 'reason' => 'Customer tidak ditemukan'];
+        if ($user['is_online']) return ['can_delete' => false, 'reason' => 'Customer sedang online'];
+
+        // Cek keranjang
+        $stmt = $this->db->prepare("SELECT COUNT(*) as cart_count FROM carts WHERE user_id = ?");
+        $stmt->execute([$id]);
+        if ($stmt->fetchColumn() > 0) return ['can_delete' => false, 'reason' => 'Customer masih memiliki produk di keranjang'];
+
+        // Cek transaksi pending
+        $stmt = $this->db->prepare("SELECT COUNT(*) as cnt FROM orders WHERE customer_id = ? AND status = 'pending'");
+        $stmt->execute([$id]);
+        if ($stmt->fetchColumn() > 0) return ['can_delete' => false, 'reason' => 'Customer masih memiliki transaksi pending'];
+
+        return ['can_delete' => true, 'reason' => ''];
+    }
+
+
+    public function softDeleteCustomer($id)
+    {
+        // Cek apakah customer masih punya produk di keranjang
+        if ($this->customerHasCartProducts($id)) {
+            return false; // Tidak bisa dihapus
+        }
+
+        // Lakukan soft delete
+        $stmt = $this->db->prepare("
+        UPDATE users
+        SET is_deleted = 1
+        WHERE id = ? AND role_id = 3
+    ");
+        $stmt->execute([$id]);
+
+        return $stmt->rowCount() > 0;
+    }
+
+
+
     /* =======================
        SELLER
     ======================== */
@@ -195,20 +297,30 @@ class UserModel
     public function getAllSeller($excludeId = null)
     {
         $sql = "
-            SELECT id, name, email, no_tlp, nik, address, no_rekening, qris_image, photo, is_online, last_activity
-            FROM users
-            WHERE role_id = 2
-        ";
+        SELECT u.*, 
+               (SELECT COUNT(*) 
+                FROM products p 
+                WHERE p.seller_id = u.id) AS product_count
+        FROM users u
+        WHERE u.role_id = 2
+    ";
 
-        if ($excludeId) $sql .= " AND id != :id";
-        $sql .= " ORDER BY id ASC";
+        if ($excludeId) {
+            $sql .= " AND u.id != :id";
+        }
+
+        $sql .= " ORDER BY u.id ASC";
 
         $stmt = $this->db->prepare($sql);
-        if ($excludeId) $stmt->execute([':id' => $excludeId]);
-        else $stmt->execute();
+        if ($excludeId) {
+            $stmt->execute([':id' => $excludeId]);
+        } else {
+            $stmt->execute();
+        }
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
     public function createSeller($data)
     {
@@ -287,24 +399,72 @@ class UserModel
 
     public function updateSeller($data)
     {
+        $id = $data['id'];
+
+        // Cek email duplikat
+        if ($this->emailExists($data['email'], $id)) {
+            $_SESSION['error'] = 'Email sudah digunakan';
+            return false;
+        }
+
+        // Cek nomor HP duplikat
+        if ($this->phoneExists($data['no_tlp'], $id)) {
+            $_SESSION['error'] = 'Nomor HP sudah digunakan';
+            return false;
+        }
+
+        // Cek NIK duplikat
+        if (!empty($data['nik'])) {
+            $stmt = $this->db->prepare("
+            SELECT id FROM users 
+            WHERE nik = :nik AND id != :id
+            LIMIT 1
+        ");
+            $stmt->execute([
+                ':nik' => $data['nik'],
+                ':id'  => $id
+            ]);
+            if ($stmt->fetch()) {
+                $_SESSION['error'] = 'NIK sudah digunakan';
+                return false;
+            }
+        }
+
+        // Cek no_rekening duplikat (opsional, kalau ada)
+        if (!empty($data['no_rekening'])) {
+            $stmt = $this->db->prepare("
+            SELECT id FROM users 
+            WHERE no_rekening = :no_rekening AND id != :id
+            LIMIT 1
+        ");
+            $stmt->execute([
+                ':no_rekening' => $data['no_rekening'],
+                ':id'          => $id
+            ]);
+            if ($stmt->fetch()) {
+                $_SESSION['error'] = 'Nomor rekening sudah digunakan';
+                return false;
+            }
+        }
+
+        // Siapkan data untuk update
         $fields = [
             'name'        => $data['name'],
             'email'       => $data['email'],
             'no_tlp'      => $data['no_tlp'],
             'nik'         => $data['nik'],
             'address'     => $data['address'],
-            'no_rekening' => $data['no_rekening'],
-            'qris_image'  => $data['qris_image'],
-            'photo'       => $data['photo']
+            'no_rekening' => $data['no_rekening'] ?? null,
+            'qris_image'  => $data['qris_image'] ?? null,
+            'photo'       => $data['photo'] ?? null
         ];
 
-        // 🔥 JIKA PASSWORD DIISI
+        // Jika password diisi
         if (!empty($data['password'])) {
             $fields['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
 
         $set = implode(', ', array_map(fn($k) => "$k = :$k", array_keys($fields)));
-
         $sql = "UPDATE users SET $set WHERE id = :id AND role_id = 2";
         $stmt = $this->db->prepare($sql);
 
@@ -312,9 +472,38 @@ class UserModel
             $stmt->bindValue(":$key", $value);
         }
 
-        $stmt->bindValue(':id', $data['id']);
+        $stmt->bindValue(':id', $id);
 
         return $stmt->execute();
+    }
+
+
+
+    public function sellerHasProducts($sellerId)
+    {
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*) FROM products WHERE seller_id = :seller_id"
+        );
+        $stmt->execute([
+            'seller_id' => $sellerId
+        ]);
+
+        return $stmt->fetchColumn() > 0;
+    }
+
+    public function getAllSellerWithProductCount()
+    {
+        $sql = "
+        SELECT u.*, 
+               (SELECT COUNT(*) 
+                FROM products p 
+                WHERE p.seller_id = u.id) AS total_produk
+        FROM users u
+        WHERE u.role_id = 2
+        ORDER BY u.id ASC
+    ";
+
+        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
 

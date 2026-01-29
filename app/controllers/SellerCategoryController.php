@@ -87,7 +87,6 @@ class SellerCategoryController
     }
 
 
-    // 🔹 Hapus kategori seller
     public function delete()
     {
         $id = (int)($_GET['id'] ?? 0);
@@ -98,13 +97,24 @@ class SellerCategoryController
             exit;
         }
 
+        // 🔒 Cek kepemilikan kategori
+        if (!$this->model->isSellerCategory($id, $this->sellerId)) {
+            $_SESSION['error'] = 'Tidak boleh menghapus kategori admin';
+            header('Location: ' . BASE_URL . '/?c=sellerCategory&m=index');
+            exit;
+        }
+
+        // 🔒 Cek apakah kategori masih dipakai produk
+        if ($this->model->hasSellerProducts($id, $this->sellerId)) {
+            $_SESSION['error'] = 'Kategori tidak bisa dihapus karena masih memiliki produk';
+            header('Location: ' . BASE_URL . '/?c=sellerCategory&m=index');
+            exit;
+        }
+
         $result = $this->model->deleteSeller($id, $this->sellerId);
 
-        if ($result) {
-            $_SESSION['success'] = 'Kategori berhasil dihapus';
-        } else {
-            $_SESSION['error'] = 'Kategori gagal dihapus';
-        }
+        $_SESSION[$result ? 'success' : 'error'] =
+            $result ? 'Kategori berhasil dihapus' : 'Kategori gagal dihapus';
 
         header('Location: ' . BASE_URL . '/?c=sellerCategory&m=index');
         exit;

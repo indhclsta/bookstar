@@ -37,7 +37,52 @@ error_reporting(E_ALL);
 
 <body>
 
-<?php Flash::render(); ?>
+<?php if (!empty($_SESSION['success'])): ?>
+<script>
+Swal.fire({
+  toast: true,
+  position: 'top-end',
+  icon: 'success',
+  title: 'Logout berhasil 👋',
+  text: 'Sampai jumpa lagi!',
+  showConfirmButton: false,
+  timer: 2500,
+  timerProgressBar: true,
+  background: '#1e293b',
+  color: '#fff',
+  iconColor: '#22c55e'
+});
+</script>
+<?php unset($_SESSION['success']); endif; ?>
+<?php if (!empty($_SESSION['success'])): ?>
+<script>
+Swal.fire({
+  toast: true,
+  position: 'top-end',
+  icon: 'success',
+  title: <?= json_encode($_SESSION['success']) ?>,
+  showConfirmButton: false,
+  timer: 2500,
+  timerProgressBar: true,
+  background: '#1e293b',
+  color: '#fff',
+  iconColor: '#22c55e'
+});
+</script>
+<?php unset($_SESSION['success']); endif; ?>
+
+
+<?php if (!empty($_SESSION['error'])): ?>
+<script>
+Swal.fire({
+  icon: 'error',
+  title: 'Oops 😬',
+  text: <?= json_encode($_SESSION['error']) ?>,
+  footer: '<a href="<?= BASE_URL ?>/?c=auth&m=forgot">Lupa password?</a>',
+  confirmButtonColor: '#ef4444'
+});
+</script>
+<?php unset($_SESSION['error']); endif; ?>
 
 
   <!--authentication-->

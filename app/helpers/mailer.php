@@ -18,10 +18,10 @@ class Mailer {
       $mail->SMTPAuth   = true;
       $mail->Username   = 'indahcalistaexcella@gmail.com'; // GANTI
       $mail->Password   = 'yghy ebab lfnq nyht';  // GANTI
-      $mail->SMTPSecure = 'tls';
-      $mail->Port       = 587;
+      $mail->SMTPSecure = 'ssl';
+      $mail->Port       = 465;
 
-      $mail->setFrom('indahcalistaexcella@gmail.com', 'BookStar');
+      $mail->setFrom('indahcalistaexcella@gmail.com', 'kasir');
       $mail->addAddress($to);
 
       $mail->isHTML(true);

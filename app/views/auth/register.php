@@ -21,6 +21,7 @@ error_reporting(E_ALL);
   <link href="<?= BASE_URL ?>/assets/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Material+Icons+Outlined" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <link href="<?= BASE_URL ?>/assets/css/bootstrap-extended.css" rel="stylesheet">
   <link href="<?= BASE_URL ?>/assets/css/main.css" rel="stylesheet">
@@ -30,6 +31,35 @@ error_reporting(E_ALL);
 </head>
 
 <body>
+  <?php if (!empty($_SESSION['success'])): ?>
+<script>
+Swal.fire({
+  toast: true,
+  position: 'top-end',
+  icon: 'success',
+  title: <?= json_encode($_SESSION['success']) ?>,
+  showConfirmButton: false,
+  timer: 2500,
+  timerProgressBar: true,
+  background: '#1e293b',
+  color: '#fff',
+  iconColor: '#22c55e'
+});
+</script>
+<?php unset($_SESSION['success']); endif; ?>
+
+
+<?php if (!empty($_SESSION['error'])): ?>
+<script>
+Swal.fire({
+  icon: 'error',
+  title: 'Oops 😬',
+  text: <?= json_encode($_SESSION['error']) ?>,
+  confirmButtonColor: '#ef4444'
+});
+</script>
+<?php unset($_SESSION['error']); endif; ?>
+
 
   <div class="mx-3 mx-lg-0">
     <div class="card my-5 col-xl-9 col-xxl-8 mx-auto rounded-4 overflow-hidden border-3 p-4">
