@@ -56,35 +56,30 @@
                 <form action="<?= BASE_URL ?>/?c=cart&m=add" method="POST" class="flex-grow-1">
                   <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
 
-                  <!-- Quantity input -->
-                  <input type="number" name="quantity" value="1" min="1" max="<?= $product['stock'] ?>"
-                    class="form-control mb-2" style="width:70px"
-                    <?= $product['stock'] == 0 ? 'disabled' : '' ?>>
+                  <div class="d-flex align-items-center gap-2">
+                    <!-- Quantity input -->
+                    <div class="qty-wrapper">
+                      <input type="number"
+                        name="quantity"
+                        value="1"
+                        min="1"
+                        max="<?= $product['stock'] ?>"
+                        class="form-control qty-input text-center"
+                        <?= $product['stock'] == 0 ? 'disabled' : '' ?>>
+                    </div>
 
-                  <button type="submit"
-                    class="btn btn-primary w-100 d-flex justify-content-center align-items-center gap-1 rounded-3"
-                    style="padding:6px 10px;font-size:0.8rem"
-                    <?= $product['stock'] == 0 ? 'disabled' : '' ?>>
-                    <i class="material-icons-outlined" style="font-size:17px">shopping_basket</i>
-                    Add
-                  </button>
-                </form>
-
-
-                <!-- ADD TO CART -->
-                <form action="<?= BASE_URL ?>/?c=cart&m=add" method="POST" class="flex-grow-1">
-                  <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
-                  <input type="hidden" name="quantity" value="1">
-
-                  <button type="submit"
-                    class="btn btn-primary w-100 d-flex justify-content-center align-items-center gap-1 rounded-3"
-                    style="padding:6px 10px;font-size:0.8rem"
-                    <?= $product['stock'] == 0 ? 'disabled' : '' ?>>
-                    <i class="material-icons-outlined" style="font-size:17px">shopping_basket</i>
-                    Add
-                  </button>
+                    <!-- Add button -->
+                    <button type="submit"
+                      class="btn btn-primary flex-grow-1 d-flex justify-content-center align-items-center gap-1 rounded-3"
+                      style="padding:6px 10px;font-size:0.8rem"
+                      <?= $product['stock'] == 0 ? 'disabled' : '' ?>>
+                      <i class="material-icons-outlined" style="font-size:17px">shopping_basket</i>
+                      Add
+                    </button>
+                  </div>
 
                 </form>
+
 
               </div>
 

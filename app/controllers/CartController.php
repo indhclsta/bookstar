@@ -32,13 +32,22 @@ class CartController
             exit;
         }
 
-        if ($qty > $product['stock']) {
-            $_SESSION['error'] = 'Stock tidak mencukupi';
+        // Ambil item di cart sebelumnya
+        $cartItem = $this->cartModel->getItem($userId, $productId);
+        $existingQty = $cartItem['quantity'] ?? 0;
+
+        // total quantity baru
+        $totalQty = $existingQty + $qty;
+
+        if ($totalQty > $product['stock']) {
+            $_SESSION['error'] = 'Jumlah melebihi stok tersedia';
             header('Location: ' . BASE_URL . '/?c=customer&m=order');
             exit;
         }
 
+        // Tambahkan ke cart
         $this->cartModel->add($userId, $productId, $qty);
+
 
         $_SESSION['success'] = 'Produk ditambahkan ke cart';
         header('Location: ' . BASE_URL . '/?c=customer&m=order');

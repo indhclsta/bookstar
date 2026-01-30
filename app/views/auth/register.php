@@ -32,33 +32,35 @@ error_reporting(E_ALL);
 
 <body>
   <?php if (!empty($_SESSION['success'])): ?>
-<script>
-Swal.fire({
-  toast: true,
-  position: 'top-end',
-  icon: 'success',
-  title: <?= json_encode($_SESSION['success']) ?>,
-  showConfirmButton: false,
-  timer: 2500,
-  timerProgressBar: true,
-  background: '#1e293b',
-  color: '#fff',
-  iconColor: '#22c55e'
-});
-</script>
-<?php unset($_SESSION['success']); endif; ?>
+    <script>
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: <?= json_encode($_SESSION['success']) ?>,
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        background: '#1e293b',
+        color: '#fff',
+        iconColor: '#22c55e'
+      });
+    </script>
+  <?php unset($_SESSION['success']);
+  endif; ?>
 
 
-<?php if (!empty($_SESSION['error'])): ?>
-<script>
-Swal.fire({
-  icon: 'error',
-  title: 'Oops 😬',
-  text: <?= json_encode($_SESSION['error']) ?>,
-  confirmButtonColor: '#ef4444'
-});
-</script>
-<?php unset($_SESSION['error']); endif; ?>
+  <?php if (!empty($_SESSION['error'])): ?>
+    <script>
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops 😬',
+        text: <?= json_encode($_SESSION['error']) ?>,
+        confirmButtonColor: '#ef4444'
+      });
+    </script>
+  <?php unset($_SESSION['error']);
+  endif; ?>
 
 
   <div class="mx-3 mx-lg-0">
@@ -78,33 +80,33 @@ Swal.fire({
 
                 <div class="col-12">
                   <label class="form-label">Full Name</label>
-                  <input type="text" name="name" class="form-control" required>
+                  <input type="text" name="name" class="form-control" placeholder="Enter Full Name" required>
                 </div>
 
                 <div class="col-12">
                   <label class="form-label">NIK</label>
-                  <input type="text" name="nik" class="form-control" required>
+                  <input type="text" name="nik" class="form-control" placeholder="Enter NIK" required>
                 </div>
 
                 <div class="col-12">
                   <label class="form-label">Email Address</label>
-                  <input type="email" name="email" class="form-control" required>
+                  <input type="email" name="email" class="form-control" placeholder="user@example.com" required>
                 </div>
 
                 <div class="col-12">
                   <label class="form-label">Phone Number</label>
-                  <input type="text" name="no_tlp" class="form-control" required>
+                  <input type="text" name="no_tlp" class="form-control" placeholder="0812345xxx" required>
                 </div>
 
 
                 <div class="col-12">
                   <label class="form-label">Password</label>
-                  <input type="password" name="password" class="form-control" required>
+                  <input type="password" name="password" class="form-control" placeholder="****" required>
                 </div>
 
                 <div class="col-12">
                   <label class="form-label">Confirm Password</label>
-                  <input type="password" name="confirm_password" class="form-control" required>
+                  <input type="password" name="confirm_password" class="form-control" placeholder="****" required>
                 </div>
 
                 <div class="col-12">
@@ -119,7 +121,7 @@ Swal.fire({
                 <!-- NO REKENING -->
                 <div class="col-12 d-none" id="rekeningField">
                   <label class="form-label">No Rekening</label>
-                  <input type="text" name="no_rekening" class="form-control">
+                  <input type="text" name="no_rekening" class="form-control" placeholder="Enter No Rekening">
                 </div>
 
                 <!-- 🔥 TAMBAHAN: QRIS IMAGE (SELLER) -->
@@ -130,7 +132,7 @@ Swal.fire({
 
                 <div class="col-12">
                   <label class="form-label">Address</label>
-                  <input type="text" name="address" class="form-control" required>
+                  <input type="text" name="address" class="form-control" placeholder="Enter Address" required>
                 </div>
 
                 <div class="col-12">
