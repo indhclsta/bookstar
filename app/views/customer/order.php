@@ -4,8 +4,39 @@
 <main class="main-wrapper">
   <div class="main-content">
 
-    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-4">
+    <div class="d-flex flex-wrap align-items-end justify-content-between mb-4 gap-3">
       <div class="breadcrumb-title pe-3 fw-bold">Produk</div>
+      <!-- FILTER -->
+      <form method="GET" action="<?= BASE_URL ?>" class="d-flex gap-2 flex-wrap">
+        <input type="hidden" name="c" value="customer">
+        <input type="hidden" name="m" value="order">
+
+        <!-- SEARCH -->
+        <input type="text"
+          name="search"
+          class="form-control"
+          style="width:220px"
+          placeholder="Cari produk..."
+          value="<?= $_GET['search'] ?? '' ?>">
+
+        <!-- CATEGORY -->
+        <select name="category" class="form-select" style="width:180px">
+          <option value="">Semua Kategori</option>
+          <?php foreach ($categories as $cat): ?>
+            <option value="<?= $cat['id'] ?>"
+              <?= (($_GET['category'] ?? '') == $cat['id']) ? 'selected' : '' ?>>
+              <?= htmlspecialchars($cat['name']) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+
+        <!-- BUTTON -->
+        <button class="btn btn-primary d-flex align-items-center gap-1">
+          <i class="material-icons-outlined fs-6">search</i>
+          Cari
+        </button>
+      </form>
+
     </div>
 
     <div class="row g-4">

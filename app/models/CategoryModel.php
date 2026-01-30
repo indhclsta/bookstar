@@ -21,18 +21,21 @@ class CategoryModel
     {
         $stmt = $this->db->prepare(
             "SELECT * FROM categories 
-             WHERE owner_role='admin' 
-             ORDER BY id ASC"
+         WHERE owner_role='admin' AND is_active = 1
+         ORDER BY id ASC"
         );
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+
     public function storeAdmin($name)
     {
         $check = $this->db->prepare(
             "SELECT id FROM categories 
-             WHERE name=? AND owner_role='admin'"
+         WHERE name = ? 
+           AND owner_role = 'admin'
+           AND is_active = 1"
         );
         $check->execute([$name]);
 
@@ -41,17 +44,21 @@ class CategoryModel
         }
 
         $stmt = $this->db->prepare(
-            "INSERT INTO categories (name, owner_role) 
-             VALUES (?, 'admin')"
+            "INSERT INTO categories (name, owner_role, is_active) 
+         VALUES (?, 'admin', 1)"
         );
         return $stmt->execute([$name]);
     }
+
 
     public function updateAdmin($id, $name)
     {
         $check = $this->db->prepare(
             "SELECT id FROM categories 
-             WHERE name=? AND owner_role='admin' AND id!=?"
+         WHERE name = ?
+           AND owner_role = 'admin'
+           AND is_active = 1
+           AND id != ?"
         );
         $check->execute([$name, $id]);
 
@@ -60,11 +67,13 @@ class CategoryModel
         }
 
         $stmt = $this->db->prepare(
-            "UPDATE categories SET name=? 
-             WHERE id=? AND owner_role='admin'"
+            "UPDATE categories 
+         SET name = ?
+         WHERE id = ? AND owner_role = 'admin'"
         );
         return $stmt->execute([$name, $id]);
     }
+
 
     public function deleteAdmin($id)
     {
@@ -94,9 +103,12 @@ class CategoryModel
     public function getSellerCategories($sellerId)
     {
         $sql = "SELECT * FROM categories
-            WHERE owner_role = 'admin'
-               OR (owner_role = 'seller' AND created_by = :seller_id)
-            ORDER BY owner_role ASC, name ASC";
+        WHERE is_active = 1
+          AND (
+                owner_role = 'admin'
+             OR (owner_role = 'seller' AND created_by = :seller_id)
+          )
+        ORDER BY owner_role ASC, name ASC";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
@@ -105,6 +117,7 @@ class CategoryModel
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
 
 
@@ -122,26 +135,44 @@ class CategoryModel
     }
 
 
-    // Tambah kategori seller
     public function storeSeller($name, $sellerId)
     {
-        // cek duplikat per seller
-        $check = $this->db->prepare(
+        // 1️⃣ Cek duplikat dengan kategori ADMIN (aktif)
+        $checkAdmin = $this->db->prepare(
             "SELECT id FROM categories
-             WHERE name = :name AND created_by = :seller_id"
+         WHERE name = :name
+           AND owner_role = 'admin'
+           AND is_active = 1"
         );
-        $check->execute([
+        $checkAdmin->execute([
+            'name' => $name
+        ]);
+
+        if ($checkAdmin->fetch()) {
+            return false; // bentrok kategori admin
+        }
+
+        // 2️⃣ Cek duplikat dengan kategori SELLER sendiri (aktif)
+        $checkSeller = $this->db->prepare(
+            "SELECT id FROM categories
+         WHERE name = :name
+           AND owner_role = 'seller'
+           AND created_by = :seller_id
+           AND is_active = 1"
+        );
+        $checkSeller->execute([
             'name' => $name,
             'seller_id' => $sellerId
         ]);
 
-        if ($check->fetch()) {
+        if ($checkSeller->fetch()) {
             return false;
         }
 
+        // 3️⃣ Insert kategori seller
         $stmt = $this->db->prepare(
-            "INSERT INTO categories (name, created_by, owner_role)
-             VALUES (:name, :created_by, 'seller')"
+            "INSERT INTO categories (name, created_by, owner_role, is_active)
+         VALUES (:name, :created_by, 'seller', 1)"
         );
 
         return $stmt->execute([
@@ -150,29 +181,51 @@ class CategoryModel
         ]);
     }
 
-    // Update kategori seller
+
+
     public function updateSeller($id, $name, $sellerId)
     {
-        $check = $this->db->prepare(
+        // 1️⃣ Cek bentrok dengan ADMIN
+        $checkAdmin = $this->db->prepare(
             "SELECT id FROM categories
-             WHERE name = :name
-               AND created_by = :seller_id
-               AND id != :id"
+         WHERE name = :name
+           AND owner_role = 'admin'
+           AND is_active = 1"
         );
-        $check->execute([
+        $checkAdmin->execute([
+            'name' => $name
+        ]);
+
+        if ($checkAdmin->fetch()) {
+            return false;
+        }
+
+        // 2️⃣ Cek duplikat dengan kategori seller sendiri
+        $checkSeller = $this->db->prepare(
+            "SELECT id FROM categories
+         WHERE name = :name
+           AND owner_role = 'seller'
+           AND created_by = :seller_id
+           AND is_active = 1
+           AND id != :id"
+        );
+        $checkSeller->execute([
             'name' => $name,
             'seller_id' => $sellerId,
             'id' => $id
         ]);
 
-        if ($check->fetch()) {
+        if ($checkSeller->fetch()) {
             return false;
         }
 
+        // 3️⃣ Update
         $stmt = $this->db->prepare(
             "UPDATE categories
-             SET name = :name
-             WHERE id = :id AND created_by = :seller_id"
+         SET name = :name
+         WHERE id = :id
+           AND created_by = :seller_id
+           AND owner_role = 'seller'"
         );
 
         return $stmt->execute([
@@ -181,6 +234,8 @@ class CategoryModel
             'seller_id' => $sellerId
         ]);
     }
+
+
 
     public function hasSellerProducts($categoryId, $sellerId)
     {
@@ -204,8 +259,11 @@ class CategoryModel
     public function deleteSeller($id, $sellerId)
     {
         $stmt = $this->db->prepare(
-            "DELETE FROM categories
-             WHERE id = :id AND created_by = :seller_id"
+            "UPDATE categories
+         SET is_active = 0
+         WHERE id = :id
+           AND created_by = :seller_id
+           AND owner_role = 'seller'"
         );
 
         return $stmt->execute([

@@ -21,7 +21,7 @@ class Mailer {
       $mail->SMTPSecure = 'ssl';
       $mail->Port       = 465;
 
-      $mail->setFrom('indahcalistaexcella@gmail.com', 'kasir');
+      $mail->setFrom('indahcalistaexcella@gmail.com', 'BookStar'); // GANTI
       $mail->addAddress($to);
 
       $mail->isHTML(true);

@@ -5,19 +5,33 @@
 
 <main class="main-wrapper">
     <?php if (!empty($_SESSION['error'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show mt-5">
-            <?= $_SESSION['error'];
-            unset($_SESSION['error']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops!',
+                    text: <?= json_encode($_SESSION['error']) ?>,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#ef4444'
+                });
+            });
+        </script>
+        <?php unset($_SESSION['error']); ?>
     <?php endif; ?>
 
     <?php if (!empty($_SESSION['success'])): ?>
-        <div class="alert alert-success alert-dismissible fade show mt-5">
-            <?= $_SESSION['success'];
-            unset($_SESSION['success']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: <?= json_encode($_SESSION['success']) ?>,
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+        <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
     <div class="main-content">
 

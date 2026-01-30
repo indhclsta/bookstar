@@ -83,14 +83,15 @@ class AdminCategoryController
         $id = $_GET['id'] ?? null;
         if (!$id) die('Invalid ID');
 
-        $this->categoryModel->deleteAdmin($id);
-
+        // CEK DULU
         if ($this->categoryModel->hasProducts($id)) {
             $_SESSION['error'] = 'Kategori tidak bisa dihapus karena masih memiliki produk';
             header('Location: ' . BASE_URL . '/?c=adminCategory&m=index');
             exit;
         }
 
+        // BARU DELETE
+        $this->categoryModel->deleteAdmin($id);
 
         $_SESSION['success'] = 'Kategori berhasil dihapus';
         header('Location: ' . BASE_URL . '/?c=adminCategory&m=index');

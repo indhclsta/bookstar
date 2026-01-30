@@ -123,7 +123,7 @@ class SellerProductController
     // DELETE PRODUCT
     public function delete()
     {
-        $sellerId = $_SESSION['user']['id'];
+        $sellerId  = $_SESSION['user']['id'];
         $productId = (int)$_GET['id'];
 
         $product = $this->productModel->findForSeller($productId, $sellerId);
@@ -134,20 +134,15 @@ class SellerProductController
         }
 
         if ($product['stock'] > 0) {
-            $_SESSION['error'] = 'Produk masih memiliki stock, tidak bisa dihapus';
+            $_SESSION['error'] = 'Produk masih memiliki stok, tidak bisa dihapus';
             header('Location: ' . BASE_URL . '/?c=sellerProduct&m=index');
             exit;
         }
 
-        // hapus image jika ada
-        if ($product['image']) {
-            $imagePath = APP_PATH . '/../public/uploads/products/' . $product['image'];
-            if (file_exists($imagePath)) unlink($imagePath);
-        }
 
-        $this->productModel->delete($productId, $sellerId);
+        $this->productModel->softDelete($productId, $sellerId);
 
-        $_SESSION['success'] = 'Produk berhasil dihapus';
+        $_SESSION['success'] = 'Produk berhasil di hapus';
         header('Location: ' . BASE_URL . '/?c=sellerProduct&m=index');
         exit;
     }

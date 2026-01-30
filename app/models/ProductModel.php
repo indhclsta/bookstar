@@ -12,15 +12,20 @@ class ProductModel
     public function getBySeller($sellerId)
     {
         $stmt = $this->db->prepare("
-            SELECT p.*, c.name AS category_name
-            FROM products p
-            JOIN categories c ON c.id = p.category_id
-            WHERE p.seller_id = ?
-            ORDER BY p.id ASC
-        ");
+        SELECT 
+            p.*,
+            c.name AS category_name
+        FROM products p
+        LEFT JOIN categories c ON c.id = p.category_id
+        WHERE p.seller_id = ?
+        AND p.is_active = 1
+        ORDER BY p.id ASC
+    ");
         $stmt->execute([$sellerId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
 
     public function nameExists($sellerId, $name, $excludeId = null)
     {
@@ -57,16 +62,20 @@ class ProductModel
         ]);
     }
 
-    public function findForSeller($id, $sellerId)
+    public function findForSeller($productId, $sellerId)
     {
         $stmt = $this->db->prepare("
-            SELECT * FROM products
-            WHERE id = ? AND seller_id = ?
-            LIMIT 1
-        ");
-        $stmt->execute([$id, $sellerId]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        SELECT *
+        FROM products
+        WHERE id = ?
+        AND seller_id = ?
+        AND is_active = 1
+        LIMIT 1
+    ");
+        $stmt->execute([$productId, $sellerId]);
+        return $stmt->fetch();
     }
+
 
     public function update($data)
     {
@@ -89,14 +98,16 @@ class ProductModel
         ]);
     }
 
-    public function delete($id, $sellerId)
+    public function softDelete($id, $sellerId)
     {
         $stmt = $this->db->prepare("
-            DELETE FROM products
-            WHERE id=? AND seller_id=?
-        ");
+        UPDATE products
+        SET is_active = 0
+        WHERE id = ? AND seller_id = ?
+    ");
         return $stmt->execute([$id, $sellerId]);
     }
+
 
     public function getAll()
     {
@@ -133,5 +144,35 @@ class ProductModel
         WHERE id = ? AND stock >= ?
     ");
         return $stmt->execute([$qty, $productId, $qty]);
+    }
+
+    // FILTER + SEARCH PRODUK (UNTUK CUSTOMER)
+    public function getFilteredProducts($search = null, $categoryId = null)
+    {
+        $sql = "
+        SELECT p.*, c.name AS category_name
+        FROM products p
+        JOIN categories c ON c.id = p.category_id
+        WHERE 1=1
+    ";
+
+        $params = [];
+
+        if (!empty($search)) {
+            $sql .= " AND p.name LIKE :search ";
+            $params['search'] = '%' . $search . '%';
+        }
+
+        if (!empty($categoryId)) {
+            $sql .= " AND p.category_id = :category ";
+            $params['category'] = $categoryId;
+        }
+
+        $sql .= " ORDER BY p.created_at DESC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

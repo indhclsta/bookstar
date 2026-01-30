@@ -3,12 +3,15 @@
 require_once APP_PATH . '/core/auth.php';
 require_once APP_PATH . '/models/UserModel.php';
 require_once APP_PATH . '/models/ProductModel.php';
+require_once APP_PATH . '/models/CategoryModel.php';
 
 class CustomerController
 {
     private $userModel;
     private $productModel;
+    private $categoryModel;
     private $customerId;
+
 
     public function __construct()
     {
@@ -17,6 +20,7 @@ class CustomerController
 
         $this->userModel = new UserModel();
         $this->productModel = new ProductModel();
+        $this->categoryModel = new CategoryModel();
         $this->customerId = $_SESSION['user']['id'];
 
         // update last activity setiap request
@@ -96,14 +100,17 @@ class CustomerController
 
     public function order()
     {
-        // update last activity
         $this->userModel->updateLastActivity($this->customerId);
 
-        // ambil semua produk
-        $products = $this->productModel->getAll();
+        $search   = $_GET['search'] ?? null;
+        $category = $_GET['category'] ?? null;
+
+        $products   = $this->productModel->getFilteredProducts($search, $category);
+        $categories = $this->categoryModel->getAll();
 
         require APP_PATH . '/views/customer/order.php';
     }
+
 
     public function addToCart()
     {

@@ -2,6 +2,29 @@
 <?php require APP_PATH . '/views/layouts/seller/sidebar.php'; ?>
 
 <main class="main-wrapper">
+  <?php if (!empty($_SESSION['success'])): ?>
+    <script>
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: <?= json_encode($_SESSION['success']) ?>,
+        timer: 2000,
+        showConfirmButton: false
+      });
+    </script>
+  <?php unset($_SESSION['success']);
+  endif; ?>
+
+  <?php if (!empty($_SESSION['error'])): ?>
+    <script>
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: <?= json_encode($_SESSION['error']) ?>
+      });
+    </script>
+  <?php unset($_SESSION['error']);
+  endif; ?>
   <div class="main-content">
 
     <!-- breadcrumb -->
@@ -136,14 +159,14 @@
                           <li>
                             <?php if ($p['stock'] > 0): ?>
                               <!-- tombol disable kalau masih ada stock -->
-                              <button class="dropdown-item text-danger"
-                                title="Produk masih memiliki stock, tidak bisa dihapus">
-                                <i class="bi bi-trash me-2"></i> Delete
-                              </button>
+                              <button class="dropdown-item text-danger" disabled
+                            title="Produk masih memiliki stock, tidak bisa dihapus">
+                            <i class="bi bi-lock-fill me-2"></i> Delete
+                          </button>
                             <?php else: ?>
-                              <a class="dropdown-item text-danger"
-                                onclick="return confirm('Hapus produk ini?')"
-                                href="<?= BASE_URL ?>/?c=sellerProduct&m=delete&id=<?= $p['id'] ?>">
+                              <a href="#"
+                                class="dropdown-item text-danger btn-delete"
+                                data-id="<?= $p['id'] ?>">
                                 <i class="bi bi-trash me-2"></i> Delete
                               </a>
                             <?php endif; ?>
@@ -322,6 +345,31 @@
       document.getElementById('editStock').value = this.dataset.stock;
       document.getElementById('editDescription').value = this.dataset.description;
 
+    });
+  });
+</script>
+<script>
+  document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+
+      const productId = this.dataset.id;
+
+      Swal.fire({
+        title: 'Yakin mau hapus?',
+        text: 'Produk yang sudah dihapus tidak bisa dikembalikan!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href =
+            "<?= BASE_URL ?>/?c=sellerProduct&m=delete&id=" + productId;
+        }
+      });
     });
   });
 </script>

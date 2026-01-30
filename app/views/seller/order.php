@@ -30,7 +30,7 @@
               <th>Approval</th>
               <th>Status</th>
               <th>Resi</th>
-              <th>Tracking Url</th>
+              <th>Lacak</th>
               <th>Aksi</th>
             </tr>
           </thead>
