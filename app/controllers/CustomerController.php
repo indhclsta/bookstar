@@ -106,7 +106,7 @@ class CustomerController
         $category = $_GET['category'] ?? null;
 
         $products   = $this->productModel->getFilteredProducts($search, $category);
-        $categories = $this->categoryModel->getAll();
+        $categories = $this->categoryModel->getActiveCategoriesForCustomer();
 
         require APP_PATH . '/views/customer/order.php';
     }

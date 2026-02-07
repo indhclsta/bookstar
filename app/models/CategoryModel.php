@@ -271,4 +271,17 @@ class CategoryModel
             'seller_id' => $sellerId
         ]);
     }
+
+    public function getActiveCategoriesForCustomer()
+{
+    $stmt = $this->db->prepare("
+        SELECT DISTINCT c.*
+        FROM categories c
+        WHERE c.is_active = 1
+        ORDER BY c.name ASC
+    ");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 }
