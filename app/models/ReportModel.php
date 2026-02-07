@@ -1,5 +1,7 @@
 <?php
 
+require_once APP_PATH . '/models/Database.php';
+
 class ReportModel
 {
     private $db;
@@ -9,60 +11,61 @@ class ReportModel
         $this->db = Database::getInstance()->getConnection();
     }
 
-    // ringkas summary (tolak tidak masuk)
-    public function getSummary($sellerId, $month, $year)
+    public function getPurchaseReport($customerId, $month = null, $year = null)
     {
-        $stmt = $this->db->prepare("
-            SELECT 
-                COUNT(*) AS total_order,
-                SUM((SELECT SUM(oi.qty * oi.price_snapshot) FROM order_items oi WHERE oi.order_id=o.id)) AS omzet
-            FROM orders o
-            WHERE o.seller_id=?
-              AND o.status IN ('approved','shipped','refund')
-              AND MONTH(o.created_at)=?
-              AND YEAR(o.created_at)=?
-        ");
-        $stmt->execute([$sellerId, $month, $year]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+        $sql = "
+        SELECT 
+            o.order_code,
+            oi.product_title,
+            oi.quantity,
+            oi.price,
+            (oi.quantity * oi.price) AS total_price,
+            o.payment_method,
+            o.payment_proof,
+            o.created_at
+        FROM orders o
+        JOIN order_items oi ON oi.order_id = o.id
+        WHERE 
+            o.customer_id = ?
+            AND o.approval_status = 'approved'
+    ";
 
-    public function getTable($sellerId, $month, $year)
-    {
-        $stmt = $this->db->prepare("
-            SELECT 
-                o.created_at,
-                o.order_code,
-                o.payment_method,
-                o.status,
-                (SELECT oi.title_snapshot FROM order_items oi WHERE oi.order_id=o.id LIMIT 1) AS title,
-                (SELECT SUM(oi.qty) FROM order_items oi WHERE oi.order_id=o.id) AS qty,
-                (SELECT SUM(oi.qty * oi.price_snapshot) FROM order_items oi WHERE oi.order_id=o.id) AS total
-            FROM orders o
-            WHERE o.seller_id=?
-              AND o.status IN ('approved','shipped','refund')
-              AND MONTH(o.created_at)=?
-              AND YEAR(o.created_at)=?
-            ORDER BY o.id DESC
-        ");
-        $stmt->execute([$sellerId, $month, $year]);
+        $params = [$customerId];
+
+        if ($month) {
+            $sql .= " AND MONTH(o.created_at) = ?";
+            $params[] = $month;
+        }
+
+        if ($year) {
+            $sql .= " AND YEAR(o.created_at) = ?";
+            $params[] = $year;
+        }
+
+        $sql .= " ORDER BY o.created_at DESC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
-    public function getChartDaily($sellerId, $month, $year)
+    public function getMonthlyPurchaseChart($customerId, $year)
     {
         $stmt = $this->db->prepare("
-            SELECT 
-                DATE(o.created_at) AS tgl,
-                SUM((SELECT SUM(oi.qty * oi.price_snapshot) FROM order_items oi WHERE oi.order_id=o.id)) AS total
-            FROM orders o
-            WHERE o.seller_id=?
-              AND o.status IN ('approved','shipped','refund')
-              AND MONTH(o.created_at)=?
-              AND YEAR(o.created_at)=?
-            GROUP BY DATE(o.created_at)
-            ORDER BY DATE(o.created_at) ASC
-        ");
-        $stmt->execute([$sellerId, $month, $year]);
+        SELECT 
+            MONTH(o.created_at) AS month,
+            SUM(oi.quantity * oi.price) AS total
+        FROM orders o
+        JOIN order_items oi ON oi.order_id = o.id
+        WHERE 
+            o.customer_id = ?
+            AND o.approval_status = 'approved'
+            AND YEAR(o.created_at) = ?
+        GROUP BY MONTH(o.created_at)
+        ORDER BY MONTH(o.created_at)
+    ");
+
+        $stmt->execute([$customerId, $year]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

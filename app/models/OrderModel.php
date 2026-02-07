@@ -111,16 +111,30 @@ VALUES (?,?,?,?,?,?,?,?,?,?)
     public function getOrdersWithItems($customerId)
     {
         $stmt = $this->db->prepare("
-            SELECT o.*, u.name as seller_name, oi.product_title, oi.quantity, oi.price
-            FROM orders o
-            JOIN users u ON o.seller_id=u.id
-            JOIN order_items oi ON oi.order_id=o.id
-            WHERE o.customer_id=?
-            ORDER BY o.created_at DESC
-        ");
+        SELECT 
+            o.*,
+
+            -- SELLER
+            u.name    AS seller_name,
+            u.address AS seller_address,
+
+            -- ITEM
+            oi.product_title,
+            oi.quantity,
+            oi.price
+
+        FROM orders o
+        JOIN users u ON o.seller_id = u.id
+        JOIN order_items oi ON oi.order_id = o.id
+
+        WHERE o.customer_id = ?
+        ORDER BY o.created_at DESC
+    ");
+
         $stmt->execute([$customerId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
     public function getOrdersBySeller($sellerId)
     {
@@ -149,6 +163,28 @@ VALUES (?,?,?,?,?,?,?,?,?,?)
 
         return $orders;
     }
+
+    public function getApprovedOrdersByCustomer($customerId)
+    {
+        $stmt = $this->db->prepare("
+        SELECT 
+            o.order_code,
+            oi.product_title,
+            oi.quantity,
+            oi.price,
+            o.payment_proof,
+            o.payment_method
+        FROM orders o
+        JOIN order_items oi ON oi.order_id = o.id
+        WHERE 
+            o.customer_id = ?
+            AND o.approval_status = 'approved'
+        ORDER BY o.created_at DESC
+    ");
+        $stmt->execute([$customerId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 
     public function addOrderItem($orderId, $productId, $title, $qty, $price)
     {

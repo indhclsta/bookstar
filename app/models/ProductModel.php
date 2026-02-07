@@ -153,7 +153,7 @@ class ProductModel
         SELECT p.*, c.name AS category_name
         FROM products p
         JOIN categories c ON c.id = p.category_id
-        WHERE 1=1
+        WHERE p.is_active = 1
     ";
 
         $params = [];
