@@ -150,8 +150,7 @@
                   <?php endif; ?>
 
                   <!-- CHAT selalu ada -->
-                  <a href="<?= BASE_URL ?>/?c=sellerChat&m=index&order_id=<?= $o['id'] ?>"
-                    class="btn btn-sm btn-secondary">
+                  <a href="<?= BASE_URL ?>/?c=sellerChat&m=index&userId=<?= $o['customer_id'] ?>" class="btn btn-sm btn-secondary">
                     Chat
                   </a>
 

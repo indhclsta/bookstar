@@ -559,4 +559,28 @@ class UserModel
 
         return $stmt->execute();
     }
+    public function getUserPhoto($userId)
+    {
+        $stmt = $this->db->prepare("
+            SELECT photo 
+            FROM users 
+            WHERE id = :id
+        ");
+        $stmt->execute([':id' => $userId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result['photo'] ?? null;
+    }
+
+    // Ambil semua data user berdasarkan ID
+    public function getUserById($userId)
+    {
+        $stmt = $this->db->prepare("
+            SELECT * 
+            FROM users 
+            WHERE id = :id
+        ");
+        $stmt->execute([':id' => $userId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

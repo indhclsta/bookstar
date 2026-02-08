@@ -1,5 +1,4 @@
 <?php
-
 require_once APP_PATH . '/core/auth.php';
 require_once APP_PATH . '/models/ChatModel.php';
 
@@ -11,7 +10,6 @@ class CustomerChatController
     {
         Auth::check();
         Auth::role('customer');
-
         $this->chatModel = new ChatModel();
     }
 
@@ -19,52 +17,57 @@ class CustomerChatController
     {
         $customerId = $_SESSION['user']['id'];
 
-        // list chat customer
-        $chats = $this->chatModel->getChatsByCustomer($customerId);
+        // Ambil semua seller (bisa semua seller atau yang pernah order)
+        $sellers = $this->chatModel->getAllSellers();
 
-        $activeChatId = $_GET['chat_id'] ?? null;
+        $chatWith = ['id' => '', 'name' => 'Select a chat', 'photo' => '', 'status' => 'Offline'];
         $messages = [];
 
-        if ($activeChatId) {
-            $messages = $this->chatModel->getMessagesByCustomer(
-                $activeChatId,
-                $customerId
-            );
+        if (isset($_GET['userId'])) {
+            $sellerId = $_GET['userId'];
+            $messages = $this->chatModel->getChatWithSeller($customerId, $sellerId);
+
+            // Ambil info seller
+            foreach ($sellers as $s) {
+                if ($s['id'] == $sellerId) {
+                    $chatWith = $s;
+                    break;
+                }
+            }
         }
+
+        // Ambil foto customer dari database
+        require_once APP_PATH . '/models/UserModel.php';
+        $userModel = new UserModel();
+        $customerPhoto = $userModel->getUserPhoto($customerId);
+        
+        // Simpan di session untuk digunakan di view
+        $_SESSION['user']['photo'] = $customerPhoto;
 
         require APP_PATH . '/views/customer/chat.php';
     }
 
-    public function start()
-    {
-        $customerId = $_SESSION['user']['id'];
-        $sellerId   = $_GET['seller_id'];
-
-        // cek chat sudah ada atau belum
-        $chatId = $this->chatModel->getOrCreateChat($sellerId, $customerId);
-
-        header("Location: " . BASE_URL . "/?c=customerChat&m=index&chat_id=$chatId");
-        exit;
-    }
-
     public function send()
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') die('Invalid request');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $customerId = $_SESSION['user']['id'];
+            $receiverId = $_POST['receiver_id'] ?? null;
+            $message = $_POST['message'] ?? '';
 
-        $chatId  = $_POST['chat_id'];
-        $message = trim($_POST['message']);
-        $userId  = $_SESSION['user']['id'];
+            if (!$receiverId || !$message) {
+                header("Location: " . BASE_URL . "/?c=customerChat&m=index");
+                exit;
+            }
 
-        if ($message !== '') {
-            $this->chatModel->sendMessage(
-                $chatId,
-                'customer',
-                $userId,
-                $message
-            );
+            $data = [
+                'sender_id' => $customerId,
+                'receiver_id' => $receiverId,
+                'message' => $message
+            ];
+
+            $this->chatModel->sendMessage($data);
+            header("Location: " . BASE_URL . "/?c=customerChat&m=index&userId=" . $receiverId);
+            exit;
         }
-
-        header("Location: " . BASE_URL . "/?c=customerChat&m=index&chat_id=$chatId");
-        exit;
     }
 }

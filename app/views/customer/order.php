@@ -76,13 +76,13 @@
               <!-- ACTION -->
               <div class="d-flex align-items-center gap-3 mt-auto pt-3 border-top">
 
-                <!-- CHAT SELLER -->
-                <a href="<?= BASE_URL ?>/?c=customerChat&m=index&seller_id=<?= $product['seller_id'] ?>"
+                <a href="<?= BASE_URL ?>/?c=customerChat&m=index&userId=<?= $product['seller_id'] ?>"
                   class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center"
                   style="width:44px;height:44px"
                   title="Chat Seller">
                   <i class="material-icons-outlined fs-5">chat</i>
                 </a>
+
 
                 <form action="<?= BASE_URL ?>/?c=cart&m=add" method="POST" class="flex-grow-1">
                   <input type="hidden" name="product_id" value="<?= $product['id'] ?>">

@@ -38,7 +38,7 @@
 
                     <table class="table table-borderless align-middle">
                         <thead class="table-light">
-                            <tr class="small text-muted">
+                            <tr class="small text">
                                 <th>Kode</th>
                                 <th>Produk</th>
                                 <th>Seller</th>
@@ -121,17 +121,26 @@
 
                                             <div class="modal-body">
 
-                                                <div class="d-flex justify-content-between mb-3">
-                                                    <span class="badge bg-<?=
-                                                                            $o['approval_status'] === 'approved' ? 'success' : ($o['approval_status'] === 'rejected' ? 'danger' : 'warning')
-                                                                            ?>">
-                                                        <?= ucfirst($o['approval_status']) ?>
-                                                    </span>
+                                                <div class="mb-3">
+                                                    <?php
+                                                    $status = $o['approval_status'] ?? 'pending';
+                                                    if ($status === 'approved') {
+                                                        echo '<span class="badge bg-success">Approved <i class="bi bi-check2 ms-2"></i></span>';
+                                                    } elseif ($status === 'rejected') {
+                                                        echo '<span class="badge bg-danger">Rejected <i class="bi bi-x-lg ms-2"></i></span>';
+                                                        if (!empty($o['reject_reason'])) {
+                                                            echo '<div class="mt-1 small text-danger">Alasan: ' . htmlspecialchars($o['reject_reason']) . '</div>';
+                                                        }
+                                                    } else {
+                                                        echo '<span class="badge bg-warning text-dark">Pending <i class="bi bi-info-circle ms-2"></i></span>';
+                                                    }
+                                                    ?>
 
-                                                    <span class="badge bg-info">
-                                                        <?= ucfirst($o['order_status']) ?>
+                                                    <span class="badge bg-info ms-2">
+                                                        <?= ucfirst($o['order_status'] ?? '-') ?>
                                                     </span>
                                                 </div>
+
 
                                                 <div class="card mb-3 border-0 bg-light">
                                                     <div class="card-body">
@@ -141,7 +150,7 @@
                                                                 <div class="fw-semibold">
                                                                     <?= htmlspecialchars($o['product_title']) ?>
                                                                 </div>
-                                                                <small class="text-muted">
+                                                                <small class="text">
                                                                     Rp <?= number_format($o['price'], 0, ',', '.') ?>
                                                                     × <?= $o['quantity'] ?>
                                                                 </small>
@@ -195,7 +204,7 @@
                                                                 class="img-fluid rounded-3 border"
                                                                 style="max-height:250px">
                                                         <?php else: ?>
-                                                            <div class="text-muted fst-italic">
+                                                            <div class="text fst-italic">
                                                                 Belum ada bukti pembayaran
                                                             </div>
                                                         <?php endif; ?>

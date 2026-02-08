@@ -1,4 +1,5 @@
 <?php
+require_once APP_PATH . '/models/Database.php';
 
 class ChatModel
 {
@@ -6,104 +7,108 @@ class ChatModel
 
     public function __construct()
     {
-        // ambil PDO connection
         $this->db = Database::getInstance()->getConnection();
     }
 
-    // Ambil daftar chat berdasarkan seller
+    // Ambil semua chat yang melibatkan seller
     public function getChatsBySeller($sellerId)
     {
-        $sql = "
-            SELECT c.*, u.name AS customer_name
+        $stmt = $this->db->prepare("
+            SELECT c.*, u.id AS user_id, u.name AS user_name, u.photo AS user_photo
             FROM chats c
-            JOIN users u ON u.id = c.customer_id
-            WHERE c.seller_id = ?
-            ORDER BY c.created_at DESC
-        ";
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$sellerId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // Ambil pesan berdasarkan chat_id
-    public function getMessages($chatId)
-    {
-        $sql = "
-            SELECT *
-            FROM chat_messages
-            WHERE chat_id = ?
-            ORDER BY created_at ASC
-        ";
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$chatId]);
+            JOIN users u ON (c.sender_id = u.id OR c.receiver_id = u.id)
+            WHERE c.sender_id = :seller_id OR c.receiver_id = :seller_id
+            ORDER BY c.created_at ASC
+        ");
+        $stmt->execute([':seller_id' => $sellerId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Kirim pesan
-    public function sendMessage($chatId, $senderRole, $senderId, $message)
+    public function sendMessage($data)
     {
-        $sql = "
-            INSERT INTO chat_messages
-            (chat_id, sender_role, sender_id, message)
-            VALUES (?, ?, ?, ?)
-        ";
-
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->db->prepare("
+            INSERT INTO chats (sender_id, receiver_id, message)
+            VALUES (:sender_id, :receiver_id, :message)
+        ");
         return $stmt->execute([
-            $chatId,
-            $senderRole,
-            $senderId,
-            $message
+            ':sender_id' => $data['sender_id'],
+            ':receiver_id' => $data['receiver_id'],
+            ':message' => $data['message']
         ]);
     }
 
+    // Ambil percakapan antara seller dan customer tertentu
+    public function getChatWithUser($sellerId, $customerId)
+    {
+        $stmt = $this->db->prepare("
+            SELECT *
+            FROM chats
+            WHERE (sender_id = :seller_id AND receiver_id = :customer_id)
+               OR (sender_id = :customer_id AND receiver_id = :seller_id)
+            ORDER BY created_at ASC
+        ");
+        $stmt->execute([
+            ':seller_id' => $sellerId,
+            ':customer_id' => $customerId
+        ]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Ambil semua customer yang pernah membeli produk seller
+    public function getCustomersByOrders($sellerId)
+    {
+        $stmt = $this->db->prepare("
+        SELECT DISTINCT u.id, u.name, u.photo
+        FROM users u
+        JOIN orders o ON o.customer_id = u.id
+        JOIN order_items oi ON oi.order_id = o.id
+        JOIN products p ON p.id = oi.product_id
+        WHERE p.seller_id = :seller_id
+    ");
+        $stmt->execute([':seller_id' => $sellerId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    // Ambil semua chat user (customer)
     public function getChatsByCustomer($customerId)
-{
-    $sql = "
-        SELECT c.*, u.name AS seller_name
-        FROM chats c
-        JOIN users u ON u.id = c.seller_id
-        WHERE c.customer_id = ?
-        ORDER BY c.created_at DESC
-    ";
+    {
+        $stmt = $this->db->prepare("
+            SELECT c.*, u.id AS user_id, u.name AS user_name, u.photo AS user_photo
+            FROM chats c
+            JOIN users u ON (c.sender_id = u.id OR c.receiver_id = u.id)
+            WHERE c.sender_id = :customer_id OR c.receiver_id = :customer_id
+            ORDER BY c.created_at ASC
+        ");
+        $stmt->execute([':customer_id' => $customerId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([$customerId]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+    public function getChatWithSeller($customerId, $sellerId)
+    {
+        $stmt = $this->db->prepare("
+            SELECT *
+            FROM chats
+            WHERE (sender_id = :customer_id AND receiver_id = :seller_id)
+               OR (sender_id = :seller_id AND receiver_id = :customer_id)
+            ORDER BY created_at ASC
+        ");
+        $stmt->execute([
+            ':customer_id' => $customerId,
+            ':seller_id' => $sellerId
+        ]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
-public function getMessagesByCustomer($chatId, $customerId)
-{
-    $sql = "
-        SELECT m.*
-        FROM chat_messages m
-        JOIN chats c ON c.id = m.chat_id
-        WHERE m.chat_id = ? AND c.customer_id = ?
-        ORDER BY m.created_at ASC
-    ";
-
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([$chatId, $customerId]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-public function getOrCreateChat($sellerId, $customerId)
-{
-    $sql = "SELECT id FROM chats WHERE seller_id = ? AND customer_id = ?";
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([$sellerId, $customerId]);
-
-    $chat = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($chat) return $chat['id'];
-
-    $sql = "INSERT INTO chats (seller_id, customer_id) VALUES (?, ?)";
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([$sellerId, $customerId]);
-
-    return $this->db->lastInsertId();
-}
-
-
+    // Ambil daftar semua seller untuk customer sidebar
+    // Ambil daftar semua seller untuk customer sidebar (berdasarkan produk)
+    public function getAllSellers()
+    {
+        $stmt = $this->db->prepare("
+        SELECT DISTINCT u.id, u.name, u.photo
+        FROM users u
+        JOIN products p ON p.seller_id = u.id
+    ");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

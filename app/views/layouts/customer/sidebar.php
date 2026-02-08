@@ -70,7 +70,7 @@
         </a>
       </li>
       <li>
-        <a href="<?= BASE_URL ?>/?c=sellerCategory&m=index">
+        <a href="<?= BASE_URL ?>/?c=customerChat&m=index">
           <div class="parent-icon"><i class="material-icons-outlined">chat</i>
           </div>
           <div class="menu-title">Chat</div>
