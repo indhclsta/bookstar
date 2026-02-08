@@ -203,26 +203,24 @@ VALUES (?,?,?,?,?,?,?,?,?,?)
     }
 
     // ================== UPDATE APPROVAL ==================
-    public function updateApproval($orderId, $status)
+    public function updateApproval($orderId, $status, $reason = null)
     {
+        $orderStatus = $status === 'rejected' ? 'refund' : 'paid'; // otomatis refund kalau ditolak
         $stmt = $this->db->prepare("
-        UPDATE orders 
-        SET approval_status = ?, 
-            order_status = ?, 
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
+        UPDATE orders
+        SET approval_status = :status,
+            order_status = :order_status,
+            reject_reason = :reason
+        WHERE id = :id
     ");
-
-        // kalau approve → lanjut proses
-        // kalau reject → otomatis cancelled
-        $orderStatus = ($status === 'approved') ? 'process' : 'cancelled';
-
         $stmt->execute([
-            $status,
-            $orderStatus,
-            $orderId
+            ':status' => $status,
+            ':order_status' => $orderStatus,
+            ':reason' => $reason,
+            ':id' => $orderId
         ]);
     }
+
 
     // ================== INPUT RESI ==================
     public function inputResi($orderId, $resi, $trackingUrl = null)

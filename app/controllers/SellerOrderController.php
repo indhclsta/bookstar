@@ -32,42 +32,47 @@ class SellerOrderController
     }
 
     public function approve()
-{
-    if (isset($_GET['id'])) {
-        $orderId = $_GET['id'];
+    {
+        if (isset($_GET['id'])) {
+            $orderId = $_GET['id'];
 
-        $orderItemModel = new OrderItemModel();
-        $productModel   = new ProductModel();
+            $orderItemModel = new OrderItemModel();
+            $productModel   = new ProductModel();
 
-        // ambil semua item dalam order
-        $items = $orderItemModel->getByOrderId($orderId);
+            // ambil semua item dalam order
+            $items = $orderItemModel->getByOrderId($orderId);
 
-        // kurangi stok per produk
-        foreach ($items as $item) {
-            $productModel->reduceStock(
-                $item['product_id'],
-                $item['quantity']
-            );
+            // kurangi stok per produk
+            foreach ($items as $item) {
+                $productModel->reduceStock(
+                    $item['product_id'],
+                    $item['quantity']
+                );
+            }
+
+            // update status order
+            $this->orderModel->updateApproval($orderId, 'approved');
+
+            $_SESSION['success'] = "Pesanan disetujui & stok otomatis berkurang";
+            header("Location: " . BASE_URL . "/?c=sellerOrder&m=index");
         }
-
-        // update status order
-        $this->orderModel->updateApproval($orderId, 'approved');
-
-        $_SESSION['success'] = "Pesanan disetujui & stok otomatis berkurang";
-        header("Location: " . BASE_URL . "/?c=sellerOrder&m=index");
     }
-}
 
 
     public function reject()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
+        if (isset($_GET['id'])) {
             $orderId = $_GET['id'];
-            $this->orderModel->updateApproval($orderId, 'rejected');
-            $_SESSION['success'] = "Pesanan ditolak";
+            $reason  = $_GET['reason'] ?? null;
+
+            // update approval + order_status + reject_reason
+            $this->orderModel->updateApproval($orderId, 'rejected', $reason);
+
+            $_SESSION['success'] = "Pesanan ditolak" . ($reason ? " dengan alasan: $reason" : "");
             header("Location: " . BASE_URL . "/?c=sellerOrder&m=index");
         }
     }
+
 
     // INPUT RESI
     public function inputResi()

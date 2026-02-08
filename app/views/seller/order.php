@@ -74,12 +74,18 @@
                 </td>
 
                 <td>
-                  <span class="badge bg-<?=
-                                        $o['approval_status'] === 'approved' ? 'success' : ($o['approval_status'] === 'rejected' ? 'danger' : 'warning')
-                                        ?>">
-                    <?= ucfirst($o['approval_status'] ?? 'pending') ?>
-                  </span>
+                  <?php
+                  $status = $o['approval_status'] ?? 'pending';
+                  if ($status === 'approved') {
+                    echo '<span class="badge bg-success">Approved <i class="bi bi-check2 ms-2"></i></span>';
+                  } elseif ($status === 'rejected') {
+                    echo '<span class="badge bg-danger">Rejected <i class="bi bi-x-lg ms-2"></i></span>';
+                  } else {
+                    echo '<span class="badge bg-warning text-dark">Pending <i class="bi bi-info-circle ms-2"></i></span>';
+                  }
+                  ?>
                 </td>
+
 
                 <!-- Status -->
                 <td><?= ucfirst($o['order_status'] ?? '-') ?></td>
@@ -175,10 +181,17 @@
         <p><b>Pembeli:</b> <span id="d_name"></span></p>
         <p><b>Alamat:</b> <span id="d_address"></span></p>
         <img id="d_proof" class="img-fluid rounded mt-2">
+
+        <!-- Alasan Tolak (hanya muncul saat klik Tolak) -->
+        <div id="rejectReasonWrapper" class="mt-3 d-none">
+          <label>Alasan Penolakan</label>
+          <textarea id="rejectReasonInput" class="form-control" placeholder="Masukkan alasan penolakan..."></textarea>
+        </div>
       </div>
       <div class="modal-footer">
         <a id="btnApprove" class="btn btn-success">Setujui</a>
-        <a id="btnReject" class="btn btn-danger">Tolak</a>
+        <button id="btnReject" class="btn btn-danger">Tolak</button>
+        <button id="btnConfirmReject" class="btn btn-danger d-none">Kirim Tolak</button>
       </div>
     </div>
   </div>
@@ -212,7 +225,6 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Isi modal detail
     document.querySelectorAll('.btn-detail').forEach(btn => {
       btn.onclick = () => {
         d_code.innerText = btn.dataset.code;
@@ -221,16 +233,36 @@
         d_address.innerText = btn.dataset.address;
         d_proof.src = btn.dataset.proof;
         btnApprove.href = "<?= BASE_URL ?>/?c=sellerOrder&m=approve&id=" + btn.dataset.id;
-        btnReject.href = "<?= BASE_URL ?>/?c=sellerOrder&m=reject&id=" + btn.dataset.id;
+        btnReject.dataset.id = btn.dataset.id;
+
+        // reset reason
+        document.getElementById('rejectReasonWrapper').classList.add('d-none');
+        document.getElementById('rejectReasonInput').value = '';
+        document.getElementById('btnConfirmReject').classList.add('d-none');
       };
     });
 
-    // Isi modal resi
-    document.querySelectorAll('.btn-resi').forEach(btn => {
-      btn.onclick = () => {
-        document.getElementById('resi_order_id').value = btn.dataset.id;
-      };
-    });
+    // Klik Tolak → tampilkan textarea dan tombol konfirmasi
+    btnReject.onclick = () => {
+      document.getElementById('rejectReasonWrapper').classList.remove('d-none');
+      document.getElementById('btnConfirmReject').classList.remove('d-none');
+      btnReject.classList.add('d-none');
+    };
+
+    // Klik Konfirmasi Tolak → kirim ke backend
+    btnConfirmReject.onclick = () => {
+      const reason = document.getElementById('rejectReasonInput').value;
+      const orderId = btnReject.dataset.id;
+      window.location.href = "<?= BASE_URL ?>/?c=sellerOrder&m=reject&id=" + orderId + "&reason=" + encodeURIComponent(reason);
+    };
+  });
+
+
+  // Isi modal resi
+  document.querySelectorAll('.btn-resi').forEach(btn => {
+    btn.onclick = () => {
+      document.getElementById('resi_order_id').value = btn.dataset.id;
+    };
   });
 </script>
 
