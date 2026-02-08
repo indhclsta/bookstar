@@ -15,7 +15,7 @@ class CustomerOrderController
         $this->orderModel = new OrderModel();
         $this->orderItemModel = new OrderItemModel();
     }
-
+    
     public function index()
     {
         $customerId = $_SESSION['user']['id'];

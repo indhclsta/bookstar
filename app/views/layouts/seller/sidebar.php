@@ -1,19 +1,19 @@
 <script>
   function confirmLogout() {
-  Swal.fire({
-    title: 'Logout?',
-    text: 'Klik logout untuk keluar',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Ya',
-    cancelButtonText: 'Tidak'
-  }).then((res) => {
-    if (res.isConfirmed) {
-      window.location.href = "<?= BASE_URL ?>/?c=auth&m=logout";
-    }
-  });
-}
-</script> 
+    Swal.fire({
+      title: 'Logout?',
+      text: 'Klik logout untuk keluar',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Ya',
+      cancelButtonText: 'Tidak'
+    }).then((res) => {
+      if (res.isConfirmed) {
+        window.location.href = "<?= BASE_URL ?>/?c=auth&m=logout";
+      }
+    });
+  }
+</script>
 <!--start sidebar-->
 <aside class="sidebar-wrapper" data-simplebar="true">
   <div class="sidebar-header">
@@ -72,8 +72,9 @@
       </li>
 
       <li>
-        <a href="<?= BASE_URL ?>/?c=sellerCategory&m=index">
-          <div class="parent-icon"><i class="material-icons-outlined">bar_chart</i>
+        <a href="<?= BASE_URL ?>/?c=sellerReport&m=index">
+          <div class="parent-icon">
+            <i class="material-icons-outlined">bar_chart</i>
           </div>
           <div class="menu-title">Reports</div>
         </a>
