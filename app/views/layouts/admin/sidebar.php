@@ -34,7 +34,7 @@
     <!--navigation-->
     <ul class="metismenu" id="sidenav">
       <li>
-        <a href="<?= BASE_URL ?>/?c=admin&m=dashboard">
+        <a href="<?= BASE_URL ?>/?c=adminDashboard&m=index">
           <div class="parent-icon"><i class="material-icons-outlined">home</i>
           </div>
           <div class="menu-title">Dashboard</div>

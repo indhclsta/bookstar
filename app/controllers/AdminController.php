@@ -3,11 +3,13 @@
 require_once APP_PATH . '/core/auth.php';
 require_once APP_PATH . '/models/UserModel.php';
 require_once APP_PATH . '/models/ProductModel.php';
+require_once APP_PATH . '/models/AdminDashboardModel.php';
 
 class AdminController
 {
     private $userModel;
     private $productModel;
+    private $dashboardModel;
 
     public function __construct()
     {
@@ -16,13 +18,28 @@ class AdminController
 
         $this->userModel = new UserModel();
         $this->productModel = new ProductModel();
+        $this->dashboardModel = new AdminDashboardModel();
     }
 
 
     public function dashboard()
-    {
-        require APP_PATH . '/views/admin/dashboard.php';
-    }
+{
+    $data = [
+        'totalUsers'     => $this->dashboardModel->totalUsers(),
+        'totalSellers'   => $this->dashboardModel->totalSellers(),
+        'totalCustomers' => $this->dashboardModel->totalCustomers(),
+        'totalProducts'  => $this->dashboardModel->totalProducts(),
+        'totalOrders'    => $this->dashboardModel->totalOrders(),
+        'totalRevenue'   => $this->dashboardModel->totalRevenue(),
+
+        'recentOrders'   => $this->dashboardModel->recentOrders(),
+        'pendingOrders'  => $this->dashboardModel->pendingOrders(),
+        'ordersChart'    => $this->dashboardModel->ordersPerMonth()
+    ];
+
+    require APP_PATH . '/views/admin/dashboard.php';
+}
+
 
     public function faq()
     {
