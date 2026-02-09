@@ -583,4 +583,89 @@ class UserModel
         $stmt->execute([':id' => $userId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function getTodaySales($sellerId)
+{
+    $stmt = $this->db->prepare("
+        SELECT COALESCE(SUM(total_price),0) 
+        FROM orders
+        WHERE seller_id = ?
+        AND DATE(created_at) = CURDATE()
+        AND approval_status = 'approved'
+    ");
+    $stmt->execute([$sellerId]);
+    return $stmt->fetchColumn();
+}
+
+public function getOrderStatusStats($sellerId)
+{
+    $stmt = $this->db->prepare("
+        SELECT approval_status, COUNT(*) as total
+        FROM orders
+        WHERE seller_id = ?
+        GROUP BY approval_status
+    ");
+    $stmt->execute([$sellerId]);
+    return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+}
+
+public function getMonthlySales($sellerId)
+{
+    $stmt = $this->db->prepare("
+        SELECT MONTH(created_at) as bulan, SUM(total_price) as total
+        FROM orders
+        WHERE seller_id = ?
+        AND approval_status = 'approved'
+        AND YEAR(created_at) = YEAR(CURDATE())
+        GROUP BY MONTH(created_at)
+        ORDER BY bulan
+    ");
+    $stmt->execute([$sellerId]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+public function getCustomerDashboardStats($customerId)
+{
+    // total pesanan
+    $stmt = $this->db->prepare("
+        SELECT COUNT(*) FROM orders 
+        WHERE customer_id = ?
+    ");
+    $stmt->execute([$customerId]);
+    $totalOrders = $stmt->fetchColumn();
+
+    // pesanan pending
+    $stmt = $this->db->prepare("
+        SELECT COUNT(*) FROM orders 
+        WHERE customer_id = ? AND approval_status = 'pending'
+    ");
+    $stmt->execute([$customerId]);
+    $pendingOrders = $stmt->fetchColumn();
+
+    // pesanan selesai (approved)
+    $stmt = $this->db->prepare("
+        SELECT COUNT(*) FROM orders 
+        WHERE customer_id = ? AND approval_status = 'approved'
+    ");
+    $stmt->execute([$customerId]);
+    $completedOrders = $stmt->fetchColumn();
+
+    // total item di cart
+    $stmt = $this->db->prepare("
+        SELECT COALESCE(SUM(quantity),0)
+        FROM carts
+        WHERE user_id = ?
+    ");
+    $stmt->execute([$customerId]);
+    $cartItems = $stmt->fetchColumn();
+
+    return [
+        'total_orders'     => $totalOrders,
+        'pending_orders'   => $pendingOrders,
+        'completed_orders' => $completedOrders,
+        'cart_items'       => $cartItems
+    ];
+}
+
+
+
 }

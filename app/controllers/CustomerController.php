@@ -28,9 +28,11 @@ class CustomerController
     }
 
     public function dashboard()
-    {
-        require APP_PATH . '/views/customer/dashboard.php';
-    }
+{
+    $stats = $this->userModel->getCustomerDashboardStats($this->customerId);
+    require APP_PATH . '/views/customer/dashboard.php';
+}
+
 
     public function profile()
     {

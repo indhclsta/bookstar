@@ -2,10 +2,13 @@
 
 require_once APP_PATH . '/core/auth.php';
 require_once APP_PATH . '/models/UserModel.php';
+require_once APP_PATH . '/models/ProductModel.php';
+
 
 class SellerController
 {
     private $userModel;
+    private $productModel;  
 
     public function __construct()
     {
@@ -13,6 +16,7 @@ class SellerController
         Auth::role('seller');
 
         $this->userModel = new UserModel();
+        $this->productModel = new ProductModel();
         $this->userModel->updateLastActivity($_SESSION['user']['id']);
     }
 
@@ -26,12 +30,20 @@ class SellerController
     }
 
     public function dashboard()
-    {
-        $sellerId = $_SESSION['user']['id'];
-        $this->userModel->updateLastActivity($sellerId);
+{
+    $sellerId = $_SESSION['user']['id'];
 
-        require APP_PATH . '/views/seller/dashboard.php';
-    }
+    $todaySales     = $this->userModel->getTodaySales($sellerId);
+    $orderStatus    = $this->userModel->getOrderStatusStats($sellerId);
+    $monthlySales   = $this->userModel->getMonthlySales($sellerId);
+
+    // RECENT PRODUCTS (REAL)
+    $recentProducts = $this->productModel->getRecentProductsBySeller($sellerId, 4);
+
+    require APP_PATH . '/views/seller/dashboard.php';
+}
+
+
 
     public function product()
     {
