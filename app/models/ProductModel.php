@@ -29,18 +29,27 @@ class ProductModel
 
     public function nameExists($sellerId, $name, $excludeId = null)
     {
-        $sql = "SELECT id FROM products WHERE seller_id = ? AND name = ?";
+        $sql = "
+        SELECT id 
+        FROM products 
+        WHERE seller_id = ?
+          AND name = ?
+          AND is_active = 1
+    ";
+
         $params = [$sellerId, $name];
 
-        if ($excludeId) {
+        if ($excludeId !== null) {
             $sql .= " AND id != ?";
             $params[] = $excludeId;
         }
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
-        return (bool)$stmt->fetch();
+
+        return (bool) $stmt->fetch();
     }
+
 
     public function create($data)
     {
@@ -79,11 +88,27 @@ class ProductModel
 
     public function update($data)
     {
+        // 🔴 VALIDASI UNIQUE NAMA PRODUK
+        if ($this->nameExists(
+            $data['seller_id'],
+            $data['name'],
+            $data['id']
+        )) {
+            $_SESSION['error'] = 'Produk dengan nama tersebut sudah ada dan masih aktif';
+            return false;
+        }
+
         $stmt = $this->db->prepare("
-            UPDATE products
-            SET category_id=?, name=?, description=?, cost_price=?, price=?, stock=?, image=?
-            WHERE id=? AND seller_id=?
-        ");
+        UPDATE products
+        SET category_id = ?,
+            name        = ?,
+            description = ?,
+            cost_price  = ?,
+            price       = ?,
+            stock       = ?,
+            image       = ?
+        WHERE id = ? AND seller_id = ?
+    ");
 
         return $stmt->execute([
             $data['category_id'],
@@ -97,6 +122,7 @@ class ProductModel
             $data['seller_id']
         ]);
     }
+
 
     public function softDelete($id, $sellerId)
     {
@@ -173,6 +199,23 @@ class ProductModel
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
 
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getRecentProductsBySeller($sellerId, $limit = 4)
+    {
+        // pastikan $limit integer
+        $limit = (int)$limit;
+
+        $stmt = $this->db->prepare("
+        SELECT p.*, c.name AS category_name
+        FROM products p
+        LEFT JOIN categories c ON c.id = p.category_id
+        WHERE p.seller_id = ? AND p.is_active = 1
+        ORDER BY p.created_at DESC
+        LIMIT $limit
+    ");
+        $stmt->execute([$sellerId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

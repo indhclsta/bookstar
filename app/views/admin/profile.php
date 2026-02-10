@@ -56,6 +56,25 @@ $photo = !empty($user['photo'])
                             </div>
 
                             <div class="mb-3">
+                                <label class="form-label">NIK</label>
+                                <input
+                                    type="text"
+                                    name="nik"
+                                    class="form-control"
+                                    value="<?= htmlspecialchars($user['nik'] ?? '') ?>"
+                                    placeholder="Masukkan NIK">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Address</label>
+                                <textarea
+                                    name="address"
+                                    class="form-control"
+                                    rows="3"
+                                    placeholder="Masukkan alamat"><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
+                            </div>
+
+                            <div class="mb-3">
                                 <label class="form-label">Role</label>
                                 <input type="text" class="form-control" value="<?= htmlspecialchars($role) ?>" disabled>
                             </div>

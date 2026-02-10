@@ -384,16 +384,16 @@ body {
   <div class="col-xl-3 col-md-6">
     <div class="stats-card">
       <div class="d-flex align-items-center">
-        <div class="icon-wrapper danger me-3">
+        <div class="icon-wrapper success me-3">
           <i class="bi bi-check-circle fs-4"></i> <!-- Changed to Bootstrap Icon -->
         </div>
         <div class="flex-grow-1">
           <p class="text-muted mb-1">Approved</p>
-          <h3 class="fw-bold mb-0 text-danger"><?= $orderStatus['approved'] ?? 0 ?></h3>
+          <h3 class="fw-bold mb-0 text-success"><?= $orderStatus['approved'] ?? 0 ?></h3>
         </div>
       </div>
       <div class="progress progress-thin mt-3">
-        <div class="progress-bar bg-danger" style="width: 70%"></div>
+        <div class="progress-bar bg-success" style="width: 70%"></div>
       </div>
     </div>
   </div>

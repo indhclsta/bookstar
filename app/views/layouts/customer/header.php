@@ -35,6 +35,7 @@ $photo = !empty($user['photo'])
   <link href="<?= BASE_URL ?>/assets/plugins/fancy-file-uploader/fancy_fileupload.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="<?= BASE_URL ?>/assets/plugins/metismenu/mm-vertical.css">
   <link rel="stylesheet" type="text/css" href="<?= BASE_URL ?>/assets/plugins/simplebar/css/simplebar.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/chat.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

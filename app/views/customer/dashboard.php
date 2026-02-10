@@ -46,9 +46,7 @@ endif; ?>
               <div class="position-relative">
                 <img src="<?= htmlspecialchars($photo) ?>" width="80" height="80"
                      class="rounded-circle border border-3 border-white shadow-sm">
-                <div class="position-absolute bottom-0 end-0 bg-success rounded-circle p-1 border border-2 border-white">
-                  <i class="ti ti-circle-check text-white" style="font-size: 12px;"></i>
-                </div>
+                
               </div>
               <div class="flex-grow-1">
                 <p class="mb-1 text small">Selamat datang kembali di BookStar 👋</p>
@@ -169,7 +167,7 @@ endif; ?>
         <h5 class="fw-bold mb-4">Akses Cepat</h5>
         <div class="row g-3">
           <div class="col-md-4">
-            <a href="<?= BASE_URL ?>/?c=customer&m=cart" class="text-decoration-none">
+            <a href="<?= BASE_URL ?>/?c=cart&m=index" class="text-decoration-none">
               <div class="card border-0 shadow-sm rounded-4 h-100 hover-lift">
                 <div class="card-body p-4">
                   <div class="d-flex align-items-center gap-3">
@@ -187,7 +185,7 @@ endif; ?>
           </div>
           
           <div class="col-md-4">
-            <a href="<?= BASE_URL ?>/?c=customer&m=orders" class="text-decoration-none">
+            <a href="<?= BASE_URL ?>/?c=customerOrder&m=index" class="text-decoration-none">
               <div class="card border-0 shadow-sm rounded-4 h-100 hover-lift">
                 <div class="card-body p-4">
                   <div class="d-flex align-items-center gap-3">
@@ -205,7 +203,7 @@ endif; ?>
           </div>
           
           <div class="col-md-4">
-            <a href="<?= BASE_URL ?>/?c=customer&m=chat" class="text-decoration-none">
+            <a href="<?= BASE_URL ?>/?c=customerChat&m=index" class="text-decoration-none">
               <div class="card border-0 shadow-sm rounded-4 h-100 hover-lift">
                 <div class="card-body p-4">
                   <div class="d-flex align-items-center gap-3">

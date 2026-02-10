@@ -3,14 +3,11 @@
 require_once APP_PATH . '/core/auth.php';
 require_once APP_PATH . '/models/UserModel.php';
 require_once APP_PATH . '/models/ProductModel.php';
-require_once APP_PATH . '/models/AdminDashboardModel.php';
 
 class AdminController
 {
     private $userModel;
     private $productModel;
-    private $dashboardModel;
-
     public function __construct()
     {
         Auth::check();
@@ -18,27 +15,28 @@ class AdminController
 
         $this->userModel = new UserModel();
         $this->productModel = new ProductModel();
-        $this->dashboardModel = new AdminDashboardModel();
     }
 
 
     public function dashboard()
-{
-    $data = [
-        'totalUsers'     => $this->dashboardModel->totalUsers(),
-        'totalSellers'   => $this->dashboardModel->totalSellers(),
-        'totalCustomers' => $this->dashboardModel->totalCustomers(),
-        'totalProducts'  => $this->dashboardModel->totalProducts(),
-        'totalOrders'    => $this->dashboardModel->totalOrders(),
-        'totalRevenue'   => $this->dashboardModel->totalRevenue(),
+    {
+        $stats = $this->userModel->getDashboardStats(); // query DB di model
+        $recentOrders = $this->userModel->getRecentOrders();
+        $pendingOrders = $this->userModel->getPendingOrders();
+        $ordersChart = $this->userModel->getOrdersPerMonth();
+        $userStats = $this->userModel->getUserStats();
 
-        'recentOrders'   => $this->dashboardModel->recentOrders(),
-        'pendingOrders'  => $this->dashboardModel->pendingOrders(),
-        'ordersChart'    => $this->dashboardModel->ordersPerMonth()
-    ];
+        $data = array_merge($stats, [
+            'recentOrders'  => $recentOrders,
+            'pendingOrders' => $pendingOrders,
+            'ordersChart'   => $ordersChart,
+            'userStats'     => $userStats
+        ]);
 
-    require APP_PATH . '/views/admin/dashboard.php';
-}
+        require APP_PATH . '/views/admin/dashboard.php';
+    }
+
+
 
 
     public function faq()
@@ -113,9 +111,6 @@ class AdminController
         header("Location: ?c=admin&m=profile");
         exit;
     }
-
-
-
 
     /* ===================== CUSTOMER ===================== */
     public function customer()
@@ -416,7 +411,7 @@ class AdminController
                 APP_PATH . '/../public/uploads/qris/' . $qrisName
             );
         }
-
+        
         $this->userModel->createSeller([
             'name'        => trim($_POST['name']),
             'email'       => trim($_POST['email']),

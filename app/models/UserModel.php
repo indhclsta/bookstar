@@ -77,6 +77,9 @@ class UserModel
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
+        $noRekening = trim($data['no_rekening'] ?? '');
+        $noRekening = $noRekening === '' ? null : $noRekening;
+
         return $stmt->execute([
             $data['role_id'],
             $data['name'],
@@ -85,7 +88,7 @@ class UserModel
             password_hash($data['password'], PASSWORD_DEFAULT),
             $data['nik'],
             $data['address'],
-            $data['no_rekening'] ?? null,
+            $noRekening,
             $data['qris_image'] ?? null
         ]);
     }
@@ -324,12 +327,16 @@ class UserModel
 
     public function createSeller($data)
     {
+        // ✅ Normalisasi no_rekening (kosong → NULL)
+        $noRekening = trim($data['no_rekening'] ?? '');
+        $noRekening = $noRekening === '' ? null : $noRekening;
+
         $stmt = $this->db->prepare("
-            INSERT INTO users 
-            (name, email, no_tlp, password, role_id, nik, address, no_rekening, qris_image, photo, is_online, created_at)
-            VALUES
-            (:name, :email, :no_tlp, :password, 2, :nik, :address, :no_rekening, :qris_image, :photo, 0, NOW())
-        ");
+        INSERT INTO users 
+        (name, email, no_tlp, password, role_id, nik, address, no_rekening, qris_image, photo, is_online, created_at)
+        VALUES
+        (:name, :email, :no_tlp, :password, 2, :nik, :address, :no_rekening, :qris_image, :photo, 0, NOW())
+    ");
 
         return $stmt->execute([
             ':name'        => $data['name'],
@@ -338,11 +345,12 @@ class UserModel
             ':password'    => $data['password'],
             ':nik'         => $data['nik'],
             ':address'     => $data['address'],
-            ':no_rekening' => $data['no_rekening'],
-            ':qris_image'  => $data['qris_image'],
-            ':photo'       => $data['photo']
+            ':no_rekening' => $noRekening,      // 🔥 ini kuncinya
+            ':qris_image'  => $data['qris_image'] ?? null,
+            ':photo'       => $data['photo'] ?? null
         ]);
     }
+
 
     public function emailExists($email, $excludeId = null)
     {
@@ -523,22 +531,24 @@ class UserModel
 
     public function updateProfile($id, $data)
     {
-        $fields = [
-            'name'        => $data['name'],
-            'email'       => $data['email'],
-            'no_tlp'      => $data['no_tlp'],
-            'nik'         => $data['nik'],
-            'address'     => $data['address'],
-            'no_rekening' => $data['no_rekening'] ?? null,
-            'qris_image'  => $data['qris_image'] ?? null
-        ];
+        $fields = [];
 
-        if (!empty($data['password'])) {
-            $fields['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        /* ================= BASIC ================= */
+        if (isset($data['name'])) {
+            $fields['name'] = $data['name'];
         }
 
-        if (!empty($data['photo'])) {
-            $fields['photo'] = $data['photo'];
+        if (isset($data['email'])) {
+            $fields['email'] = $data['email'];
+        }
+
+        /* ================= OPTIONAL ================= */
+        if (!empty($data['nik'])) {
+            $fields['nik'] = $data['nik'];
+        }
+
+        if (!empty($data['address'])) {
+            $fields['address'] = $data['address'];
         }
 
         if (!empty($data['no_tlp'])) {
@@ -549,16 +559,43 @@ class UserModel
             $fields['no_tlp'] = $data['no_tlp'];
         }
 
-        $set = implode(', ', array_map(fn($k) => "$k = :$k", array_keys($fields)));
+        if (!empty($data['no_rekening'])) {
+            $fields['no_rekening'] = $data['no_rekening'];
+        }
+
+        if (!empty($data['qris_image'])) {
+            $fields['qris_image'] = $data['qris_image'];
+        }
+
+        if (!empty($data['password'])) {
+            $fields['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        }
+
+        if (!empty($data['photo'])) {
+            $fields['photo'] = $data['photo'];
+        }
+
+        /* ================= SAFETY ================= */
+        if (empty($fields)) {
+            return false;
+        }
+
+        $set = implode(', ', array_map(
+            fn($k) => "$k = :$k",
+            array_keys($fields)
+        ));
+
         $stmt = $this->db->prepare("UPDATE users SET $set WHERE id = :id");
 
         foreach ($fields as $key => $value) {
             $stmt->bindValue(":$key", $value);
         }
-        $stmt->bindValue(':id', $id);
+
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
         return $stmt->execute();
     }
+
     public function getUserPhoto($userId)
     {
         $stmt = $this->db->prepare("
@@ -585,33 +622,33 @@ class UserModel
     }
 
     public function getTodaySales($sellerId)
-{
-    $stmt = $this->db->prepare("
+    {
+        $stmt = $this->db->prepare("
         SELECT COALESCE(SUM(total_price),0) 
         FROM orders
         WHERE seller_id = ?
         AND DATE(created_at) = CURDATE()
         AND approval_status = 'approved'
     ");
-    $stmt->execute([$sellerId]);
-    return $stmt->fetchColumn();
-}
+        $stmt->execute([$sellerId]);
+        return $stmt->fetchColumn();
+    }
 
-public function getOrderStatusStats($sellerId)
-{
-    $stmt = $this->db->prepare("
+    public function getOrderStatusStats($sellerId)
+    {
+        $stmt = $this->db->prepare("
         SELECT approval_status, COUNT(*) as total
         FROM orders
         WHERE seller_id = ?
         GROUP BY approval_status
     ");
-    $stmt->execute([$sellerId]);
-    return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-}
+        $stmt->execute([$sellerId]);
+        return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+    }
 
-public function getMonthlySales($sellerId)
-{
-    $stmt = $this->db->prepare("
+    public function getMonthlySales($sellerId)
+    {
+        $stmt = $this->db->prepare("
         SELECT MONTH(created_at) as bulan, SUM(total_price) as total
         FROM orders
         WHERE seller_id = ?
@@ -620,52 +657,168 @@ public function getMonthlySales($sellerId)
         GROUP BY MONTH(created_at)
         ORDER BY bulan
     ");
-    $stmt->execute([$sellerId]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-public function getCustomerDashboardStats($customerId)
-{
-    // total pesanan
-    $stmt = $this->db->prepare("
+        $stmt->execute([$sellerId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function getCustomerDashboardStats($customerId)
+    {
+        // total pesanan
+        $stmt = $this->db->prepare("
         SELECT COUNT(*) FROM orders 
         WHERE customer_id = ?
     ");
-    $stmt->execute([$customerId]);
-    $totalOrders = $stmt->fetchColumn();
+        $stmt->execute([$customerId]);
+        $totalOrders = $stmt->fetchColumn();
 
-    // pesanan pending
-    $stmt = $this->db->prepare("
+        // pesanan pending
+        $stmt = $this->db->prepare("
         SELECT COUNT(*) FROM orders 
         WHERE customer_id = ? AND approval_status = 'pending'
     ");
-    $stmt->execute([$customerId]);
-    $pendingOrders = $stmt->fetchColumn();
+        $stmt->execute([$customerId]);
+        $pendingOrders = $stmt->fetchColumn();
 
-    // pesanan selesai (approved)
-    $stmt = $this->db->prepare("
+        // pesanan selesai (approved)
+        $stmt = $this->db->prepare("
         SELECT COUNT(*) FROM orders 
         WHERE customer_id = ? AND approval_status = 'approved'
     ");
-    $stmt->execute([$customerId]);
-    $completedOrders = $stmt->fetchColumn();
+        $stmt->execute([$customerId]);
+        $completedOrders = $stmt->fetchColumn();
 
-    // total item di cart
-    $stmt = $this->db->prepare("
+        // total item di cart
+        $stmt = $this->db->prepare("
         SELECT COALESCE(SUM(quantity),0)
         FROM carts
         WHERE user_id = ?
     ");
-    $stmt->execute([$customerId]);
-    $cartItems = $stmt->fetchColumn();
+        $stmt->execute([$customerId]);
+        $cartItems = $stmt->fetchColumn();
 
-    return [
-        'total_orders'     => $totalOrders,
-        'pending_orders'   => $pendingOrders,
-        'completed_orders' => $completedOrders,
-        'cart_items'       => $cartItems
-    ];
-}
+        return [
+            'total_orders'     => $totalOrders,
+            'pending_orders'   => $pendingOrders,
+            'completed_orders' => $completedOrders,
+            'cart_items'       => $cartItems
+        ];
+    }
+    /* ===========================
+   DASHBOARD ADMIN
+=========================== */
+
+    public function getDashboardStats()
+    {
+        $stats = [];
+
+        // Total Users (semua role non-deleted)
+        $stmt = $this->db->prepare("SELECT COUNT(*) AS totalUsers FROM users WHERE is_deleted = 0");
+        $stmt->execute();
+        $stats['totalUsers'] = $stmt->fetch(PDO::FETCH_ASSOC)['totalUsers'];
+
+        // Total Sellers
+        $stmt = $this->db->prepare("SELECT COUNT(*) AS totalSellers FROM users WHERE role_id = 2 AND is_deleted = 0");
+        $stmt->execute();
+        $stats['totalSellers'] = $stmt->fetch(PDO::FETCH_ASSOC)['totalSellers'];
+
+        // Total Customers
+        $stmt = $this->db->prepare("SELECT COUNT(*) AS totalCustomers FROM users WHERE role_id = 3 AND is_deleted = 0");
+        $stmt->execute();
+        $stats['totalCustomers'] = $stmt->fetch(PDO::FETCH_ASSOC)['totalCustomers'];
+
+        // Total Orders
+        $stmt = $this->db->prepare("SELECT COUNT(*) AS totalOrders FROM orders");
+        $stmt->execute();
+        $stats['totalOrders'] = $stmt->fetch(PDO::FETCH_ASSOC)['totalOrders'];
+
+        // Total Products
+        $stmt = $this->db->prepare("SELECT COUNT(*) AS totalProducts FROM products WHERE is_active = 1");
+        $stmt->execute();
+        $stats['totalProducts'] = $stmt->fetch(PDO::FETCH_ASSOC)['totalProducts'];
+
+        // Total Revenue
+        $stmt = $this->db->prepare("
+        SELECT IFNULL(SUM(total_price), 0) AS totalRevenue
+        FROM orders
+        WHERE approval_status = 'approved' AND order_status IN ('paid','shipped')
+    ");
+        $stmt->execute();
+        $stats['totalRevenue'] = $stmt->fetch(PDO::FETCH_ASSOC)['totalRevenue'];
+
+        return $stats;
+    }
 
 
+    public function getRecentOrders($limit = 5)
+    {
+        $stmt = $this->db->prepare("
+        SELECT o.*, u.name as customer
+        FROM orders o
+        JOIN users u ON o.customer_id = u.id
+        ORDER BY o.created_at DESC
+        LIMIT ?
+    ");
+        $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
+    public function getPendingOrders($limit = 5)
+    {
+        $stmt = $this->db->prepare("
+        SELECT o.*, u.name as customer
+        FROM orders o
+        JOIN users u ON o.customer_id = u.id
+        WHERE o.approval_status = 'pending'
+        ORDER BY o.created_at DESC
+        LIMIT ?
+    ");
+        $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getOrdersPerMonth()
+    {
+        $stmt = $this->db->prepare("
+        SELECT DATE_FORMAT(created_at, '%b %Y') as month, COUNT(*) as total
+        FROM orders
+        GROUP BY YEAR(created_at), MONTH(created_at)
+        ORDER BY created_at ASC
+    ");
+        $stmt->execute();
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $result = [];
+        foreach ($data as $row) {
+            $result[$row['month']] = (int)$row['total'];
+        }
+
+        return $result;
+    }
+
+    public function getUserStats()
+    {
+        $stmt = $this->db->prepare("
+        SELECT role_id, COUNT(*) as total
+        FROM users
+        WHERE is_deleted = 0
+        GROUP BY role_id
+    ");
+        $stmt->execute();
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $result = [
+            'Admin' => 0,
+            'Seller' => 0,
+            'Customer' => 0
+        ];
+
+        foreach ($data as $row) {
+            if ($row['role_id'] == 1) $result['Admin'] = (int)$row['total'];
+            if ($row['role_id'] == 2) $result['Seller'] = (int)$row['total'];
+            if ($row['role_id'] == 3) $result['Customer'] = (int)$row['total'];
+        }
+
+        return $result;
+    }
 }

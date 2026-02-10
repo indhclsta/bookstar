@@ -8,7 +8,7 @@ require_once APP_PATH . '/models/ProductModel.php';
 class SellerController
 {
     private $userModel;
-    private $productModel;  
+    private $productModel;
 
     public function __construct()
     {
@@ -30,18 +30,18 @@ class SellerController
     }
 
     public function dashboard()
-{
-    $sellerId = $_SESSION['user']['id'];
+    {
+        $sellerId = $_SESSION['user']['id'];
 
-    $todaySales     = $this->userModel->getTodaySales($sellerId);
-    $orderStatus    = $this->userModel->getOrderStatusStats($sellerId);
-    $monthlySales   = $this->userModel->getMonthlySales($sellerId);
+        $todaySales     = $this->userModel->getTodaySales($sellerId);
+        $orderStatus    = $this->userModel->getOrderStatusStats($sellerId);
+        $monthlySales   = $this->userModel->getMonthlySales($sellerId);
 
-    // RECENT PRODUCTS (REAL)
-    $recentProducts = $this->productModel->getRecentProductsBySeller($sellerId, 4);
+        // RECENT PRODUCTS (REAL)
+        $recentProducts = $this->productModel->getRecentProductsBySeller($sellerId, 4);
 
-    require APP_PATH . '/views/seller/dashboard.php';
-}
+        require APP_PATH . '/views/seller/dashboard.php';
+    }
 
 
 
@@ -90,6 +90,7 @@ class SellerController
             'nik'         => trim($_POST['nik'] ?? ''),
             'address'     => trim($_POST['address'] ?? ''),
             'no_rekening' => trim($_POST['no_rekening'] ?? ''),
+            'no_tlp' => trim($_POST['no_tlp'] ?? ''),
             'password'    => !empty($_POST['password']) ? $_POST['password'] : null,
         ];
 

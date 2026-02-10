@@ -1,6 +1,7 @@
 <?php
 require_once APP_PATH . '/core/auth.php';
 require_once APP_PATH . '/models/ChatModel.php';
+require_once APP_PATH . '/models/UserModel.php';
 
 class CustomerChatController
 {
@@ -37,7 +38,6 @@ class CustomerChatController
         }
 
         // Ambil foto customer dari database
-        require_once APP_PATH . '/models/UserModel.php';
         $userModel = new UserModel();
         $customerPhoto = $userModel->getUserPhoto($customerId);
         
