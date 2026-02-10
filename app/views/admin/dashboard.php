@@ -84,8 +84,7 @@
         ['Sellers', $data['totalSellers'] ?? 0, 'success', 'fas fa-store'],
         ['Customers', $data['totalCustomers'] ?? 0, 'info', 'fas fa-user-tag'],
         ['Products', $data['totalProducts'] ?? 0, 'warning', 'fas fa-book'],
-        ['Orders', $data['totalOrders'] ?? 0, 'danger', 'fas fa-shopping-cart'],
-        ['Revenue', 'Rp ' . number_format($data['totalRevenue'] ?? 0, 0, ',', '.'), 'purple', 'fas fa-money-bill-wave'],
+        ['Orders', $data['totalOrders'] ?? 0, 'danger', 'fas fa-shopping-cart']
       ];
       ?>
       <?php foreach ($cards as $card): ?>

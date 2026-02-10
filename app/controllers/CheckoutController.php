@@ -3,12 +3,14 @@ require_once APP_PATH . '/core/auth.php';
 require_once APP_PATH . '/models/OrderModel.php';
 require_once APP_PATH . '/models/OrderItemModel.php';
 require_once APP_PATH . '/models/UserModel.php';
+require_once APP_PATH . '/models/NotificationModel.php';
 
 class CheckoutController
 {
     private $orderModel;
     private $orderItemModel;
     private $userModel;
+    private $notificationModel;
 
     public function __construct()
     {
@@ -18,6 +20,7 @@ class CheckoutController
         $this->orderModel     = new OrderModel();
         $this->orderItemModel = new OrderItemModel();
         $this->userModel      = new UserModel();
+        $this->notificationModel = new NotificationModel();
     }
 
     public function index()
@@ -85,19 +88,29 @@ class CheckoutController
 
         // 🔥 SIMPAN ORDER DENGAN CHECKOUT CODE
         $orderId = $this->orderModel->create([
-            'order_code'       => 'ORD-' . strtoupper(uniqid()),
-            'checkout_code'    => $checkoutCode,
-            'customer_id'      => $customerId,
-            'seller_id'        => $sellerId,
-            'total_price'      => $totalPrice,
-            'payment_method'   => $paymentMethod,
-            'payment_proof'    => $paymentProof,
-            'shipping_address' => $_SESSION['user']['address'] ?? '-',
-            'order_status'     => 'pending',
-            'approval_status'  => 'pending'
-        ]);
+    'order_code'       => 'ORD-' . strtoupper(uniqid()),
+    'checkout_code'    => $checkoutCode,
+    'customer_id'      => $customerId,
+    'seller_id'        => $sellerId,
+    'total_price'      => $totalPrice,
+    'payment_method'   => $paymentMethod,
+    'payment_proof'    => $paymentProof,
+    'shipping_address' => $_SESSION['user']['address'] ?? '-',
+    'order_status'     => 'pending',
+    'approval_status'  => 'pending'
+]);
 
-        $lastOrderId = $orderId;
+$lastOrderId = $orderId;
+
+// 🔔 NOTIF KE SELLER (INI YANG KURANG)
+$this->notificationModel->create([
+    'user_id' => $sellerId,
+    'title'   => 'Pesanan Baru',
+    'message' => 'Ada pesanan baru dari customer #' . $customerId,
+    'link'    => BASE_URL . '/?c=sellerOrder&m=index',
+    'is_read' => 0
+]);
+
 
         // ================= ORDER ITEMS =================
         foreach ($cartItems as $item) {
@@ -113,6 +126,15 @@ class CheckoutController
         // ================= CLEAR CART =================
         $this->orderModel->clearCartBySeller($customerId, $sellerId);
     }
+    // 🔔 NOTIF KE CUSTOMER - CHECKOUT BERHASIL
+$this->notificationModel->create([
+    'user_id' => $customerId,
+    'title'   => 'Pesanan Berhasil',
+    'message' => 'Pesanan kamu berhasil dibuat dengan kode ' . $checkoutCode,
+    'link'    => BASE_URL . '/?c=invoice&m=show&id=' . $checkoutCode,
+    'is_read' => 0
+]);
+
 
     // 🔥 REDIRECT PAKAI CHECKOUT CODE
     header('Location: ' . BASE_URL . '/?c=invoice&m=show&id=' . $checkoutCode);

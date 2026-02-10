@@ -6,6 +6,18 @@ if (isset($_SESSION['user'])) {
   $cartModel = new CartModel();
   $cartCount = $cartModel->countByUser($_SESSION['user']['id']);
 }
+
+require_once APP_PATH . '/models/NotificationModel.php';
+
+$notifications = [];
+$unreadCount  = 0;
+
+if (isset($_SESSION['user'])) {
+    $notificationModel = new NotificationModel();
+    $notifications = $notificationModel->getByUser($_SESSION['user']['id'], 5);
+    $unreadCount  = $notificationModel->countUnread($_SESSION['user']['id']);
+}
+
 ?>
 <?php
 $user  = $_SESSION['user'] ?? null;
@@ -194,7 +206,10 @@ $photo = !empty($user['photo'])
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" data-bs-auto-close="outside"
                 data-bs-toggle="dropdown" href="javascript:;"><i class="material-icons-outlined">notifications</i>
-                <span class="badge-notify">5</span>
+                <?php if ($unreadCount > 0): ?>
+    <span class="badge-notify"><?= $unreadCount ?></span>
+<?php endif; ?>
+
               </a>
               <div class="dropdown-menu dropdown-notify dropdown-menu-end shadow">
                 <div class="px-3 py-1 d-flex align-items-center justify-content-between border-bottom">
@@ -224,109 +239,40 @@ $photo = !empty($user['photo'])
                   </div>
                 </div>
                 <div class="notify-list">
-                  <div>
-                    <a class="dropdown-item border-bottom py-2" href="javascript:;">
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="">
-                          <img src="https://placehold.co/110x110/png" class="rounded-circle" width="45" height="45" alt="">
-                        </div>
-                        <div class="">
-                          <h5 class="notify-title">Congratulations Jhon</h5>
-                          <p class="mb-0 notify-desc">Many congtars jhon. You have won the gifts.</p>
-                          <p class="mb-0 notify-time">Today</p>
-                        </div>
-                        <div class="notify-close position-absolute end-0 me-3">
-                          <i class="material-icons-outlined fs-6">close</i>
-                        </div>
-                      </div>
-                    </a>
-                  </div>
-                  <div>
-                    <a class="dropdown-item border-bottom py-2" href="javascript:;">
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="user-wrapper bg-primary text-primary bg-opacity-10">
-                          <span>RS</span>
-                        </div>
-                        <div class="">
-                          <h5 class="notify-title">New Account Created</h5>
-                          <p class="mb-0 notify-desc">From USA an user has registered.</p>
-                          <p class="mb-0 notify-time">Yesterday</p>
-                        </div>
-                        <div class="notify-close position-absolute end-0 me-3">
-                          <i class="material-icons-outlined fs-6">close</i>
-                        </div>
-                      </div>
-                    </a>
-                  </div>
-                  <div>
-                    <a class="dropdown-item border-bottom py-2" href="javascript:;">
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="">
-                          <img src="<?= BASE_URL ?>/assets/images/apps/13.png" class="rounded-circle" width="45" height="45" alt="">
-                        </div>
-                        <div class="">
-                          <h5 class="notify-title">Payment Recived</h5>
-                          <p class="mb-0 notify-desc">New payment recived successfully</p>
-                          <p class="mb-0 notify-time">1d ago</p>
-                        </div>
-                        <div class="notify-close position-absolute end-0 me-3">
-                          <i class="material-icons-outlined fs-6">close</i>
-                        </div>
-                      </div>
-                    </a>
-                  </div>
-                  <div>
-                    <a class="dropdown-item border-bottom py-2" href="javascript:;">
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="">
-                          <img src="<?= BASE_URL ?>/assets/images/apps/14.png" class="rounded-circle" width="45" height="45" alt="">
-                        </div>
-                        <div class="">
-                          <h5 class="notify-title">New Order Recived</h5>
-                          <p class="mb-0 notify-desc">Recived new order from michle</p>
-                          <p class="mb-0 notify-time">2:15 AM</p>
-                        </div>
-                        <div class="notify-close position-absolute end-0 me-3">
-                          <i class="material-icons-outlined fs-6">close</i>
-                        </div>
-                      </div>
-                    </a>
-                  </div>
-                  <div>
-                    <a class="dropdown-item border-bottom py-2" href="javascript:;">
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="">
-                          <img src="https://placehold.co/110x110/png" class="rounded-circle" width="45" height="45" alt="">
-                        </div>
-                        <div class="">
-                          <h5 class="notify-title">Congratulations Jhon</h5>
-                          <p class="mb-0 notify-desc">Many congtars jhon. You have won the gifts.</p>
-                          <p class="mb-0 notify-time">Today</p>
-                        </div>
-                        <div class="notify-close position-absolute end-0 me-3">
-                          <i class="material-icons-outlined fs-6">close</i>
-                        </div>
-                      </div>
-                    </a>
-                  </div>
-                  <div>
-                    <a class="dropdown-item py-2" href="javascript:;">
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="user-wrapper bg-danger text-danger bg-opacity-10">
-                          <span>PK</span>
-                        </div>
-                        <div class="">
-                          <h5 class="notify-title">New Account Created</h5>
-                          <p class="mb-0 notify-desc">From USA an user has registered.</p>
-                          <p class="mb-0 notify-time">Yesterday</p>
-                        </div>
-                        <div class="notify-close position-absolute end-0 me-3">
-                          <i class="material-icons-outlined fs-6">close</i>
-                        </div>
-                      </div>
-                    </a>
-                  </div>
+
+<?php if (empty($notifications)): ?>
+    <div class="text-center text py-3 small">
+        Tidak ada notifikasi
+    </div>
+<?php else: ?>
+    <?php foreach ($notifications as $notif): ?>
+        <a class="dropdown-item border-bottom py-2"
+           href="<?= $notif['link'] ?>">
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="user-wrapper bg-primary text-primary bg-opacity-10">
+                    <span><i class="material-icons-outlined">notifications</i></span>
                 </div>
+
+                <div class="<?= $notif['is_read'] ? '' : 'fw-bold' ?>">
+                    <h6 class="notify-title mb-0">
+                        <?= htmlspecialchars($notif['title']) ?>
+                    </h6>
+                    <p class="mb-0 notify-desc small">
+                        <?= htmlspecialchars($notif['message']) ?>
+                    </p>
+                    <p class="mb-0 notify-time small text">
+                        <?= date('d M Y H:i', strtotime($notif['created_at'])) ?>
+                    </p>
+                </div>
+            </div>
+
+        </a>
+    <?php endforeach; ?>
+<?php endif; ?>
+
+</div>
+
               </div>
             </li>
 

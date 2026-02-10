@@ -81,31 +81,30 @@ VALUES (?,?,?,?,?,?,?,?,?,?)
         $stmt->execute([$customerId, $sellerId]);
     }
 
-    // GET CART GROUPED BY SELLER
     public function getCartGroupedBySeller($customerId)
-    {
-        $stmt = $this->db->prepare("
-            SELECT p.seller_id, c.product_id, c.quantity, p.name, p.price
-            FROM carts c
-            JOIN products p ON c.product_id = p.id
-            WHERE c.user_id=?
-        ");
-        $stmt->execute([$customerId]);
-        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+{
+    $stmt = $this->db->prepare("
+        SELECT 
+            p.seller_id AS seller_user_id,
+            c.product_id,
+            c.quantity,
+            p.name,
+            p.price
+        FROM carts c
+        JOIN products p ON c.product_id = p.id
+        WHERE c.user_id = ?
+    ");
+    $stmt->execute([$customerId]);
+    $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $grouped = [];
-        foreach ($items as $item) {
-            $grouped[$item['seller_id']][] = $item;
-        }
-        return $grouped;
+    $grouped = [];
+    foreach ($items as $item) {
+        $grouped[$item['seller_user_id']][] = $item;
     }
+    return $grouped;
+}
 
-    // ADD NOTIFICATION
-    public function addNotification($userId, $message)
-    {
-        $stmt = $this->db->prepare("INSERT INTO notifications (user_id, message) VALUES (?,?)");
-        $stmt->execute([$userId, $message]);
-    }
+
 
     // GET ORDERS WITH ITEMS FOR CUSTOMER
     public function getOrdersWithItems($customerId)

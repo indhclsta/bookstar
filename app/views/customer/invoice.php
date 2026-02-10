@@ -204,8 +204,8 @@
                     <div>Order has been received and is being processed</div>
                 </div>
                 <div class="mt-2">
-                    <a href="<?= BASE_URL ?>/?c=cart&m=order" class="btn btn-sm btn-outline-secondary me-2">
-                        <i class="bi bi-arrow-left me-1"></i>Back to Orders
+                    <a href="<?= BASE_URL ?>/?c=customerOrder&m=index" class="btn btn-sm btn-outline-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>See Order Status
                     </a>
                 </div>
             </div>

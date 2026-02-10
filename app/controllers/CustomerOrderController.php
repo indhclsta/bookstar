@@ -2,6 +2,8 @@
 require_once APP_PATH . '/core/auth.php';
 require_once APP_PATH . '/models/OrderModel.php';
 require_once APP_PATH . '/models/OrderItemModel.php';
+require_once APP_PATH . '/models/NotificationModel.php';
+
 
 class CustomerOrderController
 {
@@ -35,62 +37,72 @@ class CustomerOrderController
         require APP_PATH . '/views/customer/invoice.php';
     }
     public function checkout()
-    {
-        Auth::check();
-        Auth::role('customer');
+{
+    Auth::check();
+    Auth::role('customer');
 
-        $customerId = $_SESSION['user']['id'];
+    $customerId = $_SESSION['user']['id'];
 
-        // ambil cart yang sudah dikelompokkan per seller
-        $groupedCart = $this->orderModel->getCartGroupedBySeller($customerId);
+    $groupedCart = $this->orderModel->getCartGroupedBySeller($customerId);
 
-        foreach ($groupedCart as $sellerId => $items) {
+    foreach ($groupedCart as $sellerId => $items) {
 
-            $uploadedFileName = null;
+        $uploadedFileName = null;
 
-            if (!empty($_FILES['payment_proof']['name'])) {
-                $ext = pathinfo($_FILES['payment_proof']['name'], PATHINFO_EXTENSION);
-                $uploadedFileName = 'payment_' . uniqid() . '.' . $ext;
+        if (!empty($_FILES['payment_proof']['name'])) {
+            $ext = pathinfo($_FILES['payment_proof']['name'], PATHINFO_EXTENSION);
+            $uploadedFileName = 'payment_' . uniqid() . '.' . $ext;
 
-                move_uploaded_file(
-                    $_FILES['payment_proof']['tmp_name'],
-                    APP_PATH . '/../public/uploads/payments/' . $uploadedFileName
-                );
-            }
-
-
-            $orderData = [
-                'order_code' => 'ORD' . strtoupper(uniqid()), // 🔥 PINDAH KE SINI
-                'customer_id' => $customerId,
-                'seller_id' => $sellerId,
-                'total_price' => array_sum(array_map(
-                    fn($i) => $i['price'] * $i['quantity'],
-                    $items
-                )),
-                'payment_method' => $_POST['payment_method'],
-                'payment_proof' => $uploadedFileName,
-                'shipping_address' => $_POST['shipping_address'],
-                'order_status' => 'pending',
-                'approval_status' => 'pending'
-            ];
-
-            $orderId = $this->orderModel->create($orderData);
-
-            foreach ($items as $item) {
-                $this->orderModel->addOrderItem(
-                    $orderId,
-                    $item['product_id'],
-                    $item['name'],
-                    $item['quantity'],
-                    $item['price']
-                );
-            }
-
-            // hapus cart seller ini
-            $this->orderModel->clearCartBySeller($customerId, $sellerId);
+            move_uploaded_file(
+                $_FILES['payment_proof']['tmp_name'],
+                APP_PATH . '/../public/uploads/payments/' . $uploadedFileName
+            );
         }
 
-        $_SESSION['success'] = 'Pesanan berhasil dibuat';
-        header("Location: " . BASE_URL . "/?c=customerOrder&m=index");
+        $orderData = [
+            'order_code' => 'ORD' . strtoupper(uniqid()),
+            'customer_id' => $customerId,
+            'seller_id' => $sellerId,
+            'total_price' => array_sum(array_map(
+                fn($i) => $i['price'] * $i['quantity'],
+                $items
+            )),
+            'payment_method' => $_POST['payment_method'],
+            'payment_proof' => $uploadedFileName,
+            'shipping_address' => $_POST['shipping_address'],
+            'order_status' => 'pending',
+            'approval_status' => 'pending'
+        ];
+
+        // ✅ ORDER DIBUAT
+        $orderId = $this->orderModel->create($orderData);
+
+        // 🔔 NOTIFIKASI KE SELLER (INI POSISINYA)
+        $notificationModel = new NotificationModel();
+        $notificationModel->create([
+            'user_id' => $sellerId,
+            'title'   => 'Pesanan Baru',
+            'message' => 'Ada pesanan baru dari customer #' . $customerId,
+            'link'    => BASE_URL . '/?c=sellerOrder&m=index'
+        ]);
+
+        // ITEM ORDER
+        foreach ($items as $item) {
+            $this->orderModel->addOrderItem(
+                $orderId,
+                $item['product_id'],
+                $item['name'],
+                $item['quantity'],
+                $item['price']
+            );
+        }
+
+        // HAPUS CART PER SELLER
+        $this->orderModel->clearCartBySeller($customerId, $sellerId);
     }
+
+    $_SESSION['success'] = 'Pesanan berhasil dibuat';
+    header("Location: " . BASE_URL . "/?c=customerOrder&m=index");
+}
+
 }
