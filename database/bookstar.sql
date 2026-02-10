@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 10, 2026 at 03:56 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Waktu pembuatan: 10 Feb 2026 pada 06.14
+-- Versi server: 10.4.32-MariaDB
+-- Versi PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -24,7 +24,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `carts`
+-- Struktur dari tabel `carts`
 --
 
 CREATE TABLE `carts` (
@@ -36,7 +36,7 @@ CREATE TABLE `carts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `carts`
+-- Dumping data untuk tabel `carts`
 --
 
 INSERT INTO `carts` (`id`, `user_id`, `product_id`, `quantity`, `created_at`) VALUES
@@ -45,7 +45,7 @@ INSERT INTO `carts` (`id`, `user_id`, `product_id`, `quantity`, `created_at`) VA
 -- --------------------------------------------------------
 
 --
--- Table structure for table `categories`
+-- Struktur dari tabel `categories`
 --
 
 CREATE TABLE `categories` (
@@ -58,7 +58,7 @@ CREATE TABLE `categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `categories`
+-- Dumping data untuk tabel `categories`
 --
 
 INSERT INTO `categories` (`id`, `name`, `created_by`, `owner_role`, `created_at`, `is_active`) VALUES
@@ -78,7 +78,7 @@ INSERT INTO `categories` (`id`, `name`, `created_by`, `owner_role`, `created_at`
 -- --------------------------------------------------------
 
 --
--- Table structure for table `chats`
+-- Struktur dari tabel `chats`
 --
 
 CREATE TABLE `chats` (
@@ -90,7 +90,7 @@ CREATE TABLE `chats` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `chats`
+-- Dumping data untuk tabel `chats`
 --
 
 INSERT INTO `chats` (`id`, `sender_id`, `receiver_id`, `message`, `created_at`) VALUES
@@ -107,7 +107,7 @@ INSERT INTO `chats` (`id`, `sender_id`, `receiver_id`, `message`, `created_at`) 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `faq`
+-- Struktur dari tabel `faq`
 --
 
 CREATE TABLE `faq` (
@@ -120,21 +120,32 @@ CREATE TABLE `faq` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `notifications`
+-- Struktur dari tabel `notifications`
 --
 
 CREATE TABLE `notifications` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `message` text NOT NULL,
-  `is_read` tinyint(1) DEFAULT 0,
+  `title` varchar(100) DEFAULT NULL,
+  `message` text DEFAULT NULL,
+  `link` varchar(255) DEFAULT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `notifications`
+--
+
+INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `link`, `is_read`, `created_at`) VALUES
+(1, 7, 'Pesanan Baru', 'Ada pesanan baru dari customer #8', 'http://localhost/bookstar/public/?c=sellerOrder&m=index', 1, '2026-02-10 04:12:28'),
+(2, 13, 'Pesanan Baru', 'Ada pesanan baru dari customer #8', 'http://localhost/bookstar/public/?c=sellerOrder&m=index', 0, '2026-02-10 04:26:04'),
+(3, 8, 'Pesanan Berhasil', 'Pesanan kamu berhasil dibuat dengan kode CHK-698AB35CCBDBA', 'http://localhost/bookstar/public/?c=invoice&m=show&id=CHK-698AB35CCBDBA', 0, '2026-02-10 04:26:04');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `orders`
+-- Struktur dari tabel `orders`
 --
 
 CREATE TABLE `orders` (
@@ -157,7 +168,7 @@ CREATE TABLE `orders` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `orders`
+-- Dumping data untuk tabel `orders`
 --
 
 INSERT INTO `orders` (`id`, `order_code`, `checkout_code`, `customer_id`, `seller_id`, `total_price`, `payment_method`, `payment_proof`, `approval_status`, `order_status`, `shipping_address`, `tracking_url`, `resi`, `created_at`, `updated_at`, `reject_reason`) VALUES
@@ -197,12 +208,18 @@ INSERT INTO `orders` (`id`, `order_code`, `checkout_code`, `customer_id`, `selle
 (45, 'ORD-6989396A7ECB0', 'CHK-6989396A64CE0', 8, 13, 70000.00, 'qris', 'payment_6989396a65076_1770600810.jpg', 'pending', 'pending', 'bandung', NULL, NULL, '2026-02-09 01:33:30', '2026-02-09 01:33:30', NULL),
 (46, 'ORD-69893A0521AA5', 'CHK-69893A05132FF', 8, 11, 17000.00, 'transfer', 'payment_69893a0513695_1770600965.jpg', 'pending', 'pending', 'bandung', NULL, NULL, '2026-02-09 01:36:05', '2026-02-09 01:36:05', NULL),
 (47, 'ORD-69893A0528682', 'CHK-69893A05132FF', 8, 13, 70000.00, 'transfer', 'payment_69893a0524c76_1770600965.jpg', 'pending', 'pending', 'bandung', NULL, NULL, '2026-02-09 01:36:05', '2026-02-09 01:36:05', NULL),
-(48, 'ORD-698A8582DC628', 'CHK-698A8582D576E', 8, 13, 70000.00, 'qris', 'payment_698a8582d5a5f_1770685826.png', 'pending', 'pending', 'bandung', NULL, NULL, '2026-02-10 01:10:26', '2026-02-10 01:10:26', NULL);
+(48, 'ORD-698A8582DC628', 'CHK-698A8582D576E', 8, 13, 70000.00, 'qris', 'payment_698a8582d5a5f_1770685826.png', 'pending', 'pending', 'bandung', NULL, NULL, '2026-02-10 01:10:26', '2026-02-10 01:10:26', NULL),
+(49, 'ORD-698AA9D916348', 'CHK-698AA9D913EF6', 8, 7, 100000.00, 'transfer', 'payment_698aa9d91408a_1770695129.jpg', 'pending', 'pending', 'bandung', NULL, NULL, '2026-02-10 03:45:29', '2026-02-10 03:45:29', NULL),
+(50, 'ORD-698AAD9CCF27F', 'CHK-698AAD9CCD5DA', 8, 7, 20000.00, 'transfer', 'payment_698aad9ccd863_1770696092.jpg', 'pending', 'pending', 'bandung', NULL, NULL, '2026-02-10 04:01:32', '2026-02-10 04:01:32', NULL),
+(51, 'ORD-698AAF718FE89', 'CHK-698AAF718D657', 8, 7, 20000.00, 'transfer', 'payment_698aaf718d904_1770696561.jpg', 'pending', 'pending', 'bandung', NULL, NULL, '2026-02-10 04:09:21', '2026-02-10 04:09:21', NULL),
+(52, 'ORD-698AAFDC18DD1', 'CHK-698AAFDC182F3', 8, 7, 20000.00, 'transfer', 'payment_698aafdc18358_1770696668.jpg', 'pending', 'pending', 'bandung', NULL, NULL, '2026-02-10 04:11:08', '2026-02-10 04:11:08', NULL),
+(53, 'ORD-698AB02C0C688', 'CHK-698AB02C0A050', 8, 7, 20000.00, 'transfer', 'payment_698ab02c0a25c_1770696748.jpg', 'pending', 'pending', 'bandung', NULL, NULL, '2026-02-10 04:12:28', '2026-02-10 04:12:28', NULL),
+(54, 'ORD-698AB35CCE619', 'CHK-698AB35CCBDBA', 8, 13, 70000.00, 'transfer', 'payment_698ab35ccc058_1770697564.jpg', 'pending', 'pending', 'bandung', NULL, NULL, '2026-02-10 04:26:04', '2026-02-10 04:26:04', NULL);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `order_items`
+-- Struktur dari tabel `order_items`
 --
 
 CREATE TABLE `order_items` (
@@ -215,7 +232,7 @@ CREATE TABLE `order_items` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `order_items`
+-- Dumping data untuk tabel `order_items`
 --
 
 INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `product_title`, `quantity`, `price`) VALUES
@@ -254,12 +271,16 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `product_title`, `qua
 (39, 45, 6, 'Perahu Kertas', 1, 70000.00),
 (40, 46, 4, 'coba', 1, 17000.00),
 (41, 47, 6, 'Perahu Kertas', 1, 70000.00),
-(42, 48, 6, 'Perahu Kertas', 1, 70000.00);
+(42, 48, 6, 'Perahu Kertas', 1, 70000.00),
+(43, 49, 9, 'Perahu Kertas', 1, 100000.00),
+(44, 50, 8, 'Buku Belajar', 1, 20000.00),
+(45, 53, 8, 'Buku Belajar', 1, 20000.00),
+(46, 54, 6, 'Perahu Kertas', 1, 70000.00);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `order_logs`
+-- Struktur dari tabel `order_logs`
 --
 
 CREATE TABLE `order_logs` (
@@ -273,7 +294,7 @@ CREATE TABLE `order_logs` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `password_resets`
+-- Struktur dari tabel `password_resets`
 --
 
 CREATE TABLE `password_resets` (
@@ -287,7 +308,7 @@ CREATE TABLE `password_resets` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `products`
+-- Struktur dari tabel `products`
 --
 
 CREATE TABLE `products` (
@@ -305,7 +326,7 @@ CREATE TABLE `products` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `products`
+-- Dumping data untuk tabel `products`
 --
 
 INSERT INTO `products` (`id`, `seller_id`, `category_id`, `name`, `description`, `price`, `cost_price`, `stock`, `image`, `created_at`, `is_active`) VALUES
@@ -322,7 +343,7 @@ INSERT INTO `products` (`id`, `seller_id`, `category_id`, `name`, `description`,
 -- --------------------------------------------------------
 
 --
--- Table structure for table `roles`
+-- Struktur dari tabel `roles`
 --
 
 CREATE TABLE `roles` (
@@ -331,7 +352,7 @@ CREATE TABLE `roles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `roles`
+-- Dumping data untuk tabel `roles`
 --
 
 INSERT INTO `roles` (`id`, `role_name`) VALUES
@@ -342,7 +363,7 @@ INSERT INTO `roles` (`id`, `role_name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Struktur dari tabel `users`
 --
 
 CREATE TABLE `users` (
@@ -369,15 +390,15 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `users`
+-- Dumping data untuk tabel `users`
 --
 
 INSERT INTO `users` (`id`, `role_id`, `name`, `email`, `no_tlp`, `password`, `nik`, `address`, `no_rekening`, `qris_image`, `is_online`, `is_super_admin`, `created_at`, `updated_at`, `reset_token`, `reset_expired`, `photo`, `status`, `last_activity`, `is_deleted`) VALUES
-(1, 1, 'Indah Callista Ex', 'indahcalistaexcella@gmail.com', NULL, '$2y$10$LNlITW0uDQLG3Lw53S5wVOdbkfNtSoc/ZO2sWrRE4A5DFSy5Jgxbu', '12345678', 'jakarta', NULL, NULL, 0, 0, '2026-01-18 09:35:48', '2026-02-10 02:10:36', NULL, NULL, 'user_1.png', 'aktif', '2026-02-10 09:10:36', 0),
+(1, 1, 'Indah Callista Ex', 'indahcalistaexcella@gmail.com', NULL, '$2y$10$LNlITW0uDQLG3Lw53S5wVOdbkfNtSoc/ZO2sWrRE4A5DFSy5Jgxbu', '12345678', 'jakarta', NULL, NULL, 0, 0, '2026-01-18 09:35:48', '2026-02-10 04:38:09', NULL, NULL, 'user_1.png', 'aktif', '2026-02-10 11:38:09', 0),
 (4, 3, 'Calandra', 'indah.callista26@smk.belajar.id', '12345566785', '$2y$10$iGurJVkR5sm1seubALIdke4iF.MQz5/6LXwxbeR5e9bdNG687EqX2', '1234567854', 'Jakarta', NULL, NULL, 0, 0, '2026-01-18 11:55:19', '2026-01-29 08:18:37', 'c2a094f804450d1f316010f7a82416715c362274ea8ee7dda798629ef6568a3c', '2026-01-29 16:18:37', '696eec8736d00.jpeg', 'aktif', '2026-01-29 13:09:18', 0),
 (6, 2, 'asa', 'asa@gmail.com', NULL, '$2y$10$icw5c.7vZcf7weLp3HJZIe.bKR.w8TBpoXRbDvu8Lf.Ak1OIta/BS', '123456', 'jkt', '4323534635', NULL, 0, 0, '2026-01-20 04:52:46', '2026-01-28 12:32:19', NULL, NULL, 'seller_696f0a1c5b348.png', '', NULL, 0),
-(7, 2, 'AccSellerr', 'seller@gmail.com', '08127613761', '$2y$10$CPmfeGT2lIT57rMa/eFg4uoZEg9b8X8d6FF6dVoAxnbNM1Jjvw/Jy', '123123123', 'sukabumi', '123', 'qris_7_1770689953.png', 0, 0, '2026-01-22 04:58:08', '2026-02-10 02:42:20', NULL, NULL, 'seller_7_1769168799.png', 'aktif', '2026-02-10 09:42:20', 0),
-(8, 3, 'Customeraccount', 'customer@gmail.com', '12345451321', '$2y$10$Q4EfscRcRV8h1oNCRxFiSumqK3uyEvNVzlejvOCINI62IwM7ZGRmC', '12345566785', 'bandung', NULL, NULL, 0, 0, '2026-01-24 02:59:34', '2026-02-10 02:53:02', NULL, NULL, 'customer_8_1769225739.jpg', 'aktif', '2026-02-10 09:53:02', 0),
+(7, 2, 'AccSellerr', 'seller@gmail.com', '08127613761', '$2y$10$CPmfeGT2lIT57rMa/eFg4uoZEg9b8X8d6FF6dVoAxnbNM1Jjvw/Jy', '123123123', 'sukabumi', '123', 'qris_7_1770689953.png', 0, 0, '2026-01-22 04:58:08', '2026-02-10 04:30:31', NULL, NULL, 'seller_7_1769168799.png', 'aktif', '2026-02-10 11:30:31', 0),
+(8, 3, 'Customeraccount', 'customer@gmail.com', '12345451321', '$2y$10$Q4EfscRcRV8h1oNCRxFiSumqK3uyEvNVzlejvOCINI62IwM7ZGRmC', '12345566785', 'bandung', NULL, NULL, 0, 0, '2026-01-24 02:59:34', '2026-02-10 04:34:31', NULL, NULL, 'customer_8_1769225739.jpg', 'aktif', '2026-02-10 11:34:31', 0),
 (9, 3, 'customer', 'csr@gmail.com', '2345654323543', '$2y$10$.6DaVqGfsCuM.Qm4Dn.9QO.wIc.qBuH3SjdsWZLeBo8r1wFEHZZCS', '12345432345', 'jkt', NULL, NULL, 0, 0, '2026-01-24 03:48:05', '2026-01-29 05:43:42', NULL, NULL, 'customer_9_1769228311.jpg', 'aktif', '2026-01-29 12:23:13', 1),
 (10, 2, 'OkeSeller', 'okeseller@gmail.com', NULL, '$2y$10$bygwnB2XLEVYhIRVYIw8POfDK15.Qq0u215NA1lA/2T43.eXAZEP2', '9090909090', 'Surabaya', '', NULL, 0, 0, '2026-01-24 12:45:35', '2026-01-30 04:54:34', NULL, NULL, NULL, 'aktif', '2026-01-30 11:54:34', 0),
 (11, 2, 'sellera', 'dummy@gmail.com', '13221323', '$2y$10$LUY.0HxS4gMDvjYT.ClGwe8YD.aOVAy2Ee2obU.owjr1AmgKfak3.', '', '', '1234567890', 'qris_11_1769400089.jpg', 0, 0, '2026-01-24 13:44:24', '2026-01-29 03:26:18', NULL, NULL, NULL, 'aktif', '2026-01-28 21:40:18', 0),
@@ -392,21 +413,21 @@ INSERT INTO `users` (`id`, `role_id`, `name`, `email`, `no_tlp`, `password`, `ni
 --
 
 --
--- Indexes for table `carts`
+-- Indeks untuk tabel `carts`
 --
 ALTER TABLE `carts`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `user_product` (`user_id`,`product_id`);
 
 --
--- Indexes for table `categories`
+-- Indeks untuk tabel `categories`
 --
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unique_category_active` (`name`,`owner_role`,`is_active`);
 
 --
--- Indexes for table `chats`
+-- Indeks untuk tabel `chats`
 --
 ALTER TABLE `chats`
   ADD PRIMARY KEY (`id`),
@@ -414,20 +435,19 @@ ALTER TABLE `chats`
   ADD KEY `receiver_id` (`receiver_id`);
 
 --
--- Indexes for table `faq`
+-- Indeks untuk tabel `faq`
 --
 ALTER TABLE `faq`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `notifications`
+-- Indeks untuk tabel `notifications`
 --
 ALTER TABLE `notifications`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `orders`
+-- Indeks untuk tabel `orders`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`id`),
@@ -436,7 +456,7 @@ ALTER TABLE `orders`
   ADD KEY `seller_id` (`seller_id`);
 
 --
--- Indexes for table `order_items`
+-- Indeks untuk tabel `order_items`
 --
 ALTER TABLE `order_items`
   ADD PRIMARY KEY (`id`),
@@ -444,20 +464,20 @@ ALTER TABLE `order_items`
   ADD KEY `product_id` (`product_id`);
 
 --
--- Indexes for table `order_logs`
+-- Indeks untuk tabel `order_logs`
 --
 ALTER TABLE `order_logs`
   ADD PRIMARY KEY (`id`),
   ADD KEY `order_id` (`order_id`);
 
 --
--- Indexes for table `password_resets`
+-- Indeks untuk tabel `password_resets`
 --
 ALTER TABLE `password_resets`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `products`
+-- Indeks untuk tabel `products`
 --
 ALTER TABLE `products`
   ADD PRIMARY KEY (`id`),
@@ -465,14 +485,14 @@ ALTER TABLE `products`
   ADD KEY `category_id` (`category_id`);
 
 --
--- Indexes for table `roles`
+-- Indeks untuk tabel `roles`
 --
 ALTER TABLE `roles`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `role_name` (`role_name`);
 
 --
--- Indexes for table `users`
+-- Indeks untuk tabel `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
@@ -483,126 +503,120 @@ ALTER TABLE `users`
   ADD KEY `role_id` (`role_id`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT untuk tabel yang dibuang
 --
 
 --
--- AUTO_INCREMENT for table `carts`
+-- AUTO_INCREMENT untuk tabel `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
 
 --
--- AUTO_INCREMENT for table `categories`
+-- AUTO_INCREMENT untuk tabel `categories`
 --
 ALTER TABLE `categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
--- AUTO_INCREMENT for table `chats`
+-- AUTO_INCREMENT untuk tabel `chats`
 --
 ALTER TABLE `chats`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- AUTO_INCREMENT for table `faq`
+-- AUTO_INCREMENT untuk tabel `faq`
 --
 ALTER TABLE `faq`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `notifications`
+-- AUTO_INCREMENT untuk tabel `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `orders`
+-- AUTO_INCREMENT untuk tabel `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
--- AUTO_INCREMENT for table `order_items`
+-- AUTO_INCREMENT untuk tabel `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
--- AUTO_INCREMENT for table `order_logs`
+-- AUTO_INCREMENT untuk tabel `order_logs`
 --
 ALTER TABLE `order_logs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `password_resets`
+-- AUTO_INCREMENT untuk tabel `password_resets`
 --
 ALTER TABLE `password_resets`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `products`
+-- AUTO_INCREMENT untuk tabel `products`
 --
 ALTER TABLE `products`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- AUTO_INCREMENT for table `roles`
+-- AUTO_INCREMENT untuk tabel `roles`
 --
 ALTER TABLE `roles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `users`
+-- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
--- Constraints for dumped tables
+-- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
 --
 
 --
--- Constraints for table `chats`
+-- Ketidakleluasaan untuk tabel `chats`
 --
 ALTER TABLE `chats`
   ADD CONSTRAINT `chats_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `chats_ibfk_2` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`);
 
 --
--- Constraints for table `notifications`
---
-ALTER TABLE `notifications`
-  ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
-
---
--- Constraints for table `orders`
+-- Ketidakleluasaan untuk tabel `orders`
 --
 ALTER TABLE `orders`
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`seller_id`) REFERENCES `users` (`id`);
 
 --
--- Constraints for table `order_items`
+-- Ketidakleluasaan untuk tabel `order_items`
 --
 ALTER TABLE `order_items`
   ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
 
 --
--- Constraints for table `order_logs`
+-- Ketidakleluasaan untuk tabel `order_logs`
 --
 ALTER TABLE `order_logs`
   ADD CONSTRAINT `order_logs_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`);
 
 --
--- Constraints for table `products`
+-- Ketidakleluasaan untuk tabel `products`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `users`
+-- Ketidakleluasaan untuk tabel `users`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`);
