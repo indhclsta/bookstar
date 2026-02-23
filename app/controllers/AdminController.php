@@ -168,6 +168,7 @@ class AdminController
 
     public function customerDelete()
     {
+        header('Content-Type: application/json');
         $id = $_GET['id'] ?? null;
         if (!$id) {
             echo json_encode([
@@ -357,19 +358,35 @@ class AdminController
             exit;
         }
 
-        // ❗ CEK APAKAH SELLER MASIH PUNYA PRODUK
-        if ($this->userModel->sellerHasProducts($id)) {
-            $_SESSION['error'] = 'Seller tidak bisa dihapus karena masih memiliki produk';
+        $seller = $this->userModel->findById($id);
+
+        if (!$seller || $seller['role_id'] != 2) {
+            $_SESSION['error'] = 'Seller tidak ditemukan';
             header('Location: ' . BASE_URL . '/?c=admin&m=seller');
             exit;
         }
 
-        $deleted = $this->userModel->deleteSellerIfOffline($id);
+        // ❗ Cek seller sedang online
+        if (!empty($seller['is_online']) && $seller['is_online'] == 1) {
+            $_SESSION['error'] = 'Seller sedang online dan tidak bisa dihapus';
+            header('Location: ' . BASE_URL . '/?c=admin&m=seller');
+            exit;
+        }
+
+        // ❗ Cek apakah seller masih punya produk aktif
+        if ($this->userModel->sellerHasProducts($id)) {
+            $_SESSION['error'] = 'Seller tidak bisa dihapus karena masih memiliki produk aktif';
+            header('Location: ' . BASE_URL . '/?c=admin&m=seller');
+            exit;
+        }
+
+        // ✅ Soft delete seller
+        $deleted = $this->userModel->softDeleteSeller($id);
 
         if ($deleted) {
-            $_SESSION['success'] = 'Seller berhasil dihapus';
+            $_SESSION['success'] = 'Seller berhasil dinonaktifkan';
         } else {
-            $_SESSION['error'] = 'Seller sedang online atau tidak ditemukan';
+            $_SESSION['error'] = 'Gagal menghapus seller';
         }
 
         header('Location: ' . BASE_URL . '/?c=admin&m=seller');
@@ -411,7 +428,7 @@ class AdminController
                 APP_PATH . '/../public/uploads/qris/' . $qrisName
             );
         }
-        
+
         $this->userModel->createSeller([
             'name'        => trim($_POST['name']),
             'email'       => trim($_POST['email']),

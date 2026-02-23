@@ -9,6 +9,7 @@ $photo = !empty($user['photo'])
   ? BASE_URL . '/uploads/profile/' . $user['photo']
   : 'https://placehold.co/110x110/png';
 ?>
+<!-- ALERTS -->
 <?php if (!empty($_SESSION['success'])): ?>
   <script>
     Swal.fire({
@@ -45,8 +46,8 @@ endif; ?>
             <div class="d-flex align-items-center gap-4">
               <div class="position-relative">
                 <img src="<?= htmlspecialchars($photo) ?>" width="80" height="80"
-                     class="rounded-circle border border-3 border-white shadow-sm">
-                
+                  class="rounded-circle border border-3 border-white shadow-sm">
+
               </div>
               <div class="flex-grow-1">
                 <p class="mb-1 text small">Selamat datang kembali di BookStar 👋</p>
@@ -138,28 +139,28 @@ endif; ?>
     </div>
 
     <!-- QUICK ACTION CARD WITH IMPROVED DESIGN -->
-<div class="row mt-2">
-  <div class="col-12">
-    <div class="card border-0 rounded-4 overflow-hidden bg-primary text-white">
-      <div class="card-body p-4 p-lg-5">
-        <div class="row align-items-center">
-          <div class="col-lg-8">
-            <h4 class="fw-bold mb-2">Mau belanja lagi? 🛍️</h4>
-            <p class="mb-3 mb-lg-0 opacity-90">
-              Jelajahi koleksi buku terbaru kami. Temukan buku favoritmu dan mulai petualangan membaca yang baru!
-            </p>
-          </div>
-          <div class="col-lg-4 text-lg-end">
-            <a href="<?= BASE_URL ?>/?c=customer&m=order" 
-               class="btn btn-light btn-lg rounded-pill px-4 shadow-sm hover-lift text-primary fw-semibold">
-              <i class="ti ti-shopping-cart me-2"></i>Mulai Belanja
-            </a>
+    <div class="row mt-2">
+      <div class="col-12">
+        <div class="card border-0 rounded-4 overflow-hidden bg-primary text-white">
+          <div class="card-body p-4 p-lg-5">
+            <div class="row align-items-center">
+              <div class="col-lg-8">
+                <h4 class="fw-bold mb-2">Mau belanja lagi? 🛍️</h4>
+                <p class="mb-3 mb-lg-0 opacity-90">
+                  Jelajahi koleksi buku terbaru kami. Temukan buku favoritmu dan mulai petualangan membaca yang baru!
+                </p>
+              </div>
+              <div class="col-lg-4 text-lg-end">
+                <a href="<?= BASE_URL ?>/?c=customer&m=order"
+                  class="btn btn-light btn-lg rounded-pill px-4 shadow-sm hover-lift text-primary fw-semibold">
+                  <i class="ti ti-shopping-cart me-2"></i>Mulai Belanja
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
     <!-- QUICK LINKS SECTION -->
     <div class="row mt-5">
@@ -183,7 +184,7 @@ endif; ?>
               </div>
             </a>
           </div>
-          
+
           <div class="col-md-4">
             <a href="<?= BASE_URL ?>/?c=customerOrder&m=index" class="text-decoration-none">
               <div class="card border-0 shadow-sm rounded-4 h-100 hover-lift">
@@ -201,7 +202,7 @@ endif; ?>
               </div>
             </a>
           </div>
-          
+
           <div class="col-md-4">
             <a href="<?= BASE_URL ?>/?c=customerChat&m=index" class="text-decoration-none">
               <div class="card border-0 shadow-sm rounded-4 h-100 hover-lift">
@@ -227,31 +228,38 @@ endif; ?>
 </main>
 
 <style>
-.hover-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-}
-.bg-opacity-10 {
-  background-color: rgba(var(--bs-primary-rgb), 0.1);
-}
-.bg-opacity-25 {
-  background-color: rgba(var(--bs-primary-rgb), 0.25);
-}
-.text-primary {
-  --bs-primary-rgb: 13, 110, 253;
-}
-.text-info {
-  --bs-info-rgb: 13, 202, 240;
-}
-.text-warning {
-  --bs-warning-rgb: 255, 193, 7;
-}
-.text-success {
-  --bs-success-rgb: 25, 135, 84;
-}
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+  }
+
+  .bg-opacity-10 {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+  }
+
+  .bg-opacity-25 {
+    background-color: rgba(var(--bs-primary-rgb), 0.25);
+  }
+
+  .text-primary {
+    --bs-primary-rgb: 13, 110, 253;
+  }
+
+  .text-info {
+    --bs-info-rgb: 13, 202, 240;
+  }
+
+  .text-warning {
+    --bs-warning-rgb: 255, 193, 7;
+  }
+
+  .text-success {
+    --bs-success-rgb: 25, 135, 84;
+  }
 </style>
 
 <?php require APP_PATH . '/views/layouts/customer/footer.php'; ?>

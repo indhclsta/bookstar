@@ -2,124 +2,337 @@
 <?php require APP_PATH . '/views/layouts/seller/sidebar.php'; ?>
 
 <main class="main-wrapper">
-  <div class="main-content">
-    <div class="chat-wrapper d-flex">
-      <!-- Sidebar -->
-      <div class="chat-sidebar border-end">
-        <div class="chat-sidebar-header p-3">
-          <h5>Chats</h5>
-          <input type="text" class="form-control form-control-sm mt-2" placeholder="Search chats...">
-        </div>
-        <div class="chat-sidebar-content">
-          <div class="list-group list-group-flush">
-            <?php foreach ($chatUsers as $user): ?>
-              <a href="<?= BASE_URL ?>/?c=sellerChat&m=index&userId=<?= $user['id'] ?>" class="list-group-item list-group-item-action <?= ($chatWith['id'] == $user['id']) ? 'active' : '' ?>">
-                <div class="d-flex align-items-center">
-                  <!-- <img src="<?= !empty($user['photo']) ? $user['photo'] : 'https://placehold.co/110x110/png' ?>" width="42" height="42" class="rounded-circle me-2" alt=""> -->
-                  <div class="flex-grow-1">
-                    <h6 class="mb-0"><?= htmlspecialchars($user['name']) ?></h6>
-                    <p class="mb-0 text-truncate">
-                      <?php
-                      $lastMsg = '';
-                      foreach ($messages as $msg) {
-                        if ($msg['sender_id'] == $user['id'] || $msg['receiver_id'] == $user['id']) {
-                          $lastMsg = $msg['message'];
-                        }
-                      }
-                      echo htmlspecialchars($lastMsg);
-                      ?>
-                    </p>
-                  </div>
-                </div>
-              </a>
-            <?php endforeach; ?>
-          </div>
-        </div>
-      </div>
-
-      <!-- Chat Window -->
-      <div class="chat-window flex-grow-1 d-flex flex-column">
-        <div class="chat-header p-3 border-bottom d-flex justify-content-between align-items-center">
-          <div>
-            <h6 class="mb-0"><?= htmlspecialchars($chatWith['name'] ?? 'Select a chat') ?></h6>
-            <small class="text-success"><?= $chatWith['status'] ?? 'Offline' ?></small>
-          </div>
-        </div>
-
-        <div class="chat-content flex-grow-1 overflow-auto" id="chatBox">
-          <!-- Tambahkan div kosong sebagai spacer di atas -->
-          <div style="height: 20px;"></div>
-
-          <div class="px-3">
-            <?php if (!empty($messages)): ?>
-              <?php foreach ($messages as $msg): ?>
-                <?php if ($msg['sender_id'] == $_SESSION['user']['id']): ?>
-                  <!-- Pesan dari user sendiri (kanan) -->
-                  <div class="chat-content-rightside d-flex justify-content-end mb-3">
-                    <div class="d-flex align-items-end">
-                      <div class="flex-grow-1 me-2 text-end">
-                        <p class="mb-0 chat-time text small"><?= date('H:i, d M', strtotime($msg['created_at'])) ?></p>
-                        <p class="chat-right-msg bg-primary text-white p-3 rounded d-inline-block mb-0">
-                          <?= nl2br(htmlspecialchars($msg['message'])) ?>
-                        </p>
+  <div class="container-fluid py-3 px-4">
+    <!-- Card Container untuk Chat -->
+    <div class="card border-0 rounded-3 overflow-hidden" style="height: calc(100vh - 100px); background-color: #0A0F1C;">
+      <div class="row g-0 h-100">
+        <!-- Sidebar Chats -->
+        <div class="col-12 col-md-4 col-lg-3" style="background-color: #141B2B; border-right: 1px solid #1E2A3A;">
+          <div class="d-flex flex-column h-100">
+            <!-- Header -->
+            <div class="p-3" style="background-color: #1E2A3A; border-bottom: 1px solid #2A3A4F;">
+              <h5 class="mb-3" style="color: #E5E9F0; font-weight: 500;">Chats</h5>
+              <input type="text" class="form-control form-control-sm" placeholder="Search chats..." 
+                     style="background-color: #0F1625; border: 1px solid #2A3A4F; border-radius: 8px; padding: 0.5rem; color: #E5E9F0;">
+            </div>
+            
+            <!-- Chat List -->
+            <div class="flex-grow-1 overflow-auto" style="background-color: #141B2B;">
+              <?php if (!empty($chatUsers)): ?>
+                <?php foreach ($chatUsers as $user): ?>
+                  <a href="<?= BASE_URL ?>/?c=sellerChat&m=index&userId=<?= $user['id'] ?>" class="text-decoration-none">
+                    <div class="p-3" style="border-bottom: 1px solid #1E2A3A; <?= ($chatWith['id'] == $user['id']) ? 'background-color: #1E3A5F;' : 'background-color: #141B2B;' ?>">
+                      <div class="d-flex align-items-center">
+                        <!-- Avatar -->
+                        <div class="position-relative">
+                          <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                               style="width: 42px; height: 42px; min-width: 42px; background-color: #2A6DF4; color: #FFFFFF;">
+                            <span class="fw-semibold"><?= strtoupper(substr($user['name'], 0, 1)) ?></span>
+                          </div>
+                        </div>
+                        
+                        <!-- Info -->
+                        <div class="ms-3 flex-grow-1 min-width-0">
+                          <h6 class="mb-0" style="color: #E5E9F0;"><?= htmlspecialchars($user['name']) ?></h6>
+                          <p class="mb-0 small" style="color: #8A9BB5; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <?php
+                            $lastMsg = '';
+                            foreach ($messages as $msg) {
+                              if ($msg['sender_id'] == $user['id'] || $msg['receiver_id'] == $user['id']) {
+                                $lastMsg = $msg['message'];
+                              }
+                            }
+                            if ($lastMsg) {
+                              echo htmlspecialchars(strlen($lastMsg) > 25 ? substr($lastMsg, 0, 25) . '...' : $lastMsg);
+                            } else {
+                              echo 'No messages yet';
+                            }
+                            ?>
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                <?php else: ?>
-                  <!-- Pesan dari lawan bicara (kiri) -->
-                  <div class="chat-content-leftside d-flex mb-3">
-                    <!-- <img src="<?= !empty($chatWith['photo']) ? $chatWith['photo'] : 'https://placehold.co/110x110/png' ?>"
-                      width="48" height="48"
-                      class="rounded-circle me-2"
-                      alt=""> -->
-                    <div class="flex-grow-1">
-                      <p class="mb-0 chat-time text small"><?= date('H:i, d M', strtotime($msg['created_at'])) ?></p>
-                      <p class="chat-left-msg bg-light p-3 rounded mb-0">
-                        <?= nl2br(htmlspecialchars($msg['message'])) ?>
-                      </p>
-                    </div>
-                  </div>
-                <?php endif; ?>
-              <?php endforeach; ?>
-            <?php else: ?>
-              <div class="d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 200px);">
-                <p class="text-center text-muted">No messages yet. Start the conversation!</p>
-              </div>
-            <?php endif; ?>
+                  </a>
+                <?php endforeach; ?>
+              <?php else: ?>
+                <div class="text-center py-5 px-3">
+                  <i class="bi bi-chat-dots" style="font-size: 2.5rem; color: #2A3A4F;"></i>
+                  <p class="mt-3 mb-0" style="color: #8A9BB5;">No chats yet</p>
+                  <small style="color: #546E8A;">Chats will appear when someone contacts you</small>
+                </div>
+              <?php endif; ?>
+            </div>
           </div>
-
-          <!-- Tambahkan div kosong sebagai spacer di bawah -->
-          <div style="height: 20px;"></div>
         </div>
 
-        <!-- Chat Input -->
-        <?php if (!empty($chatWith['id'])): ?>
-          <div class="chat-footer d-flex align-items-center p-3 border-top">
-            <form action="<?= BASE_URL ?>/?c=sellerChat&m=send" method="POST" class="d-flex flex-grow-1 gap-2">
-              <input type="hidden" name="receiver_id" value="<?= $chatWith['id'] ?>">
-              <div class="input-group flex-grow-1">
-                <span class="input-group-text"><i class='bx bx-smile'></i></span>
-                <input type="text" name="message" class="form-control" placeholder="Type a message" required>
+        <!-- Chat Window -->
+        <div class="col-12 col-md-8 col-lg-9" style="background-color: #0A0F1C;">
+          <?php if (!empty($chatWith['id'])): ?>
+            <div class="d-flex flex-column h-100">
+              <!-- Chat Header -->
+              <div class="p-3" style="background-color: #141B2B; border-bottom: 1px solid #1E2A3A;">
+                <div class="d-flex align-items-center">
+                  <button class="btn btn-link d-md-none p-0 me-3" onclick="toggleSidebar()" style="color: #8A9BB5;">
+                    <i class="bi bi-arrow-left"></i>
+                  </button>
+                  <div class="position-relative">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
+                         style="width: 42px; height: 42px; min-width: 42px; background-color: #2A6DF4; color: #FFFFFF;">
+                      <span class="fw-semibold"><?= strtoupper(substr($chatWith['name'] ?? 'U', 0, 1)) ?></span>
+                    </div>
+                  </div>
+                  <div>
+                    <h6 class="mb-0" style="color: #E5E9F0;"><?= htmlspecialchars($chatWith['name'] ?? '') ?></h6>
+                  </div>
+                </div>
               </div>
-              <button class="btn btn-primary">Send</button>
-            </form>
-          </div>
-        <?php endif; ?>
+
+              <!-- Messages -->
+              <div class="flex-grow-1 overflow-auto p-4" id="chatBox" style="background-color: #0A0F1C; min-height: 0;">
+                <div class="d-flex flex-column" style="min-height: 100%;">
+                  <?php if (!empty($messages)): ?>
+                    <?php foreach ($messages as $msg): ?>
+                      <?php if ($msg['sender_id'] == $_SESSION['user']['id']): ?>
+                        <!-- My Message -->
+                        <div class="d-flex justify-content-end mb-3">
+                          <div style="max-width: 70%;">
+                            <p class="mb-1 text-end small" style="color: #546E8A;"><?= date('H:i, d M', strtotime($msg['created_at'])) ?></p>
+                            <div class="p-3 rounded-3" style="background-color: #2A6DF4; color: #FFFFFF;">
+                              <p class="mb-0"><?= nl2br(htmlspecialchars($msg['message'])) ?></p>
+                            </div>
+                          </div>
+                        </div>
+                      <?php else: ?>
+                        <!-- Their Message -->
+                        <div class="d-flex mb-3">
+                          <div style="max-width: 70%;">
+                            <p class="mb-1 small" style="color: #546E8A;"><?= date('H:i, d M', strtotime($msg['created_at'])) ?></p>
+                            <div class="p-3 rounded-3" style="background-color: #141B2B; color: #E5E9F0;">
+                              <p class="mb-0"><?= nl2br(htmlspecialchars($msg['message'])) ?></p>
+                            </div>
+                          </div>
+                        </div>
+                      <?php endif; ?>
+                    <?php endforeach; ?>
+                    
+                    <!-- Invisible spacer for scroll -->
+                    <div style="height: 1px;" id="scrollTarget"></div>
+                  <?php else: ?>
+                    <div class="d-flex flex-column justify-content-center align-items-center h-100">
+                      <i class="bi bi-chat-dots mb-3" style="font-size: 3rem; color: #1E2A3A;"></i>
+                      <p class="text-center mb-0" style="color: #8A9BB5;">No messages yet</p>
+                      <small style="color: #546E8A;">Start the conversation!</small>
+                    </div>
+                  <?php endif; ?>
+                </div>
+              </div>
+
+              <!-- Chat Input -->
+              <div class="p-3" style="background-color: #141B2B; border-top: 1px solid #1E2A3A;">
+                <form action="<?= BASE_URL ?>/?c=sellerChat&m=send" method="POST" class="d-flex gap-2 align-items-center">
+                  <input type="hidden" name="receiver_id" value="<?= $chatWith['id'] ?>">
+                  <div class="flex-grow-1">
+                    <input type="text" 
+                           name="message" 
+                           class="form-control" 
+                           placeholder="Type a message..." 
+                           style="height: 45px; background-color: #0F1625; border: 1px solid #1E2A3A; border-radius: 8px; color: #E5E9F0;"
+                           required>
+                  </div>
+                  <button type="submit" class="btn px-4" style="height: 45px; min-width: 80px; background-color: #2A6DF4; color: #FFFFFF; border: 1px solid #1E4A8A;">
+                    <i class="bi bi-send me-1"></i> Send
+                  </button>
+                </form>
+              </div>
+            </div>
+          <?php else: ?>
+            <!-- No Chat Selected -->
+            <div class="d-flex flex-column justify-content-center align-items-center h-100">
+              <i class="bi bi-chat-dots mb-3" style="font-size: 4rem; color: #1E2A3A;"></i>
+              <h5 style="color: #E5E9F0; font-weight: 500;">Select a chat</h5>
+              <p style="color: #8A9BB5;" class="text-center px-4">Choose a conversation from the sidebar to start messaging</p>
+            </div>
+          <?php endif; ?>
+        </div>
       </div>
     </div>
   </div>
 </main>
 
+<style>
+
+/* Container */
+.main-wrapper .container-fluid {
+  max-width: 1600px;
+  margin: 0 auto;
+  height: 100%;
+}
+
+/* Card Chat */
+.card {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  height: 100%;
+}
+
+/* Row & Col */
+.row.g-0 {
+  height: 100%;
+}
+
+[class*="col-"] {
+  height: 100%;
+}
+
+/* Chat List */
+.min-width-0 {
+  min-width: 0;
+}
+
+/* Chat Messages Area */
+#chatBox {
+  scroll-behavior: smooth;
+  min-height: 0;
+  height: 100%;
+}
+
+#chatBox > div {
+  min-height: min-content;
+}
+
+/* Message Bubbles */
+.rounded-3 {
+  border-radius: 12px !important;
+}
+
+/* Scrollbar */
+.overflow-auto::-webkit-scrollbar {
+  width: 5px;
+}
+
+.overflow-auto::-webkit-scrollbar-track {
+  background: #141B2B;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb {
+  background: #2A3A4F;
+  border-radius: 3px;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: #3A4F6A;
+}
+
+/* Form Controls */
+.form-control {
+  font-size: 14px;
+}
+
+.form-control:focus {
+  border-color: #2A6DF4;
+  box-shadow: 0 0 0 2px rgba(42, 109, 244, 0.2);
+  outline: none;
+  background-color: #1A2335;
+  color: #E5E9F0;
+}
+
+.form-control::placeholder {
+  color: #546E8A;
+}
+
+/* Button */
+.btn {
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #1E4A8A !important;
+  border-color: #2A6DF4 !important;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+  .main-wrapper {
+    margin-left: 0;
+  }
+  
+  .main-wrapper .container-fluid {
+    padding: 10px !important;
+  }
+  
+  .col-md-4 {
+    position: fixed;
+    left: -100%;
+    top: 60px;
+    bottom: 0;
+    width: 100%;
+    z-index: 1050;
+    transition: left 0.3s ease;
+  }
+  
+  .col-md-4.show {
+    left: 0;
+  }
+}
+
+/* Text colors */
+.text-muted {
+  color: #8A9BB5 !important;
+}
+
+/* Border colors */
+.border-end {
+  border-right: 1px solid #1E2A3A !important;
+}
+
+/* Hover effects */
+a:hover .p-3 {
+  background-color: #1E2A3A !important;
+  transition: background-color 0.2s ease;
+}
+</style>
+
 <script>
-  // Tunggu sampai halaman selesai dimuat
-  document.addEventListener('DOMContentLoaded', function() {
-    const chatBox = document.getElementById('chatBox');
-    // Berikan sedikit delay untuk memastikan semua konten sudah dirender
-    setTimeout(() => {
-      // Scroll langsung ke bawah
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }, 200);
-  });
+function toggleSidebar() {
+  document.querySelector('.col-md-4').classList.toggle('show');
+}
+
+// Scroll to bottom function
+function scrollToBottom() {
+  const chatBox = document.getElementById('chatBox');
+  if (chatBox) {
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+}
+
+// Scroll to bottom on page load
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(scrollToBottom, 200);
+});
+
+// Auto refresh messages
+<?php if (!empty($chatWith['id'])): ?>
+let lastMessageCount = <?= count($messages) ?>;
+setInterval(function() {
+  fetch('<?= BASE_URL ?>/?c=sellerChat&m=getMessages&userId=<?= $chatWith['id'] ?>')
+    .then(response => response.text())
+    .then(html => {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      const newMessages = tempDiv.querySelector('#chatBox')?.innerHTML;
+      const chatBox = document.getElementById('chatBox');
+      
+      if (newMessages && chatBox && chatBox.innerHTML !== newMessages) {
+        const wasAtBottom = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 100;
+        chatBox.innerHTML = newMessages;
+        if (wasAtBottom) {
+          setTimeout(scrollToBottom, 100);
+        }
+      }
+    });
+}, 5000);
+<?php endif; ?>
 </script>
 
 <?php require APP_PATH . '/views/layouts/seller/footer.php'; ?>

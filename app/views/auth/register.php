@@ -85,7 +85,15 @@ error_reporting(E_ALL);
 
                 <div class="col-12">
                   <label class="form-label">NIK</label>
-                  <input type="text" name="nik" class="form-control" placeholder="Enter NIK" required>
+                  <input type="text"
+                    name="nik"
+                    class="form-control"
+                    placeholder="Enter NIK"
+                    maxlength="16"
+                    pattern="\d{16}"
+                    title="NIK harus terdiri dari 16 digit angka"
+                    inputmode="numeric"
+                    required>
                 </div>
 
                 <div class="col-12">
@@ -95,13 +103,24 @@ error_reporting(E_ALL);
 
                 <div class="col-12">
                   <label class="form-label">Phone Number</label>
-                  <input type="text" name="no_tlp" class="form-control" placeholder="0812345xxx" required>
+                  <input type="text"
+                    name="no_tlp"
+                    class="form-control"
+                    placeholder="0812345xxx"
+                    pattern="^[0-9]{10,15}$"
+                    inputmode="numeric"
+                    required>
                 </div>
 
 
                 <div class="col-12">
                   <label class="form-label">Password</label>
-                  <input type="password" name="password" class="form-control" placeholder="****" required>
+                  <input type="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="****"
+                    minlength="6"
+                    required>
                 </div>
 
                 <div class="col-12">
@@ -121,7 +140,12 @@ error_reporting(E_ALL);
                 <!-- NO REKENING -->
                 <div class="col-12 d-none" id="rekeningField">
                   <label class="form-label">No Rekening</label>
-                  <input type="text" name="no_rekening" class="form-control" placeholder="Enter No Rekening">
+                  <input type="text"
+                    name="no_rekening"
+                    class="form-control"
+                    placeholder="Enter No Rekening"
+                    pattern="^[0-9]{8,20}$"
+                    inputmode="numeric">
                 </div>
 
                 <!-- 🔥 TAMBAHAN: QRIS IMAGE (SELLER) -->

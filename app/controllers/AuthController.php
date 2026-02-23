@@ -84,6 +84,12 @@ class AuthController
             exit;
         }
 
+        if (!empty($data['nik']) && !preg_match('/^\d{16}$/', $data['nik'])) {
+            $_SESSION['error'] = 'NIK harus 16 digit angka';
+            header('Location: ' . BASE_URL . '/?c=auth&m=register');
+            exit;
+        }
+
         $qrisFileName = null;
 
         // 🔥 HANDLE UPLOAD QRIS (SELLER)
@@ -175,7 +181,7 @@ class AuthController
         }
 
         // SUCCESS
-        $_SESSION['success'] = 'Registrasi berhasil, silakan login';
+        $_SESSION['success'] = 'Register berhasil, Silakan login.';
         header('Location: ' . BASE_URL . '/?c=auth&m=login');
         exit;
     }
@@ -192,34 +198,37 @@ class AuthController
 
     public function sendResetLink()
     {
-        $email = $_POST['email'];
+        $email = trim($_POST['email']);
 
         $userModel = new UserModel();
         $user = $userModel->findByEmail($email);
 
-        if (!$user) {
-            die('Email tidak ditemukan');
-        }
+        if ($user) {
+            $token   = bin2hex(random_bytes(32));
+            $expired = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-        $token   = bin2hex(random_bytes(32));
-        $expired = date('Y-m-d H:i:s', strtotime('+1 hour'));
+            $userModel->saveResetToken($email, $token, $expired);
 
-        $userModel->saveResetToken($email, $token, $expired);
+            $link = BASE_URL . "/?c=auth&m=resetPassword&token=$token";
 
-        $link = BASE_URL . "/?c=auth&m=resetPassword&token=$token";
+            require_once '../app/helpers/mailer.php';
 
-        require_once '../app/helpers/mailer.php';
-
-        $body = "
+            $body = "
             <h3>Reset Password</h3>
             <p>Klik link berikut untuk reset password:</p>
             <a href='$link'>$link</a>
             <p>Link berlaku 1 jam.</p>
         ";
 
-        Mailer::send($email, 'Reset Password BookStar', $body);
+            Mailer::send($email, 'Reset Password BookStar', $body);
+        }
 
-        echo "Link reset password telah dikirim ke email Anda.";
+        //Selalu redirect, walaupun email tidak ada
+        $_SESSION['success'] =
+            'Jika email terdaftar, link reset password telah dikirim.';
+
+        header('Location: ' . BASE_URL . '/?c=auth&m=login');
+        exit;
     }
 
     public function resetPassword()
@@ -230,7 +239,9 @@ class AuthController
         $user = $userModel->findByResetToken($token);
 
         if (!$user) {
-            die('Token tidak valid atau kadaluarsa');
+            $_SESSION['error'] = 'Token tidak valid atau kadaluarsa';
+            header('Location: ' . BASE_URL . '/?c=auth&m=login');
+            exit;
         }
 
         require '../app/views/auth/reset-password.php';
@@ -239,7 +250,15 @@ class AuthController
     public function resetPasswordProcess()
     {
         if ($_POST['password'] !== $_POST['confirm_password']) {
-            die('Password tidak sama');
+            $_SESSION['error'] = 'Password tidak sama';
+            header('Location: ' . BASE_URL . '/?c=auth&m=resetPassword&token=' . $_POST['token']);
+            exit;
+        }
+
+        if (strlen($_POST['password']) < 6) {
+            $_SESSION['error'] = 'Password minimal 6 karakter';
+            header('Location: ' . BASE_URL . '/?c=auth&m=resetPassword&token=' . $_POST['token']);
+            exit;
         }
 
         $token = $_POST['token'];
@@ -248,7 +267,9 @@ class AuthController
         $user = $userModel->findByResetToken($token);
 
         if (!$user) {
-            die('Token tidak valid');
+            $_SESSION['error'] = 'Token tidak valid atau kadaluarsa';
+            header('Location: ' . BASE_URL . '/?c=auth&m=login');
+            exit;
         }
 
         $userModel->updatePassword($user['id'], $_POST['password']);
@@ -265,7 +286,7 @@ class AuthController
     {
         session_destroy();
         session_start(); // penting supaya bisa set alert
-        $_SESSION['success'] = 'Anda berhasil logout';
+        $_SESSION['success'] = 'Logout berhasil, Sampai jumpa lagi!';
         header('Location: ' . BASE_URL . '/?c=auth&m=login');
         exit;
     }

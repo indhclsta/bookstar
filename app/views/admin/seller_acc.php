@@ -290,7 +290,7 @@
 
                     <div class="col-md-6">
                         <label>NIK</label>
-                        <input type="text" name="nik" id="edit-nik" class="form-control">
+                        <input type="text" name="nik" id="edit-nik" class="form-control" disabled>
                     </div>
 
                     <!-- ✅ NO REKENING DI MODAL EDIT -->

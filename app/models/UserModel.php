@@ -265,11 +265,25 @@ class UserModel
         if ($stmt->fetchColumn() > 0) return ['can_delete' => false, 'reason' => 'Customer masih memiliki produk di keranjang'];
 
         // Cek transaksi pending
-        $stmt = $this->db->prepare("SELECT COUNT(*) as cnt FROM orders WHERE customer_id = ? AND status = 'pending'");
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*) 
+            FROM orders 
+            WHERE customer_id = ? 
+            AND order_status IN ('pending','paid')
+        ");
         $stmt->execute([$id]);
-        if ($stmt->fetchColumn() > 0) return ['can_delete' => false, 'reason' => 'Customer masih memiliki transaksi pending'];
 
-        return ['can_delete' => true, 'reason' => ''];
+        if ($stmt->fetchColumn() > 0) {
+            return [
+                'can_delete' => false,
+                'reason' => 'Customer masih memiliki transaksi aktif'
+            ];
+        }
+
+        return [
+            'can_delete' => true,
+            'reason' => ''
+        ];
     }
 
 
@@ -305,7 +319,7 @@ class UserModel
                 FROM products p 
                 WHERE p.seller_id = u.id) AS product_count
         FROM users u
-        WHERE u.role_id = 2
+        WHERE u.role_id = 2 AND u.is_deleted = 0
     ";
 
         if ($excludeId) {
@@ -489,9 +503,13 @@ class UserModel
 
     public function sellerHasProducts($sellerId)
     {
-        $stmt = $this->db->prepare(
-            "SELECT COUNT(*) FROM products WHERE seller_id = :seller_id"
-        );
+        $stmt = $this->db->prepare("
+        SELECT COUNT(*) 
+        FROM products 
+        WHERE seller_id = :seller_id
+        AND is_active = 1
+    ");
+
         $stmt->execute([
             'seller_id' => $sellerId
         ]);
@@ -514,17 +532,16 @@ class UserModel
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-
-    public function deleteSellerIfOffline($id)
+    public function softDeleteSeller($id)
     {
         $stmt = $this->db->prepare("
-            DELETE FROM users
-            WHERE id = ? AND role_id = 2 AND is_online = 0
-        ");
-        $stmt->execute([$id]);
-        return $stmt->rowCount() > 0;
+        UPDATE users 
+        SET is_deleted = 1 
+        WHERE id = ? 
+        AND role_id = 2
+    ");
+        return $stmt->execute([$id]);
     }
-
     /* =======================
        UPDATE PROFILE (UMUM)
     ======================== */

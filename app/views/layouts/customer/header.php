@@ -13,9 +13,9 @@ $notifications = [];
 $unreadCount  = 0;
 
 if (isset($_SESSION['user'])) {
-    $notificationModel = new NotificationModel();
-    $notifications = $notificationModel->getByUser($_SESSION['user']['id'], 5);
-    $unreadCount  = $notificationModel->countUnread($_SESSION['user']['id']);
+  $notificationModel = new NotificationModel();
+  $notifications = $notificationModel->getByUser($_SESSION['user']['id'], 5);
+  $unreadCount  = $notificationModel->countUnread($_SESSION['user']['id']);
 }
 
 ?>
@@ -207,8 +207,8 @@ $photo = !empty($user['photo'])
               <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" data-bs-auto-close="outside"
                 data-bs-toggle="dropdown" href="javascript:;"><i class="material-icons-outlined">notifications</i>
                 <?php if ($unreadCount > 0): ?>
-    <span class="badge-notify"><?= $unreadCount ?></span>
-<?php endif; ?>
+                  <span class="badge-notify"><?= $unreadCount ?></span>
+                <?php endif; ?>
 
               </a>
               <div class="dropdown-menu dropdown-notify dropdown-menu-end shadow">
@@ -239,39 +239,30 @@ $photo = !empty($user['photo'])
                   </div>
                 </div>
                 <div class="notify-list">
-
-<?php if (empty($notifications)): ?>
-    <div class="text-center text py-3 small">
-        Tidak ada notifikasi
-    </div>
-<?php else: ?>
-    <?php foreach ($notifications as $notif): ?>
-        <a class="dropdown-item border-bottom py-2"
-           href="<?= $notif['link'] ?>">
-
-            <div class="d-flex align-items-center gap-3">
-                <div class="user-wrapper bg-primary text-primary bg-opacity-10">
-                    <span><i class="material-icons-outlined">notifications</i></span>
+                  <?php if (empty($notifications)): ?>
+                    <div class="p-3 text-center text">
+                      Tidak ada notifikasi
+                    </div>
+                  <?php else: ?>
+                    <?php foreach ($notifications as $notif): ?>
+                      <a class="dropdown-item border-bottom py-2"
+                        href="<?= BASE_URL ?>/?c=notification&m=read&id=<?= $notif['id'] ?>&redirect=<?= urlencode($notif['link']) ?>">
+                        <div class="d-flex align-items-center gap-3">
+                          <div class="user-wrapper bg-primary bg-opacity-10">
+                            <i class="material-icons-outlined">shopping_cart</i>
+                          </div>
+                          <div>
+                            <h6 class="mb-0"><?= htmlspecialchars($notif['title']) ?></h6>
+                            <p class="mb-0 small"><?= htmlspecialchars($notif['message']) ?></p>
+                            <small class="text">
+                              <?= date('d M Y H:i', strtotime($notif['created_at'])) ?>
+                            </small>
+                          </div>
+                        </div>
+                      </a>
+                    <?php endforeach; ?>
+                  <?php endif; ?>
                 </div>
-
-                <div class="<?= $notif['is_read'] ? '' : 'fw-bold' ?>">
-                    <h6 class="notify-title mb-0">
-                        <?= htmlspecialchars($notif['title']) ?>
-                    </h6>
-                    <p class="mb-0 notify-desc small">
-                        <?= htmlspecialchars($notif['message']) ?>
-                    </p>
-                    <p class="mb-0 notify-time small text">
-                        <?= date('d M Y H:i', strtotime($notif['created_at'])) ?>
-                    </p>
-                </div>
-            </div>
-
-        </a>
-    <?php endforeach; ?>
-<?php endif; ?>
-
-</div>
 
               </div>
             </li>
