@@ -204,9 +204,10 @@ VALUES (?,?,?,?,?,?,?,?,?,?)
     // ================== UPDATE APPROVAL ==================
     public function updateApproval($orderId, $status, $reason = null)
     {
-        $orderStatus = $status === 'rejected' ? 'refund' : 'paid';
+        $orderStatus = ($status === 'rejected') ? 'refund' : 'paid';
 
         if ($status === 'rejected') {
+
             $sql = "
             UPDATE orders
             SET approval_status = :status,
@@ -215,7 +216,15 @@ VALUES (?,?,?,?,?,?,?,?,?,?)
                 rejected_at = NOW()
             WHERE id = :id
         ";
+
+            $params = [
+                ':status'       => $status,
+                ':order_status' => $orderStatus,
+                ':reason'       => $reason,
+                ':id'           => $orderId
+            ];
         } else {
+
             $sql = "
             UPDATE orders
             SET approval_status = :status,
@@ -224,16 +233,16 @@ VALUES (?,?,?,?,?,?,?,?,?,?)
                 rejected_at = NULL
             WHERE id = :id
         ";
+
+            $params = [
+                ':status'       => $status,
+                ':order_status' => $orderStatus,
+                ':id'           => $orderId
+            ];
         }
 
         $stmt = $this->db->prepare($sql);
-
-        $stmt->execute([
-            ':status' => $status,
-            ':order_status' => $orderStatus,
-            ':reason' => $reason,
-            ':id' => $orderId
-        ]);
+        return $stmt->execute($params);
     }
 
 
