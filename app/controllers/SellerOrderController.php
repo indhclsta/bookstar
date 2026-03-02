@@ -92,8 +92,13 @@ class SellerOrderController
     {
         if (isset($_GET['id'])) {
             $orderId = $_GET['id'];
-            $this->orderModel->deleteOrder($orderId);
-            $_SESSION['success'] = "Pesanan berhasil dihapus";
+
+            if ($this->orderModel->deleteOrder($orderId)) {
+                $_SESSION['success'] = "Pesanan berhasil dihapus";
+            } else {
+                $_SESSION['error'] = "Pesanan hanya bisa dihapus dalam 1 menit setelah ditolak";
+            }
+
             header("Location: " . BASE_URL . "/?c=sellerOrder&m=index");
         }
     }

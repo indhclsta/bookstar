@@ -82,8 +82,8 @@ VALUES (?,?,?,?,?,?,?,?,?,?)
     }
 
     public function getCartGroupedBySeller($customerId)
-{
-    $stmt = $this->db->prepare("
+    {
+        $stmt = $this->db->prepare("
         SELECT 
             p.seller_id AS seller_user_id,
             c.product_id,
@@ -94,15 +94,15 @@ VALUES (?,?,?,?,?,?,?,?,?,?)
         JOIN products p ON c.product_id = p.id
         WHERE c.user_id = ?
     ");
-    $stmt->execute([$customerId]);
-    $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->execute([$customerId]);
+        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $grouped = [];
-    foreach ($items as $item) {
-        $grouped[$item['seller_user_id']][] = $item;
+        $grouped = [];
+        foreach ($items as $item) {
+            $grouped[$item['seller_user_id']][] = $item;
+        }
+        return $grouped;
     }
-    return $grouped;
-}
 
 
 
@@ -204,14 +204,30 @@ VALUES (?,?,?,?,?,?,?,?,?,?)
     // ================== UPDATE APPROVAL ==================
     public function updateApproval($orderId, $status, $reason = null)
     {
-        $orderStatus = $status === 'rejected' ? 'refund' : 'paid'; // otomatis refund kalau ditolak
-        $stmt = $this->db->prepare("
-        UPDATE orders
-        SET approval_status = :status,
-            order_status = :order_status,
-            reject_reason = :reason
-        WHERE id = :id
-    ");
+        $orderStatus = $status === 'rejected' ? 'refund' : 'paid';
+
+        if ($status === 'rejected') {
+            $sql = "
+            UPDATE orders
+            SET approval_status = :status,
+                order_status = :order_status,
+                reject_reason = :reason,
+                rejected_at = NOW()
+            WHERE id = :id
+        ";
+        } else {
+            $sql = "
+            UPDATE orders
+            SET approval_status = :status,
+                order_status = :order_status,
+                reject_reason = NULL,
+                rejected_at = NULL
+            WHERE id = :id
+        ";
+        }
+
+        $stmt = $this->db->prepare($sql);
+
         $stmt->execute([
             ':status' => $status,
             ':order_status' => $orderStatus,
@@ -242,8 +258,39 @@ VALUES (?,?,?,?,?,?,?,?,?,?)
 
     public function deleteOrder($orderId)
     {
+        if (!$this->canDelete($orderId)) {
+            return false;
+        }
+
         $stmt = $this->db->prepare("DELETE FROM orders WHERE id = ?");
         return $stmt->execute([$orderId]);
+    }
+
+    public function canDelete($orderId)
+    {
+        $stmt = $this->db->prepare("
+        SELECT order_status, rejected_at 
+        FROM orders 
+        WHERE id = ?
+    ");
+        $stmt->execute([$orderId]);
+        $order = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$order) return false;
+
+        // hanya boleh kalau refund
+        if ($order['order_status'] !== 'refund') {
+            return false;
+        }
+
+        if (!$order['rejected_at']) {
+            return false;
+        }
+
+        $rejectedTime = strtotime($order['rejected_at']);
+        $now = time();
+
+        return ($now - $rejectedTime) >= 60; // >= 60 detik
     }
 
     public function getByCustomer($customerId)

@@ -222,15 +222,43 @@
                       <?php endif; ?>
 
                       <!-- Delete Button (only for rejected) -->
-                      <?php if (($o['approval_status'] ?? '') === 'rejected'): ?>
+                      <?php
+                      $canDelete = false;
+
+                      if (
+                        ($o['approval_status'] ?? '') === 'rejected'
+                        && !empty($o['rejected_at'])
+                      ) {
+                        $selisih = time() - strtotime($o['rejected_at']);
+                        if ($selisih >= 60) {
+                          $canDelete = true;
+                        }
+                      }
+                      ?>
+
+                      <?php if ($canDelete): ?>
                         <a href="<?= BASE_URL ?>/?c=sellerOrder&m=delete&id=<?= $o['id'] ?>"
                           class="btn btn-light btn-sm rounded-circle text-danger p-0 d-inline-flex align-items-center justify-content-center btn-delete"
                           title="Hapus Pesanan"
                           data-bs-toggle="tooltip"
-                          data-bs-placement="top"
                           style="width: 32px; height: 32px;">
                           <i class="bi bi-trash" style="font-size: 14px;"></i>
                         </a>
+                      <?php else: ?>
+                        <?php if (($o['approval_status'] ?? '') === 'rejected' && !empty($o['rejected_at'])): ?>
+                          <?php
+                          $selisih = time() - strtotime($o['rejected_at']);
+                          $sisa = max(0, 60 - $selisih);
+                          ?>
+
+                          <?php if ($sisa > 0): ?>
+                            <span class="badge bg-secondary countdown-badge"
+                              data-seconds="<?= $sisa ?>"
+                              data-order="<?= $o['id'] ?>">
+                              Tunggu <?= $sisa ?> detik
+                            </span>
+                          <?php endif; ?>
+                        <?php endif; ?>
                       <?php endif; ?>
 
                       <!-- Chat Button (always visible) -->
@@ -390,7 +418,7 @@
 
         const proofImg = modal.querySelector('#d_proof');
         const proofContainer = modal.querySelector('#proofContainer');
-        
+
         if (this.dataset.proof) {
           proofImg.src = this.dataset.proof;
           proofContainer.classList.remove('d-none');
@@ -478,6 +506,35 @@
         });
       });
     });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+
+    document.querySelectorAll('.countdown-badge').forEach(function(badge) {
+      let seconds = parseInt(badge.dataset.seconds);
+      const orderId = badge.dataset.order;
+
+      const interval = setInterval(function() {
+        seconds--;
+
+        if (seconds > 0) {
+          badge.innerText = "Tunggu " + seconds + " detik";
+        } else {
+          clearInterval(interval);
+
+          // ganti badge jadi tombol delete
+          badge.outerHTML = `
+          <a href="<?= BASE_URL ?>/?c=sellerOrder&m=delete&id=${orderId}"
+             class="btn btn-light btn-sm rounded-circle text-danger p-0 d-inline-flex align-items-center justify-content-center btn-delete"
+             style="width:32px;height:32px;">
+             <i class="bi bi-trash" style="font-size:14px;"></i>
+          </a>
+        `;
+        }
+      }, 1000);
+    });
+
   });
 </script>
 
@@ -631,7 +688,7 @@
     .table tbody td {
       white-space: nowrap;
     }
-    
+
     td .d-flex {
       min-width: 130px;
     }
