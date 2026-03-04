@@ -244,23 +244,47 @@ $photo = !empty($user['photo'])
                       Tidak ada notifikasi
                     </div>
                   <?php else: ?>
-                    <?php foreach ($notifications as $notif): ?>
-                      <a class="dropdown-item border-bottom py-2"
-                        href="<?= BASE_URL ?>/?c=notification&m=read&id=<?= $notif['id'] ?>&redirect=<?= urlencode($notif['link']) ?>">
-                        <div class="d-flex align-items-center gap-3">
-                          <div class="user-wrapper bg-primary bg-opacity-10">
-                            <i class="material-icons-outlined">shopping_cart</i>
+
+                    <?php
+                    $hasUnread = false;
+                    foreach ($notifications as $notif) {
+                      if (empty($notif['is_read']) || $notif['is_read'] == 0) {
+                        $hasUnread = true;
+                        break;
+                      }
+                    }
+                    ?>
+
+                    <?php if (!$hasUnread): ?>
+                      <div class="p-3 text-center text">
+                        Tidak ada notifikasi baru
+                      </div>
+                    <?php else: ?>
+
+                      <?php foreach ($notifications as $notif): ?>
+                        <?php if (!empty($notif['is_read']) && $notif['is_read'] == 1) continue; ?>
+
+                        <a class="dropdown-item border-bottom py-2"
+                          href="<?= BASE_URL ?>/?c=notification&m=read&id=<?= $notif['id'] ?>&redirect=<?= urlencode($notif['link']) ?>">
+
+                          <div class="d-flex align-items-center gap-3">
+                            <div class="user-wrapper bg-primary bg-opacity-10">
+                              <i class="material-icons-outlined">shopping_cart</i>
+                            </div>
+                            <div>
+                              <h6 class="mb-0"><?= htmlspecialchars($notif['title']) ?></h6>
+                              <p class="mb-0 small"><?= htmlspecialchars($notif['message']) ?></p>
+                              <small class="text">
+                                <?= date('d M Y H:i', strtotime($notif['created_at'])) ?>
+                              </small>
+                            </div>
                           </div>
-                          <div>
-                            <h6 class="mb-0"><?= htmlspecialchars($notif['title']) ?></h6>
-                            <p class="mb-0 small"><?= htmlspecialchars($notif['message']) ?></p>
-                            <small class="text">
-                              <?= date('d M Y H:i', strtotime($notif['created_at'])) ?>
-                            </small>
-                          </div>
-                        </div>
-                      </a>
-                    <?php endforeach; ?>
+
+                        </a>
+                      <?php endforeach; ?>
+
+                    <?php endif; ?>
+
                   <?php endif; ?>
                 </div>
 
@@ -301,4 +325,30 @@ $photo = !empty($user['photo'])
           </ul>
 
       </nav>
+      <style>
+        /* Perlebar dropdown notifikasi */
+        .dropdown-notify {
+          width: 380px !important;
+          max-width: 95vw;
+        }
+
+        /* Supaya bisa scroll kalau banyak */
+        .notify-list {
+          max-height: 400px;
+          overflow-y: auto;
+        }
+
+        /* IZINKAN TEKS TURUN KE BAWAH */
+        .notify-list .dropdown-item {
+          white-space: normal !important;
+          word-break: break-word;
+        }
+
+        /* Supaya judul & pesan tidak kepotong */
+        .notify-list h6,
+        .notify-list p {
+          white-space: normal !important;
+          margin-bottom: 2px;
+        }
+      </style>
     </header>

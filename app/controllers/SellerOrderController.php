@@ -4,6 +4,7 @@ require_once APP_PATH . '/core/auth.php';
 require_once APP_PATH . '/models/OrderModel.php';
 require_once APP_PATH . '/models/OrderItemModel.php';
 require_once APP_PATH . '/models/ProductModel.php';
+require_once APP_PATH . '/models/NotificationModel.php'; 
 
 class SellerOrderController
 {
@@ -22,7 +23,6 @@ class SellerOrderController
         $sellerId = $_SESSION['user']['id'];
         $orders = $this->orderModel->getOrdersBySeller($sellerId);
 
-        // Tambahkan field buyer_name dan buyer_address supaya view bisa langsung pakai
         foreach ($orders as &$o) {
             $o['buyer_name'] = $o['customer_name'] ?? '-';
             $o['buyer_address'] = $o['shipping_address'] ?? $o['customer_address'] ?? '-';
@@ -39,10 +39,8 @@ class SellerOrderController
             $orderItemModel = new OrderItemModel();
             $productModel   = new ProductModel();
 
-            // ambil semua item dalam order
             $items = $orderItemModel->getByOrderId($orderId);
 
-            // kurangi stok per produk
             foreach ($items as $item) {
                 $productModel->reduceStock(
                     $item['product_id'],
@@ -50,14 +48,23 @@ class SellerOrderController
                 );
             }
 
-            // update status order
+            // update status
             $this->orderModel->updateApproval($orderId, 'approved');
+
+            // 🔔 NOTIFIKASI KE CUSTOMER
+            $order = $this->orderModel->findById($orderId);
+            $notificationModel = new NotificationModel();
+            $notificationModel->create([
+                'user_id' => $order['customer_id'],
+                'title'   => 'Pesanan Disetujui',
+                'message' => 'Pesanan dengan kode ' . $order['order_code'] . ' telah disetujui oleh penjual.',
+                'link'    => BASE_URL . '/?c=customerOrder&m=index'
+            ]);
 
             $_SESSION['success'] = "Pesanan disetujui & stok otomatis berkurang";
             header("Location: " . BASE_URL . "/?c=sellerOrder&m=index");
         }
     }
-
 
     public function reject()
     {
@@ -65,16 +72,25 @@ class SellerOrderController
             $orderId = $_GET['id'];
             $reason  = $_GET['reason'] ?? null;
 
-            // update approval + order_status + reject_reason
             $this->orderModel->updateApproval($orderId, 'rejected', $reason);
+
+            // 🔔 NOTIFIKASI KE CUSTOMER
+            $order = $this->orderModel->findById($orderId);
+            $notificationModel = new NotificationModel();
+            $notificationModel->create([
+                'user_id' => $order['customer_id'],
+                'title'   => 'Pesanan Ditolak',
+                'message' => 'Pesanan dengan kode ' . $order['order_code'] .
+                             ' ditolak oleh penjual.' .
+                             ($reason ? ' Alasan: ' . $reason : ''),
+                'link'    => BASE_URL . '/?c=customerOrder&m=index'
+            ]);
 
             $_SESSION['success'] = "Pesanan ditolak" . ($reason ? " dengan alasan: $reason" : "");
             header("Location: " . BASE_URL . "/?c=sellerOrder&m=index");
         }
     }
 
-
-    // INPUT RESI
     public function inputResi()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
