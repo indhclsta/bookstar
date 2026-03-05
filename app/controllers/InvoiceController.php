@@ -29,29 +29,23 @@ class InvoiceController
      * url: ?c=invoice&m=show&id=ORDER_ID
      */
     public function show()
-{
-    $checkoutCode = $_GET['id'] ?? null;
-    $customerId   = $_SESSION['user']['id'];
+    {
+        $checkoutCode = $_GET['id'] ?? null;
+        $customerId   = $_SESSION['user']['id'];
 
-    if (!$checkoutCode) {
-        die('Invoice tidak ditemukan');
+        if (!$checkoutCode) {
+            die('Invoice tidak ditemukan');
+        }
+
+        $orders = $this->orderModel->getInvoiceByCheckout(
+            $checkoutCode,
+            $customerId
+        );
+
+        if (empty($orders)) {
+            die('Invoice tidak ditemukan');
+        }
+
+        require APP_PATH . '/views/customer/invoice.php';
     }
-
-    // 🔥 AMBIL SEMUA ORDER DALAM 1 CHECKOUT
-    $orders = $this->orderModel->getByCheckoutCode($checkoutCode, $customerId);
-
-    if (empty($orders)) {
-        die('Invoice tidak ditemukan');
-    }
-
-    // tempelkan items + seller
-    foreach ($orders as &$order) {
-        $order['items']  = $this->orderItemModel->getByOrderId($order['id']);
-        $order['seller'] = $this->userModel->findById($order['seller_id']);
-    }
-
-    require APP_PATH . '/views/customer/invoice.php';
-}
-
-
 }

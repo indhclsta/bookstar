@@ -92,7 +92,7 @@
                     <div class="seller-section mb-4 <?= $index > 0 ? 'pt-4 border-top' : '' ?>">
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <div>
-                                <h6 class="mb-1"><?= htmlspecialchars($order['seller']['name'] ?? 'Unknown Seller') ?></h6>
+                                <h6 class="mb-1"><?= htmlspecialchars($order['seller_name'] ?? 'Unknown Seller') ?></h6>
                                 <div>
                                     Invoice ID: INV-<?= $order['id'] ?> |
                                     Payment: <?= htmlspecialchars($order['payment_method']) ?>

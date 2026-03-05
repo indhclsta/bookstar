@@ -67,9 +67,9 @@ $photo = !empty($user['photo'])
         </div>
         <div class="search-bar flex-grow-1">
           <div class="position-relative">
-            <input class="form-control rounded-5 px-5 search-control d-lg-block d-none" type="text" placeholder="Search">
+            <!-- <input class="form-control rounded-5 px-5 search-control d-lg-block d-none" type="text" placeholder="Search">
             <span class="material-icons-outlined position-absolute d-lg-block d-none ms-3 translate-middle-y start-0 top-50">search</span>
-            <span class="material-icons-outlined position-absolute me-3 translate-middle-y end-0 top-50 search-close">close</span>
+            <span class="material-icons-outlined position-absolute me-3 translate-middle-y end-0 top-50 search-close">close</span> -->
             <div class="search-popup p-3">
               <div class="card rounded-4 overflow-hidden">
                 <div class="card-header d-lg-none">
