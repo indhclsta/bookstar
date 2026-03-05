@@ -1,5 +1,13 @@
 <?php
 require_once APP_PATH . '/models/CartModel.php';
+require_once APP_PATH . '/models/ChatModel.php';
+
+$chatModel = new ChatModel();
+$unreadChat = 0;
+
+if (isset($_SESSION['user'])) {
+  $unreadChat = $chatModel->countUnreadConversations($_SESSION['user']['id']);
+}
 
 $cartCount = 0;
 if (isset($_SESSION['user'])) {
@@ -183,146 +191,164 @@ $photo = !empty($user['photo'])
             <a class="nav-link" href="javascript:;"><i class="material-icons-outlined">search</i></a>
           </li>
 
-          <ul class="navbar-nav gap-1 nav-right-links align-items-center">
-            <li class="nav-item">
-              <a href="<?= BASE_URL ?>/?c=cart&m=index"
-                class="nav-link position-relative"
-                title="Keranjang Belanja">
+          <li class="nav-item">
+            <a href="<?= BASE_URL ?>/?c=cart&m=index"
+              class="nav-link position-relative"
+              title="Keranjang Belanja">
 
-                <i class="material-icons-outlined fs-4">shopping_cart</i>
+              <i class="material-icons-outlined fs-4">shopping_cart</i>
 
-                <?php if ($cartCount > 0): ?>
-                  <span class="position-absolute top-0 end-0
+              <?php if ($cartCount > 0): ?>
+                <span class="position-absolute top-0 end-0
                    badge rounded-pill bg-danger">
-                    <?= $cartCount ?>
+                  <?= $cartCount ?>
+                </span>
+              <?php endif; ?>
+
+            </a>
+          </li>
+
+          <?php if (isset($_SESSION['user'])): ?>
+
+            <li class="nav-item">
+              <a href="<?= BASE_URL ?>/?c=customerChat&m=index"
+                class="nav-link position-relative"
+                title="Chat">
+
+                <i class="material-icons-outlined fs-4">chat</i>
+
+                <?php if (!empty($unreadChat) && $unreadChat > 0): ?>
+                  <span class="position-absolute top-0 end-0 badge rounded-pill bg-danger">
+                    <?= $unreadChat ?>
                   </span>
                 <?php endif; ?>
 
               </a>
             </li>
 
+          <?php endif; ?>
 
 
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" data-bs-auto-close="outside"
-                data-bs-toggle="dropdown" href="javascript:;"><i class="material-icons-outlined">notifications</i>
-                <?php if ($unreadCount > 0): ?>
-                  <span class="badge-notify"><?= $unreadCount ?></span>
-                <?php endif; ?>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" data-bs-auto-close="outside"
+              data-bs-toggle="dropdown" href="javascript:;"><i class="material-icons-outlined">notifications</i>
+              <?php if ($unreadCount > 0): ?>
+                <span class="badge-notify"><?= $unreadCount ?></span>
+              <?php endif; ?>
 
-              </a>
-              <div class="dropdown-menu dropdown-notify dropdown-menu-end shadow">
-                <div class="px-3 py-1 d-flex align-items-center justify-content-between border-bottom">
-                  <h5 class="notiy-title mb-0">Notifications</h5>
-                  <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle dropdown-toggle-nocaret option" type="button"
-                      data-bs-toggle="dropdown" aria-expanded="false">
-                      <span class="material-icons-outlined">
-                        more_vert
-                      </span>
-                    </button>
-                    <div class="dropdown-menu dropdown-option dropdown-menu-end shadow">
-                      <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
-                            class="material-icons-outlined fs-6">inventory_2</i>Archive All</a></div>
-                      <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
-                            class="material-icons-outlined fs-6">done_all</i>Mark all as read</a></div>
-                      <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
-                            class="material-icons-outlined fs-6">mic_off</i>Disable Notifications</a></div>
-                      <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
-                            class="material-icons-outlined fs-6">grade</i>What's new ?</a></div>
-                      <div>
-                        <hr class="dropdown-divider">
-                      </div>
-                      <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
-                            class="material-icons-outlined fs-6">leaderboard</i>Reports</a></div>
+            </a>
+            <div class="dropdown-menu dropdown-notify dropdown-menu-end shadow">
+              <div class="px-3 py-1 d-flex align-items-center justify-content-between border-bottom">
+                <h5 class="notiy-title mb-0">Notifications</h5>
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle dropdown-toggle-nocaret option" type="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="material-icons-outlined">
+                      more_vert
+                    </span>
+                  </button>
+                  <div class="dropdown-menu dropdown-option dropdown-menu-end shadow">
+                    <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
+                          class="material-icons-outlined fs-6">inventory_2</i>Archive All</a></div>
+                    <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
+                          class="material-icons-outlined fs-6">done_all</i>Mark all as read</a></div>
+                    <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
+                          class="material-icons-outlined fs-6">mic_off</i>Disable Notifications</a></div>
+                    <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
+                          class="material-icons-outlined fs-6">grade</i>What's new ?</a></div>
+                    <div>
+                      <hr class="dropdown-divider">
                     </div>
+                    <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
+                          class="material-icons-outlined fs-6">leaderboard</i>Reports</a></div>
                   </div>
                 </div>
-                <div class="notify-list">
-                  <?php if (empty($notifications)): ?>
+              </div>
+              <div class="notify-list">
+                <?php if (empty($notifications)): ?>
+                  <div class="p-3 text-center text">
+                    Tidak ada notifikasi
+                  </div>
+                <?php else: ?>
+
+                  <?php
+                  $hasUnread = false;
+                  foreach ($notifications as $notif) {
+                    if (empty($notif['is_read']) || $notif['is_read'] == 0) {
+                      $hasUnread = true;
+                      break;
+                    }
+                  }
+                  ?>
+
+                  <?php if (!$hasUnread): ?>
                     <div class="p-3 text-center text">
-                      Tidak ada notifikasi
+                      Tidak ada notifikasi baru
                     </div>
                   <?php else: ?>
 
-                    <?php
-                    $hasUnread = false;
-                    foreach ($notifications as $notif) {
-                      if (empty($notif['is_read']) || $notif['is_read'] == 0) {
-                        $hasUnread = true;
-                        break;
-                      }
-                    }
-                    ?>
+                    <?php foreach ($notifications as $notif): ?>
+                      <?php if (!empty($notif['is_read']) && $notif['is_read'] == 1) continue; ?>
 
-                    <?php if (!$hasUnread): ?>
-                      <div class="p-3 text-center text">
-                        Tidak ada notifikasi baru
-                      </div>
-                    <?php else: ?>
+                      <a class="dropdown-item border-bottom py-2"
+                        href="<?= BASE_URL ?>/?c=notification&m=read&id=<?= $notif['id'] ?>&redirect=<?= urlencode($notif['link']) ?>">
 
-                      <?php foreach ($notifications as $notif): ?>
-                        <?php if (!empty($notif['is_read']) && $notif['is_read'] == 1) continue; ?>
-
-                        <a class="dropdown-item border-bottom py-2"
-                          href="<?= BASE_URL ?>/?c=notification&m=read&id=<?= $notif['id'] ?>&redirect=<?= urlencode($notif['link']) ?>">
-
-                          <div class="d-flex align-items-center gap-3">
-                            <div class="user-wrapper bg-primary bg-opacity-10">
-                              <i class="material-icons-outlined">shopping_cart</i>
-                            </div>
-                            <div>
-                              <h6 class="mb-0"><?= htmlspecialchars($notif['title']) ?></h6>
-                              <p class="mb-0 small"><?= htmlspecialchars($notif['message']) ?></p>
-                              <small class="text">
-                                <?= date('d M Y H:i', strtotime($notif['created_at'])) ?>
-                              </small>
-                            </div>
+                        <div class="d-flex align-items-center gap-3">
+                          <div class="user-wrapper bg-primary bg-opacity-10">
+                            <i class="material-icons-outlined">shopping_cart</i>
                           </div>
+                          <div>
+                            <h6 class="mb-0"><?= htmlspecialchars($notif['title']) ?></h6>
+                            <p class="mb-0 small"><?= htmlspecialchars($notif['message']) ?></p>
+                            <small class="text">
+                              <?= date('d M Y H:i', strtotime($notif['created_at'])) ?>
+                            </small>
+                          </div>
+                        </div>
 
-                        </a>
-                      <?php endforeach; ?>
-
-                    <?php endif; ?>
+                      </a>
+                    <?php endforeach; ?>
 
                   <?php endif; ?>
-                </div>
 
+                <?php endif; ?>
               </div>
-            </li>
 
-            <li class="nav-item dropdown">
-              <a href="javascript:;" class="dropdown-toggle dropdown-toggle-nocaret" data-bs-toggle="dropdown">
-                <img src="<?= $photo ?>" class="rounded-circle p-1 border" width="45" height="45" alt="User">
+            </div>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a href="javascript:;" class="dropdown-toggle dropdown-toggle-nocaret" data-bs-toggle="dropdown">
+              <img src="<?= $photo ?>" class="rounded-circle p-1 border" width="45" height="45" alt="User">
+            </a>
+
+            <div class="dropdown-menu dropdown-user dropdown-menu-end shadow">
+
+              <div class="dropdown-item text-center">
+                <img src="<?= $photo ?>" class="rounded-circle p-1 shadow mb-2" width="80" height="80">
+                <?php if ($email): ?>
+                  <small class="text-muted">
+                    <h6><?= htmlspecialchars($name ?? '') ?></h6>
+                  </small>
+                <?php endif; ?>
+              </div>
+              <hr class="dropdown-divider">
+              <a class="dropdown-item d-flex align-items-center gap-2 py-2"
+                href="<?= BASE_URL ?>/?c=customer&m=profile">
+                <i class="material-icons-outlined">person_outline</i>
+                Profile
               </a>
 
-              <div class="dropdown-menu dropdown-user dropdown-menu-end shadow">
+              <hr class="dropdown-divider">
 
-                <div class="dropdown-item text-center">
-                  <img src="<?= $photo ?>" class="rounded-circle p-1 shadow mb-2" width="80" height="80">
-                  <?php if ($email): ?>
-                    <small class="text-muted">
-                      <h6><?= htmlspecialchars($name ?? '') ?></h6>
-                    </small>
-                  <?php endif; ?>
-                </div>
-                <hr class="dropdown-divider">
-                <a class="dropdown-item d-flex align-items-center gap-2 py-2"
-                  href="<?= BASE_URL ?>/?c=customer&m=profile">
-                  <i class="material-icons-outlined">person_outline</i>
-                  Profile
-                </a>
-
-                <hr class="dropdown-divider">
-
-                <a class="dropdown-item d-flex align-items-center gap-2 py-2"
-                  href="<?= BASE_URL ?>/?c=auth&m=logout">
-                  <i class="material-icons-outlined">power_settings_new</i>
-                  Logout
-                </a>
-              </div>
-            </li>
-          </ul>
+              <a class="dropdown-item d-flex align-items-center gap-2 py-2"
+                href="<?= BASE_URL ?>/?c=auth&m=logout">
+                <i class="material-icons-outlined">power_settings_new</i>
+                Logout
+              </a>
+            </div>
+          </li>
+        </ul>
 
       </nav>
       <style>

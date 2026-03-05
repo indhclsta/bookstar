@@ -35,6 +35,9 @@ class SellerChatController
                 $chatWith = array_values($chatWithUser)[0];
                 $messages = $this->chatModel->getChatWithUser($sellerId, $chatWith['id']);
             }
+            if ($selectedUserId) {
+                $this->chatModel->markAsRead($selectedUserId, $sellerId);
+            }
         }
 
         require APP_PATH . '/views/seller/chat.php';

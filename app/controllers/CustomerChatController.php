@@ -37,10 +37,14 @@ class CustomerChatController
             }
         }
 
+        if (isset($_GET['userId'])) {
+            $this->chatModel->markAsRead($sellerId, $customerId);
+        }
+
         // Ambil foto customer dari database
         $userModel = new UserModel();
         $customerPhoto = $userModel->getUserPhoto($customerId);
-        
+
         // Simpan di session untuk digunakan di view
         $_SESSION['user']['photo'] = $customerPhoto;
 

@@ -1,11 +1,15 @@
 <?php
 require_once APP_PATH . '/models/NotificationModel.php';
+require_once APP_PATH . '/models/ChatModel.php';
 
 $userId = $_SESSION['user']['id'] ?? 0;
-$notifModel = new NotificationModel();
 
+$notifModel = new NotificationModel();
 $notifications = $notifModel->getUnreadByUser($userId);
 $totalNotif   = $notifModel->countUnread($userId);
+
+$chatModel = new ChatModel();
+$totalUnreadChat = $chatModel->countUnreadConversations($userId);
 ?>
 <?php
 $user  = $_SESSION['user'] ?? null;
@@ -13,11 +17,12 @@ $user  = $_SESSION['user'] ?? null;
 $name  = $user['name']  ?? '';
 $email = $user['email'] ?? '';
 $photo = !empty($user['photo'])
-    ? BASE_URL . '/uploads/profile/' . $user['photo']
-    : 'https://placehold.co/100x100/png';
+  ? BASE_URL . '/uploads/profile/' . $user['photo']
+  : 'https://placehold.co/100x100/png';
 ?>
 <!doctype html>
 <html lang="en" data-bs-theme="blue-theme">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,8 +30,8 @@ $photo = !empty($user['photo'])
   <!--favicon-->
   <link rel="icon" href="<?= BASE_URL ?>/assets/images/" type="image/png">
   <!-- loader-->
-	<link href="<?= BASE_URL ?>/assets/css/pace.min.css" rel="stylesheet">
-	<script src="<?= BASE_URL ?>/assets/js/pace.min.js"></script>
+  <link href="<?= BASE_URL ?>/assets/css/pace.min.css" rel="stylesheet">
+  <script src="<?= BASE_URL ?>/assets/js/pace.min.js"></script>
 
   <!--plugins-->
   <link href="<?= BASE_URL ?>/assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet">
@@ -50,186 +55,202 @@ $photo = !empty($user['photo'])
   <link href="<?= BASE_URL ?>/assets/css/responsive.css" rel="stylesheet">
 
 </head>
+
 <body>
 
-<div class="wrapper">
+  <div class="wrapper">
 
-<header class="top-header">
-  <nav class="navbar navbar-expand align-items-center gap-4">
-      <div class="btn-toggle">
-        <a href="javascript:;"><i class="material-icons-outlined">menu</i></a>
-      </div>
-      <div class="search-bar flex-grow-1">
-        <div class="position-relative">
-          <input class="form-control rounded-5 px-5 search-control d-lg-block d-none" type="text" placeholder="Search">
-          <span class="material-icons-outlined position-absolute d-lg-block d-none ms-3 translate-middle-y start-0 top-50">search</span>
-          <span class="material-icons-outlined position-absolute me-3 translate-middle-y end-0 top-50 search-close">close</span>
-          <div class="search-popup p-3">
-            <div class="card rounded-4 overflow-hidden">
-              <div class="card-header d-lg-none">
-                <div class="position-relative">
-                  <input class="form-control rounded-5 px-5 mobile-search-control" type="text" placeholder="Search">
-                  <span class="material-icons-outlined position-absolute ms-3 translate-middle-y start-0 top-50">search</span>
-                  <span class="material-icons-outlined position-absolute me-3 translate-middle-y end-0 top-50 mobile-search-close">close</span>
-                 </div>
-              </div>
-              <div class="card-body search-content">
-                <p class="search-title">Recent Searches</p>
-                <div class="d-flex align-items-start flex-wrap gap-2 kewords-wrapper">
-                  <a href="javascript:;" class="kewords"><span>Angular Template</span><i
-                      class="material-icons-outlined fs-6">search</i></a>
-                  <a href="javascript:;" class="kewords"><span>Dashboard</span><i
-                      class="material-icons-outlined fs-6">search</i></a>
-                  <a href="javascript:;" class="kewords"><span>Admin Template</span><i
-                      class="material-icons-outlined fs-6">search</i></a>
-                  <a href="javascript:;" class="kewords"><span>Bootstrap 5 Admin</span><i
-                      class="material-icons-outlined fs-6">search</i></a>
-                  <a href="javascript:;" class="kewords"><span>Html eCommerce</span><i
-                      class="material-icons-outlined fs-6">search</i></a>
-                  <a href="javascript:;" class="kewords"><span>Sass</span><i
-                      class="material-icons-outlined fs-6">search</i></a>
-                  <a href="javascript:;" class="kewords"><span>laravel 9</span><i
-                      class="material-icons-outlined fs-6">search</i></a>
-                </div>
-                <hr>
-                <p class="search-title">Tutorials</p>
-                <div class="search-list d-flex flex-column gap-2">
-                  <div class="search-list-item d-flex align-items-center gap-3">
-                    <div class="list-icon">
-                      <i class="material-icons-outlined fs-5">play_circle</i>
-                    </div>
-                    <div class="">
-                      <h5 class="mb-0 search-list-title ">Wordpress Tutorials</h5>
-                    </div>
-                  </div>
-                  <div class="search-list-item d-flex align-items-center gap-3">
-                    <div class="list-icon">
-                      <i class="material-icons-outlined fs-5">shopping_basket</i>
-                    </div>
-                    <div class="">
-                      <h5 class="mb-0 search-list-title">eCommerce Website Tutorials</h5>
-                    </div>
-                  </div>
-  
-                  <div class="search-list-item d-flex align-items-center gap-3">
-                    <div class="list-icon">
-                      <i class="material-icons-outlined fs-5">laptop</i>
-                    </div>
-                    <div class="">
-                      <h5 class="mb-0 search-list-title">Responsive Design</h5>
-                    </div>
+    <header class="top-header">
+      <nav class="navbar navbar-expand align-items-center gap-4">
+        <div class="btn-toggle">
+          <a href="javascript:;"><i class="material-icons-outlined">menu</i></a>
+        </div>
+        <div class="search-bar flex-grow-1">
+          <div class="position-relative">
+            <input class="form-control rounded-5 px-5 search-control d-lg-block d-none" type="text" placeholder="Search">
+            <span class="material-icons-outlined position-absolute d-lg-block d-none ms-3 translate-middle-y start-0 top-50">search</span>
+            <span class="material-icons-outlined position-absolute me-3 translate-middle-y end-0 top-50 search-close">close</span>
+            <div class="search-popup p-3">
+              <div class="card rounded-4 overflow-hidden">
+                <div class="card-header d-lg-none">
+                  <div class="position-relative">
+                    <input class="form-control rounded-5 px-5 mobile-search-control" type="text" placeholder="Search">
+                    <span class="material-icons-outlined position-absolute ms-3 translate-middle-y start-0 top-50">search</span>
+                    <span class="material-icons-outlined position-absolute me-3 translate-middle-y end-0 top-50 mobile-search-close">close</span>
                   </div>
                 </div>
-  
-                <hr>
-                <p class="search-title">Members</p>
-  
-                <div class="search-list d-flex flex-column gap-2">
-                  <div class="search-list-item d-flex align-items-center gap-3">
-                    <div class="memmber-img">
-                      <img src="https://placehold.co/110x110/png" width="32" height="32" class="rounded-circle" alt="">
+                <div class="card-body search-content">
+                  <p class="search-title">Recent Searches</p>
+                  <div class="d-flex align-items-start flex-wrap gap-2 kewords-wrapper">
+                    <a href="javascript:;" class="kewords"><span>Angular Template</span><i
+                        class="material-icons-outlined fs-6">search</i></a>
+                    <a href="javascript:;" class="kewords"><span>Dashboard</span><i
+                        class="material-icons-outlined fs-6">search</i></a>
+                    <a href="javascript:;" class="kewords"><span>Admin Template</span><i
+                        class="material-icons-outlined fs-6">search</i></a>
+                    <a href="javascript:;" class="kewords"><span>Bootstrap 5 Admin</span><i
+                        class="material-icons-outlined fs-6">search</i></a>
+                    <a href="javascript:;" class="kewords"><span>Html eCommerce</span><i
+                        class="material-icons-outlined fs-6">search</i></a>
+                    <a href="javascript:;" class="kewords"><span>Sass</span><i
+                        class="material-icons-outlined fs-6">search</i></a>
+                    <a href="javascript:;" class="kewords"><span>laravel 9</span><i
+                        class="material-icons-outlined fs-6">search</i></a>
+                  </div>
+                  <hr>
+                  <p class="search-title">Tutorials</p>
+                  <div class="search-list d-flex flex-column gap-2">
+                    <div class="search-list-item d-flex align-items-center gap-3">
+                      <div class="list-icon">
+                        <i class="material-icons-outlined fs-5">play_circle</i>
+                      </div>
+                      <div class="">
+                        <h5 class="mb-0 search-list-title ">Wordpress Tutorials</h5>
+                      </div>
                     </div>
-                    <div class="">
-                      <h5 class="mb-0 search-list-title ">Andrew Stark</h5>
+                    <div class="search-list-item d-flex align-items-center gap-3">
+                      <div class="list-icon">
+                        <i class="material-icons-outlined fs-5">shopping_basket</i>
+                      </div>
+                      <div class="">
+                        <h5 class="mb-0 search-list-title">eCommerce Website Tutorials</h5>
+                      </div>
+                    </div>
+
+                    <div class="search-list-item d-flex align-items-center gap-3">
+                      <div class="list-icon">
+                        <i class="material-icons-outlined fs-5">laptop</i>
+                      </div>
+                      <div class="">
+                        <h5 class="mb-0 search-list-title">Responsive Design</h5>
+                      </div>
                     </div>
                   </div>
-  
-                  <div class="search-list-item d-flex align-items-center gap-3">
-                    <div class="memmber-img">
-                      <img src="https://placehold.co/110x110/png" width="32" height="32" class="rounded-circle" alt="">
+
+                  <hr>
+                  <p class="search-title">Members</p>
+
+                  <div class="search-list d-flex flex-column gap-2">
+                    <div class="search-list-item d-flex align-items-center gap-3">
+                      <div class="memmber-img">
+                        <img src="https://placehold.co/110x110/png" width="32" height="32" class="rounded-circle" alt="">
+                      </div>
+                      <div class="">
+                        <h5 class="mb-0 search-list-title ">Andrew Stark</h5>
+                      </div>
                     </div>
-                    <div class="">
-                      <h5 class="mb-0 search-list-title ">Snetro Jhonia</h5>
+
+                    <div class="search-list-item d-flex align-items-center gap-3">
+                      <div class="memmber-img">
+                        <img src="https://placehold.co/110x110/png" width="32" height="32" class="rounded-circle" alt="">
+                      </div>
+                      <div class="">
+                        <h5 class="mb-0 search-list-title ">Snetro Jhonia</h5>
+                      </div>
                     </div>
+
+                    <div class="search-list-item d-flex align-items-center gap-3">
+                      <div class="memmber-img">
+                        <img src="https://placehold.co/110x110/png" width="32" height="32" class="rounded-circle" alt="">
+                      </div>
+                      <div class="">
+                        <h5 class="mb-0 search-list-title">Michle Clark</h5>
+                      </div>
+                    </div>
+
                   </div>
-  
-                  <div class="search-list-item d-flex align-items-center gap-3">
-                    <div class="memmber-img">
-                      <img src="https://placehold.co/110x110/png" width="32" height="32" class="rounded-circle" alt="">
-                    </div>
-                    <div class="">
-                      <h5 class="mb-0 search-list-title">Michle Clark</h5>
-                    </div>
-                  </div>
-  
                 </div>
-              </div>
-              <div class="card-footer text-center bg-transparent">
-                <a href="javascript:;" class="btn w-100">See All Search Results</a>
+                <div class="card-footer text-center bg-transparent">
+                  <a href="javascript:;" class="btn w-100">See All Search Results</a>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <ul class="navbar-nav gap-1 nav-right-links align-items-center">
-        <li class="nav-item d-lg-none mobile-search-btn">
-          <a class="nav-link" href="javascript:;"><i class="material-icons-outlined">search</i></a>
-        </li>
-   
+        <ul class="navbar-nav gap-1 nav-right-links align-items-center">
+          <li class="nav-item d-lg-none mobile-search-btn">
+            <a class="nav-link" href="javascript:;"><i class="material-icons-outlined">search</i></a>
+          </li>
+          <!-- CHAT ICON -->
+          <li class="nav-item">
+            <a href="<?= BASE_URL ?>/?c=sellerChat&m=index"
+              class="nav-link position-relative"
+              title="Chat">
 
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" data-bs-auto-close="outside"
-            data-bs-toggle="dropdown" href="javascript:;"><i class="material-icons-outlined">notifications</i>
-            <span class="badge-notify"><?= $totalNotif ?></span>
+              <i class="material-icons-outlined">chat</i>
 
-          </a>
-          <div class="dropdown-menu dropdown-notify dropdown-menu-end shadow">
-            <div class="px-3 py-1 d-flex align-items-center justify-content-between border-bottom">
-              <h5 class="notiy-title mb-0">Notifications</h5>
-              <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle dropdown-toggle-nocaret option" type="button"
-                  data-bs-toggle="dropdown" aria-expanded="false">
-                  <span class="material-icons-outlined">
-                    more_vert
-                  </span>
-                </button>
-                <div class="dropdown-menu dropdown-option dropdown-menu-end shadow">
-                  <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
-                        class="material-icons-outlined fs-6">inventory_2</i>Archive All</a></div>
-                  <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
-                        class="material-icons-outlined fs-6">done_all</i>Mark all as read</a></div>
-                  <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
-                        class="material-icons-outlined fs-6">mic_off</i>Disable Notifications</a></div>
-                  <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
-                        class="material-icons-outlined fs-6">grade</i>What's new ?</a></div>
-                  <div>
-                    <hr class="dropdown-divider">
+              <?php if ($totalUnreadChat > 0): ?>
+                <span class="badge-notify">
+                  <?= $totalUnreadChat ?>
+                </span>
+              <?php endif; ?>
+
+            </a>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" data-bs-auto-close="outside"
+              data-bs-toggle="dropdown" href="javascript:;"><i class="material-icons-outlined">notifications</i>
+              <span class="badge-notify"><?= $totalNotif ?></span>
+
+            </a>
+            <div class="dropdown-menu dropdown-notify dropdown-menu-end shadow">
+              <div class="px-3 py-1 d-flex align-items-center justify-content-between border-bottom">
+                <h5 class="notiy-title mb-0">Notifications</h5>
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle dropdown-toggle-nocaret option" type="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="material-icons-outlined">
+                      more_vert
+                    </span>
+                  </button>
+                  <div class="dropdown-menu dropdown-option dropdown-menu-end shadow">
+                    <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
+                          class="material-icons-outlined fs-6">inventory_2</i>Archive All</a></div>
+                    <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
+                          class="material-icons-outlined fs-6">done_all</i>Mark all as read</a></div>
+                    <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
+                          class="material-icons-outlined fs-6">mic_off</i>Disable Notifications</a></div>
+                    <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
+                          class="material-icons-outlined fs-6">grade</i>What's new ?</a></div>
+                    <div>
+                      <hr class="dropdown-divider">
+                    </div>
+                    <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
+                          class="material-icons-outlined fs-6">leaderboard</i>Reports</a></div>
                   </div>
-                  <div><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;"><i
-                        class="material-icons-outlined fs-6">leaderboard</i>Reports</a></div>
                 </div>
               </div>
-            </div>
-            <div class="notify-list">
-            <?php if (empty($notifications)): ?>
-              <div class="p-3 text-center text">
-                Tidak ada notifikasi
-              </div>
-            <?php else: ?>
-              <?php foreach ($notifications as $notif): ?>
-                <a class="dropdown-item border-bottom py-2"
-                  href="<?= BASE_URL ?>/?c=notification&m=read&id=<?= $notif['id'] ?>&redirect=<?= urlencode($notif['link']) ?>">
-                  <div class="d-flex align-items-center gap-3">
-                    <div class="user-wrapper bg-primary bg-opacity-10">
-                      <i class="material-icons-outlined">shopping_cart</i>
-                    </div>
-                    <div>
-                      <h6 class="mb-0"><?= htmlspecialchars($notif['title']) ?></h6>
-                      <p class="mb-0 small"><?= htmlspecialchars($notif['message']) ?></p>
-                      <small class="text">
-                        <?= date('d M Y H:i', strtotime($notif['created_at'])) ?>
-                      </small>
-                    </div>
+              <div class="notify-list">
+                <?php if (empty($notifications)): ?>
+                  <div class="p-3 text-center text">
+                    Tidak ada notifikasi
                   </div>
-                </a>
-              <?php endforeach; ?>
-            <?php endif; ?>
+                <?php else: ?>
+                  <?php foreach ($notifications as $notif): ?>
+                    <a class="dropdown-item border-bottom py-2"
+                      href="<?= BASE_URL ?>/?c=notification&m=read&id=<?= $notif['id'] ?>&redirect=<?= urlencode($notif['link']) ?>">
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="user-wrapper bg-primary bg-opacity-10">
+                          <i class="material-icons-outlined">shopping_cart</i>
+                        </div>
+                        <div>
+                          <h6 class="mb-0"><?= htmlspecialchars($notif['title']) ?></h6>
+                          <p class="mb-0 small"><?= htmlspecialchars($notif['message']) ?></p>
+                          <small class="text">
+                            <?= date('d M Y H:i', strtotime($notif['created_at'])) ?>
+                          </small>
+                        </div>
+                      </div>
+                    </a>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </div>
+
             </div>
+          </li>
 
-          </div>
-        </li>
-
-        <li class="nav-item dropdown">
+          <li class="nav-item dropdown">
             <a href="javascript:;" class="dropdown-toggle dropdown-toggle-nocaret" data-bs-toggle="dropdown">
               <img src="<?= $photo ?>" class="rounded-circle p-1 border" width="45" height="45" alt="User">
             </a>
@@ -239,11 +260,13 @@ $photo = !empty($user['photo'])
               <div class="dropdown-item text-center">
                 <img src="<?= $photo ?>" class="rounded-circle p-1 shadow mb-2" width="80" height="80">
                 <?php if ($email): ?>
-                  <small class="text"><h6><?= htmlspecialchars($name ?? '') ?></h6></small>
+                  <small class="text">
+                    <h6><?= htmlspecialchars($name ?? '') ?></h6>
+                  </small>
                 <?php endif; ?>
               </div>
-            <hr class="dropdown-divider">
-            <a class="dropdown-item d-flex align-items-center gap-2 py-2"
+              <hr class="dropdown-divider">
+              <a class="dropdown-item d-flex align-items-center gap-2 py-2"
                 href="<?= BASE_URL ?>/?c=seller&m=profile">
                 <i class="material-icons-outlined">person_outline</i>
                 Profile
@@ -256,9 +279,9 @@ $photo = !empty($user['photo'])
                 <i class="material-icons-outlined">power_settings_new</i>
                 Logout
               </a>
-          </div>
-        </li>
-      </ul>
+            </div>
+          </li>
+        </ul>
 
-    </nav>
-</header>
+      </nav>
+    </header>

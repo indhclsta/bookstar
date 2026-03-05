@@ -28,14 +28,45 @@ class ChatModel
     public function sendMessage($data)
     {
         $stmt = $this->db->prepare("
-            INSERT INTO chats (sender_id, receiver_id, message)
-            VALUES (:sender_id, :receiver_id, :message)
-        ");
+        INSERT INTO chats (sender_id, receiver_id, message, is_read)
+        VALUES (:sender_id, :receiver_id, :message, 0)
+    ");
         return $stmt->execute([
             ':sender_id' => $data['sender_id'],
             ':receiver_id' => $data['receiver_id'],
             ':message' => $data['message']
         ]);
+    }
+
+    public function markAsRead($senderId, $receiverId)
+    {
+        $stmt = $this->db->prepare("
+        UPDATE chats
+        SET is_read = 1
+        WHERE sender_id = :sender_id
+        AND receiver_id = :receiver_id
+        AND is_read = 0
+    ");
+
+        return $stmt->execute([
+            ':sender_id' => $senderId,
+            ':receiver_id' => $receiverId
+        ]);
+    }
+
+    public function countUnreadConversations($userId)
+    {
+        $stmt = $this->db->prepare("
+        SELECT COUNT(DISTINCT sender_id) as total
+        FROM chats
+        WHERE receiver_id = :user_id
+        AND is_read = 0
+    ");
+
+        $stmt->execute([':user_id' => $userId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result['total'] ?? 0;
     }
 
     // Ambil percakapan antara seller dan customer tertentu
