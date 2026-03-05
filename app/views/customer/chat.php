@@ -12,54 +12,81 @@
             <!-- Header -->
             <div class="p-3" style="background-color: #1E2A3A; border-bottom: 1px solid #2A3A4F;">
               <h5 class="mb-3" style="color: #E5E9F0; font-weight: 500;">Chats</h5>
-              <input type="text" class="form-control form-control-sm" placeholder="Search chats..." 
-                     style="background-color: #0F1625; border: 1px solid #2A3A4F; border-radius: 8px; padding: 0.5rem; color: #E5E9F0;">
+              <input type="text" class="form-control form-control-sm" placeholder="Search chats..."
+                style="background-color: #0F1625; border: 1px solid #2A3A4F; border-radius: 8px; padding: 0.5rem; color: #E5E9F0;">
             </div>
-            
+
             <!-- Chat List -->
             <div class="flex-grow-1 overflow-auto" style="background-color: #141B2B;">
               <?php if (!empty($sellers)): ?>
                 <?php foreach ($sellers as $s): ?>
                   <a href="<?= BASE_URL ?>/?c=customerChat&m=index&userId=<?= $s['id'] ?>" class="text-decoration-none">
-                    <div class="p-3" style="border-bottom: 1px solid #1E2A3A; <?= ($chatWith['id'] == $s['id']) ? 'background-color: #1E3A5F;' : 'background-color: #141B2B;' ?>">
+
+                    <div class="p-3"
+                      style="border-bottom: 1px solid #1E2A3A;
+          <?= ($chatWith['id'] == $s['id']) ? 'background-color: #1E3A5F;' : 'background-color: #141B2B;' ?>">
+
                       <div class="d-flex align-items-center">
+
                         <!-- Avatar -->
-                        <div class="position-relative">
-                          <div class="rounded-circle d-flex align-items-center justify-content-center" 
-                               style="width: 42px; height: 42px; min-width: 42px; background-color: #2A6DF4; color: #FFFFFF;">
-                            <span class="fw-semibold"><?= strtoupper(substr($s['name'], 0, 1)) ?></span>
-                          </div>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                          style="width: 42px; height: 42px; min-width: 42px; background-color: #2A6DF4; color: #FFFFFF;">
+                          <span class="fw-semibold">
+                            <?= strtoupper(substr($s['name'], 0, 1)) ?>
+                          </span>
                         </div>
-                        
+
                         <!-- Info -->
                         <div class="ms-3 flex-grow-1 min-width-0">
-                          <h6 class="mb-0" style="color: #E5E9F0;"><?= htmlspecialchars($s['name']) ?></h6>
-                          <p class="mb-0 small" style="color: #8A9BB5; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+
+                          <!-- Nama + Badge -->
+                          <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0"
+                              style="color: #E5E9F0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                              <?= htmlspecialchars($s['name']) ?>
+                            </h6>
+
+                            <span
+                              class="badge bg-danger rounded-pill unread-badge"
+                              data-user-id="<?= $s['id'] ?>"
+                              style="display:none; min-width: 20px;">
+                            </span>
+                          </div>
+
+                          <!-- Preview Message -->
+                          <p class="mb-0 small"
+                            style="color: #8A9BB5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                             <?php
-                            $lastMsg = '';
-                            foreach ($messages as $msg) {
-                              if ($msg['sender_id'] == $s['id'] || $msg['receiver_id'] == $s['id']) {
-                                $lastMsg = $msg['message'];
+                            if (!empty($s['last_message'])) {
+
+                              if ($s['last_sender_id'] == $_SESSION['user']['id']) {
+                                echo "You: ";
                               }
-                            }
-                            if ($lastMsg) {
-                              echo htmlspecialchars(strlen($lastMsg) > 25 ? substr($lastMsg, 0, 25) . '...' : $lastMsg);
+
+                              echo htmlspecialchars(strlen($s['last_message']) > 25
+                                ? substr($s['last_message'], 0, 25) . '...'
+                                : $s['last_message']);
                             } else {
                               echo 'No messages yet';
                             }
                             ?>
                           </p>
+
                         </div>
                       </div>
+
                     </div>
                   </a>
                 <?php endforeach; ?>
+
               <?php else: ?>
+
                 <div class="text-center py-5 px-3">
                   <i class="bi bi-chat-dots" style="font-size: 2.5rem; color: #2A3A4F;"></i>
                   <p class="mt-3 mb-0" style="color: #8A9BB5;">No chats yet</p>
                   <small style="color: #546E8A;">Chats will appear when you contact a seller</small>
                 </div>
+
               <?php endif; ?>
             </div>
           </div>
@@ -76,8 +103,8 @@
                     <i class="bi bi-arrow-left"></i>
                   </button>
                   <div class="position-relative">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
-                         style="width: 42px; height: 42px; min-width: 42px; background-color: #2A6DF4; color: #FFFFFF;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                      style="width: 42px; height: 42px; min-width: 42px; background-color: #2A6DF4; color: #FFFFFF;">
                       <span class="fw-semibold"><?= strtoupper(substr($chatWith['name'] ?? 'U', 0, 1)) ?></span>
                     </div>
                   </div>
@@ -120,7 +147,7 @@
                         </div>
                       <?php endif; ?>
                     <?php endforeach; ?>
-                    
+
                     <!-- Invisible spacer for scroll -->
                     <div style="height: 1px;" id="scrollTarget"></div>
                   <?php else: ?>
@@ -138,12 +165,12 @@
                 <form action="<?= BASE_URL ?>/?c=customerChat&m=send" method="POST" class="d-flex gap-2 align-items-center">
                   <input type="hidden" name="receiver_id" value="<?= $chatWith['id'] ?>">
                   <div class="flex-grow-1">
-                    <input type="text" 
-                           name="message" 
-                           class="form-control" 
-                           placeholder="Type a message..." 
-                           style="height: 45px; background-color: #0F1625; border: 1px solid #1E2A3A; border-radius: 8px; color: #E5E9F0;"
-                           required>
+                    <input type="text"
+                      name="message"
+                      class="form-control"
+                      placeholder="Type a message..."
+                      style="height: 45px; background-color: #0F1625; border: 1px solid #1E2A3A; border-radius: 8px; color: #E5E9F0;"
+                      required>
                   </div>
                   <button type="submit" class="btn px-4" style="height: 45px; min-width: 80px; background-color: #2A6DF4; color: #FFFFFF; border: 1px solid #1E4A8A;">
                     <i class="bi bi-send me-1"></i> Send
@@ -166,191 +193,239 @@
 </main>
 
 <style>
-
-/* Container */
-.main-wrapper .container-fluid {
-  max-width: 1600px;
-  margin: 0 auto;
-  height: 100%;
-}
-
-/* Card Chat */
-.card {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-  height: 100%;
-}
-
-/* Row & Col */
-.row.g-0 {
-  height: 100%;
-}
-
-[class*="col-"] {
-  height: 100%;
-}
-
-/* Chat List */
-.min-width-0 {
-  min-width: 0;
-}
-
-/* Chat Messages Area */
-#chatBox {
-  scroll-behavior: smooth;
-  min-height: 0;
-  height: 100%;
-}
-
-#chatBox > div {
-  min-height: min-content;
-}
-
-/* Message Bubbles */
-.rounded-3 {
-  border-radius: 12px !important;
-}
-
-/* Scrollbar */
-.overflow-auto::-webkit-scrollbar {
-  width: 5px;
-}
-
-.overflow-auto::-webkit-scrollbar-track {
-  background: #141B2B;
-}
-
-.overflow-auto::-webkit-scrollbar-thumb {
-  background: #2A3A4F;
-  border-radius: 3px;
-}
-
-.overflow-auto::-webkit-scrollbar-thumb:hover {
-  background: #3A4F6A;
-}
-
-/* Form Controls */
-.form-control {
-  font-size: 14px;
-}
-
-.form-control:focus {
-  border-color: #2A6DF4;
-  box-shadow: 0 0 0 2px rgba(42, 109, 244, 0.2);
-  outline: none;
-  background-color: #1A2335;
-  color: #E5E9F0;
-}
-
-.form-control::placeholder {
-  color: #546E8A;
-}
-
-/* Button */
-.btn {
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.btn:hover {
-  background-color: #1E4A8A !important;
-  border-color: #2A6DF4 !important;
-}
-
-/* Responsive */
-@media (max-width: 767px) {
-  .main-wrapper {
-    margin-left: 0;
-  }
-  
+  /* Container */
   .main-wrapper .container-fluid {
-    padding: 10px !important;
+    max-width: 1600px;
+    margin: 0 auto;
+    height: 100%;
   }
-  
-  .col-md-4 {
-    position: fixed;
-    left: -100%;
-    top: 60px;
-    bottom: 0;
-    width: 100%;
-    z-index: 1050;
-    transition: left 0.3s ease;
+
+  /* Card Chat */
+  .card {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    height: 100%;
   }
-  
-  .col-md-4.show {
-    left: 0;
+
+  /* Row & Col */
+  .row.g-0 {
+    height: 100%;
   }
-}
 
-/* Text colors */
-.text-muted {
-  color: #8A9BB5 !important;
-}
+  [class*="col-"] {
+    height: 100%;
+  }
 
-.text-success {
-  color: #2A6DF4 !important;
-}
+  /* Chat List */
+  .min-width-0 {
+    min-width: 0;
+  }
 
-/* Border colors */
-.border-end {
-  border-right: 1px solid #1E2A3A !important;
-}
+  /* Chat Messages Area */
+  #chatBox {
+    scroll-behavior: smooth;
+    min-height: 0;
+    height: 100%;
+  }
 
-.border-bottom {
-  border-bottom: 1px solid #1E2A3A !important;
-}
+  #chatBox>div {
+    min-height: min-content;
+  }
 
-.border-top {
-  border-top: 1px solid #1E2A3A !important;
-}
+  /* Message Bubbles */
+  .rounded-3 {
+    border-radius: 12px !important;
+  }
 
-/* Hover effects */
-a:hover .p-3 {
-  background-color: #1E2A3A !important;
-  transition: background-color 0.2s ease;
-}
+  /* Scrollbar */
+  .overflow-auto::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .overflow-auto::-webkit-scrollbar-track {
+    background: #141B2B;
+  }
+
+  .overflow-auto::-webkit-scrollbar-thumb {
+    background: #2A3A4F;
+    border-radius: 3px;
+  }
+
+  .overflow-auto::-webkit-scrollbar-thumb:hover {
+    background: #3A4F6A;
+  }
+
+  /* Form Controls */
+  .form-control {
+    font-size: 14px;
+  }
+
+  .form-control:focus {
+    border-color: #2A6DF4;
+    box-shadow: 0 0 0 2px rgba(42, 109, 244, 0.2);
+    outline: none;
+    background-color: #1A2335;
+    color: #E5E9F0;
+  }
+
+  .form-control::placeholder {
+    color: #546E8A;
+  }
+
+  /* Button */
+  .btn {
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .btn:hover {
+    background-color: #1E4A8A !important;
+    border-color: #2A6DF4 !important;
+  }
+
+  /* Responsive */
+  @media (max-width: 767px) {
+    .main-wrapper {
+      margin-left: 0;
+    }
+
+    .main-wrapper .container-fluid {
+      padding: 10px !important;
+    }
+
+    .col-md-4 {
+      position: fixed;
+      left: -100%;
+      top: 60px;
+      bottom: 0;
+      width: 100%;
+      z-index: 1050;
+      transition: left 0.3s ease;
+    }
+
+    .col-md-4.show {
+      left: 0;
+    }
+  }
+
+  /* Text colors */
+  .text-muted {
+    color: #8A9BB5 !important;
+  }
+
+  .text-success {
+    color: #2A6DF4 !important;
+  }
+
+  /* Border colors */
+  .border-end {
+    border-right: 1px solid #1E2A3A !important;
+  }
+
+  .border-bottom {
+    border-bottom: 1px solid #1E2A3A !important;
+  }
+
+  .border-top {
+    border-top: 1px solid #1E2A3A !important;
+  }
+
+  /* Hover effects */
+  a:hover .p-3 {
+    background-color: #1E2A3A !important;
+    transition: background-color 0.2s ease;
+  }
 </style>
 
 <script>
-function toggleSidebar() {
-  document.querySelector('.col-md-4').classList.toggle('show');
-}
-
-// Scroll to bottom function
-function scrollToBottom() {
-  const chatBox = document.getElementById('chatBox');
-  if (chatBox) {
-    chatBox.scrollTop = chatBox.scrollHeight;
+  function toggleSidebar() {
+    document.querySelector('.col-md-4').classList.toggle('show');
   }
-}
 
-// Scroll to bottom on page load
-document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(scrollToBottom, 200);
-});
+  // Scroll to bottom function
+  function scrollToBottom() {
+    const chatBox = document.getElementById('chatBox');
+    if (chatBox) {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  }
 
-// Auto refresh messages
-<?php if (!empty($chatWith['id'])): ?>
-let lastMessageCount = <?= count($messages) ?>;
-setInterval(function() {
-  fetch('<?= BASE_URL ?>/?c=customerChat&m=getMessages&userId=<?= $chatWith['id'] ?>')
-    .then(response => response.text())
-    .then(html => {
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = html;
-      const newMessages = tempDiv.querySelector('#chatBox')?.innerHTML;
-      const chatBox = document.getElementById('chatBox');
-      
-      if (newMessages && chatBox && chatBox.innerHTML !== newMessages) {
-        const wasAtBottom = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 100;
-        chatBox.innerHTML = newMessages;
-        if (wasAtBottom) {
-          setTimeout(scrollToBottom, 100);
-        }
-      }
-    });
-}, 5000);
-<?php endif; ?>
+  // Scroll to bottom on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(scrollToBottom, 200);
+  });
+
+  // Auto refresh messages
+  <?php if (!empty($chatWith['id'])): ?>
+    let lastMessageCount = <?= count($messages) ?>;
+    setInterval(function() {
+      fetch('<?= BASE_URL ?>/?c=customerChat&m=getMessages&userId=<?= $chatWith['id'] ?>')
+        .then(response => response.text())
+        .then(html => {
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = html;
+          const newMessages = tempDiv.querySelector('#chatBox')?.innerHTML;
+          const chatBox = document.getElementById('chatBox');
+
+          if (newMessages && chatBox && chatBox.innerHTML !== newMessages) {
+            const wasAtBottom = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 100;
+            chatBox.innerHTML = newMessages;
+            if (wasAtBottom) {
+              setTimeout(scrollToBottom, 100);
+            }
+          }
+        });
+    }, 5000);
+  <?php endif; ?>
+
+  function updateSidebarBadges() {
+    fetch('<?= BASE_URL ?>/?c=customerChat&m=getUnreadPerUser')
+      .then(res => res.json())
+      .then(data => {
+
+        // Reset semua badge dulu
+        document.querySelectorAll('.unread-badge').forEach(b => {
+          b.style.display = 'none';
+        });
+
+        data.forEach(item => {
+          const badge = document.querySelector(
+            `.unread-badge[data-user-id="${item.sender_id}"]`
+          );
+
+          if (badge) {
+            badge.textContent = item.total;
+            badge.style.display = 'inline-block';
+          }
+        });
+      });
+  }
+
+  // Jalankan pertama kali
+  updateSidebarBadges();
+
+  // Update tiap 5 detik
+  setInterval(updateSidebarBadges, 5000);
+
+  document.querySelectorAll('.unread-badge').forEach(b => {
+    b.style.display = 'none';
+    const name = b.closest('.ms-3').querySelector('h6');
+    name.classList.remove('fw-bold');
+  });
+
+  data.forEach(item => {
+    const badge = document.querySelector(
+      `.unread-badge[data-user-id="${item.sender_id}"]`
+    );
+
+    if (badge) {
+      badge.textContent = item.total;
+      badge.style.display = 'inline-block';
+
+      const name = badge.closest('.ms-3').querySelector('h6');
+      name.classList.add('fw-bold');
+    }
+  });
 </script>
 
 <?php require APP_PATH . '/views/layouts/customer/footer.php'; ?>

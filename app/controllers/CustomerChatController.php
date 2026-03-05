@@ -20,6 +20,17 @@ class CustomerChatController
 
         // Ambil semua seller (bisa semua seller atau yang pernah order)
         $sellers = $this->chatModel->getAllSellers();
+        foreach ($sellers as &$seller) {
+            $last = $this->chatModel->getLastMessage($customerId, $seller['id']);
+
+            if ($last) {
+                $seller['last_message'] = $last['message'];
+                $seller['last_sender_id'] = $last['sender_id'];
+                $seller['last_time'] = $last['created_at'];
+            } else {
+                $seller['last_message'] = null;
+            }
+        }
 
         $chatWith = ['id' => '', 'name' => 'Select a chat', 'photo' => '', 'status' => 'Offline'];
         $messages = [];
@@ -73,5 +84,47 @@ class CustomerChatController
             header("Location: " . BASE_URL . "/?c=customerChat&m=index&userId=" . $receiverId);
             exit;
         }
+    }
+    public function getMessages()
+    {
+        $customerId = $_SESSION['user']['id'];
+        $sellerId = $_GET['userId'] ?? null;
+
+        if (!$sellerId) {
+            exit;
+        }
+
+        $messages = $this->chatModel->getChatWithSeller($customerId, $sellerId);
+
+        require APP_PATH . '/views/customer/chat_messages.php';
+    }
+    public function getUnreadPerUser()
+    {
+        $customerId = $_SESSION['user']['id'];
+
+        $data = $this->chatModel->getUnreadCountPerUser($customerId);
+
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit;
+    }
+    public function getUnreadCount()
+    {
+        $customerId = $_SESSION['user']['id'];
+
+        $count = $this->chatModel->getUnreadCount($customerId);
+
+        header('Content-Type: application/json');
+        echo json_encode(['total' => $count]);
+        exit;
+    }
+    public function getTotalUnread()
+    {
+        $userId = $_SESSION['user']['id'];
+
+        $total = $this->chatModel->getTotalUnread($userId);
+
+        echo json_encode(['total' => $total]);
+        exit;
     }
 }

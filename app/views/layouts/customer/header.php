@@ -6,7 +6,7 @@ $chatModel = new ChatModel();
 $unreadChat = 0;
 
 if (isset($_SESSION['user'])) {
-  $unreadChat = $chatModel->countUnreadConversations($_SESSION['user']['id']);
+  $unreadChat = $chatModel->getTotalUnread($_SESSION['user']['id']);
 }
 
 $cartCount = 0;
@@ -209,7 +209,6 @@ $photo = !empty($user['photo'])
           </li>
 
           <?php if (isset($_SESSION['user'])): ?>
-
             <li class="nav-item">
               <a href="<?= BASE_URL ?>/?c=customerChat&m=index"
                 class="nav-link position-relative"
@@ -217,15 +216,14 @@ $photo = !empty($user['photo'])
 
                 <i class="material-icons-outlined fs-4">chat</i>
 
-                <?php if (!empty($unreadChat) && $unreadChat > 0): ?>
-                  <span class="position-absolute top-0 end-0 badge rounded-pill bg-danger">
+                <?php if ($unreadChat > 0): ?>
+                  <span class="badge-notify">
                     <?= $unreadChat ?>
                   </span>
                 <?php endif; ?>
 
               </a>
             </li>
-
           <?php endif; ?>
 
 

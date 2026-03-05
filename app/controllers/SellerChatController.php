@@ -22,6 +22,18 @@ class SellerChatController
 
         // Ambil customer yang pernah beli produk seller
         $chatUsers = $this->chatModel->getCustomersByOrders($sellerId);
+        // Tambahkan last message ke setiap user
+        foreach ($chatUsers as &$user) {
+            $last = $this->chatModel->getLastMessage($sellerId, $user['id']);
+
+            if ($last) {
+                $user['last_message'] = $last['message'];
+                $user['last_sender_id'] = $last['sender_id'];
+                $user['last_time'] = $last['created_at'];
+            } else {
+                $user['last_message'] = null;
+            }
+        }
 
         // Tentukan chat dengan siapa (default)
         $chatWith = ['name' => 'Select a chat', 'id' => '', 'photo' => '', 'status' => 'Offline'];
@@ -68,5 +80,34 @@ class SellerChatController
             header("Location: " . BASE_URL . "/?c=sellerChat&m=index&userId=" . $receiverId);
             exit;
         }
+    }
+    public function getUnreadPerUser()
+    {
+        $customerId = $_SESSION['user']['id'];
+
+        $data = $this->chatModel->getUnreadCountPerUser($customerId);
+
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit;
+    }
+    public function getUnreadCount()
+    {
+        $customerId = $_SESSION['user']['id'];
+
+        $count = $this->chatModel->getUnreadCount($customerId);
+
+        header('Content-Type: application/json');
+        echo json_encode(['total' => $count]);
+        exit;
+    }
+    public function getTotalUnread()
+    {
+        $userId = $_SESSION['user']['id'];
+
+        $total = $this->chatModel->getTotalUnread($userId);
+
+        echo json_encode(['total' => $total]);
+        exit;
     }
 }

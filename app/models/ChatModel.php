@@ -69,6 +69,30 @@ class ChatModel
         return $result['total'] ?? 0;
     }
 
+    public function getLastMessage($userId, $otherUserId)
+    {
+        $sql = "SELECT 
+                id,
+                sender_id,
+                receiver_id,
+                message,
+                is_read,
+                created_at
+            FROM chats 
+            WHERE (sender_id = :userId AND receiver_id = :otherUserId)
+               OR (sender_id = :otherUserId AND receiver_id = :userId)
+            ORDER BY created_at DESC
+            LIMIT 1";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':userId' => $userId,
+            ':otherUserId' => $otherUserId
+        ]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     // Ambil percakapan antara seller dan customer tertentu
     public function getChatWithUser($sellerId, $customerId)
     {
@@ -142,4 +166,44 @@ class ChatModel
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function getUnreadCountPerUser($userId)
+    {
+        $stmt = $this->db->prepare("
+        SELECT sender_id, COUNT(*) as total
+        FROM chats
+        WHERE receiver_id = :userId
+        AND is_read = 0
+        GROUP BY sender_id
+    ");
+
+        $stmt->execute([':userId' => $userId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function getUnreadCount($userId)
+    {
+        $stmt = $this->db->prepare("
+        SELECT COUNT(*) as total
+        FROM chats
+        WHERE receiver_id = :userId
+        AND is_read = 0
+    ");
+
+        $stmt->execute([':userId' => $userId]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+    }
+    public function getTotalUnread($userId)
+{
+    $stmt = $this->db->prepare("
+        SELECT COUNT(*) 
+        FROM chats 
+        WHERE receiver_id = :userId
+        AND is_read = 0
+    ");
+
+    $stmt->execute([':userId' => $userId]);
+
+    return $stmt->fetchColumn();
+}
 }

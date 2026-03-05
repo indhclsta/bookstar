@@ -9,7 +9,7 @@ $notifications = $notifModel->getUnreadByUser($userId);
 $totalNotif   = $notifModel->countUnread($userId);
 
 $chatModel = new ChatModel();
-$totalUnreadChat = $chatModel->countUnreadConversations($userId);
+$totalUnreadChat = $chatModel->getTotalUnread($userId); 
 ?>
 <?php
 $user  = $_SESSION['user'] ?? null;
@@ -177,7 +177,7 @@ $photo = !empty($user['photo'])
               class="nav-link position-relative"
               title="Chat">
 
-              <i class="material-icons-outlined">chat</i>
+              <i class="material-icons-outlined fs-4">chat</i>
 
               <?php if ($totalUnreadChat > 0): ?>
                 <span class="badge-notify">
