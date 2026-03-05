@@ -314,12 +314,12 @@ class UserModel
     public function getAllSeller($excludeId = null)
     {
         $sql = "
-        SELECT u.*, 
-               (SELECT COUNT(*) 
-                FROM products p 
-                WHERE p.seller_id = u.id) AS product_count
-        FROM users u
-        WHERE u.role_id = 2 AND u.is_deleted = 0
+    SELECT u.*, 
+           (SELECT COUNT(*) 
+            FROM products p 
+            WHERE p.seller_id = u.id AND p.is_active = 1) AS product_count
+    FROM users u
+    WHERE u.role_id = 2 AND u.is_deleted = 0
     ";
 
         if ($excludeId) {
@@ -837,5 +837,58 @@ class UserModel
         }
 
         return $result;
+    }
+    public function searchSeller($q, $excludeId = null)
+    {
+        $sql = "
+        SELECT u.*, 
+               (SELECT COUNT(*) 
+                FROM products p 
+                WHERE p.seller_id = u.id AND p.is_active = 1) AS product_count
+        FROM users u
+        WHERE u.role_id = 2
+        AND u.is_deleted = 0
+        AND (
+            u.name LIKE :q
+            OR u.email LIKE :q
+            OR u.nik LIKE :q
+        )
+    ";
+
+        if ($excludeId) {
+            $sql .= " AND u.id != :excludeId";
+        }
+
+        $sql .= " ORDER BY u.name ASC";
+
+        $stmt = $this->db->prepare($sql);
+
+        if ($excludeId) {
+            $stmt->execute([
+                ':q' => "%$q%",
+                ':excludeId' => $excludeId
+            ]);
+        } else {
+            $stmt->execute([
+                ':q' => "%$q%"
+            ]);
+        }
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    public function searchCustomer($q)
+    {
+        $stmt = $this->db->prepare("
+        SELECT * 
+        FROM users 
+        WHERE role_id = 3 
+          AND is_deleted = 0
+          AND name LIKE :q 
+        ORDER BY name ASC
+    ");
+        $stmt->execute(['q' => "%$q%"]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

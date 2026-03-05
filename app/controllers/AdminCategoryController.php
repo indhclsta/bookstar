@@ -18,7 +18,14 @@ class AdminCategoryController
     // ================= LIST =================
     public function index()
     {
-        $categories = $this->categoryModel->getAdminCategories();
+        $query = trim($_GET['q'] ?? '');
+
+        if ($query !== '') {
+            $categories = $this->categoryModel->searchAdmin($query); // search di model
+        } else {
+            $categories = $this->categoryModel->getAdminCategories();
+        }
+
         require APP_PATH . '/views/admin/category.php';
     }
 

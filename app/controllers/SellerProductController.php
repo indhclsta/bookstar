@@ -22,8 +22,16 @@ class SellerProductController
     public function index()
     {
         $sellerId = $_SESSION['user']['id'];
+        $q = $_GET['q'] ?? '';
 
-        $products   = $this->productModel->getBySeller($sellerId);
+        if (!empty($q)) {
+            // jika ada search
+            $products = $this->productModel->searchBySeller($sellerId, $q);
+        } else {
+            // jika tidak ada search
+            $products = $this->productModel->getBySeller($sellerId);
+        }
+
         $categories = $this->categoryModel->getSellerCategories($sellerId);
 
         require APP_PATH . '/views/seller/product.php';

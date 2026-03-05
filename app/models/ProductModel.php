@@ -218,4 +218,41 @@ class ProductModel
         $stmt->execute([$sellerId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function searchSellerProducts($sellerId, $q)
+    {
+        $stmt = $this->db->prepare("
+        SELECT *
+        FROM products
+        WHERE seller_id = :seller_id
+        AND is_deleted = 0
+        AND title LIKE :q
+        ORDER BY title ASC
+    ");
+
+        $stmt->execute([
+            ':seller_id' => $sellerId,
+            ':q' => "%$q%"
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function searchBySeller($sellerId, $q)
+    {
+        $stmt = $this->db->prepare("
+        SELECT p.*, c.name AS category_name
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
+        WHERE p.seller_id = :seller_id
+        AND p.is_active = 1
+        AND p.name LIKE :q
+        ORDER BY p.id DESC
+    ");
+
+        $stmt->execute([
+            'seller_id' => $sellerId,
+            'q' => "%$q%"
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

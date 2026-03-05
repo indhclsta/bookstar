@@ -21,13 +21,22 @@ class SellerController
     }
 
     public function index()
-    {
-        $sellerId = $_SESSION['user']['id'];
-        $this->userModel->updateLastActivity($sellerId);
+{
+    $sellerId = $_SESSION['user']['id'];
+    $this->userModel->updateLastActivity($sellerId);
 
+    $q = trim($_GET['q'] ?? '');
+
+    if ($q) {
+        // SEARCH SELLER
+        $sellers = $this->userModel->searchSeller($q, $sellerId);
+    } else {
+        // LIST NORMAL
         $sellers = $this->userModel->getAllSeller($sellerId);
-        require APP_PATH . '/views/seller/list_seller.php';
     }
+
+    require APP_PATH . '/views/seller/list_seller.php';
+}
 
     public function dashboard()
     {
@@ -131,4 +140,63 @@ class SellerController
         header('Location: ' . BASE_URL . '/?c=seller&m=profile');
         exit;
     }
+   public function search()
+{
+    $q = $_GET['q'] ?? '';
+
+    if (!$q) {
+        echo json_encode([]);
+        return;
+    }
+
+    require_once APP_PATH . '/models/ProductModel.php';
+    require_once APP_PATH . '/models/CategoryModel.php';
+
+    $productModel  = new ProductModel();
+    $categoryModel = new CategoryModel();
+
+    $sellerId = $_SESSION['user']['id'];
+
+    // search produk milik seller
+    $products = $productModel->searchSellerProducts($sellerId, $q);
+
+    // search kategori milik seller
+    $categories = $categoryModel->searchSellerCategories($sellerId, $q);
+
+    $sellers = $this->userModel->searchSeller($q, $sellerId);
+
+    $results = [];
+
+    foreach ($products as $p) {
+        $results[] = [
+            'type'  => 'product',
+            'name'  => $p['title'],
+            'price' => $p['price'],
+            'stock' => $p['stock'],
+            'photo' => BASE_URL . '/uploads/products/' . $p['photo']
+        ];
+    }
+
+    foreach ($categories as $c) {
+        $results[] = [
+            'type' => 'category',
+            'name' => $c['name']
+        ];
+    }
+
+    foreach ($sellers as $s) {
+    $results[] = [
+        'type'  => 'seller',
+        'name'  => $s['name'],
+        'email' => $s['email'],
+        'photo' => $s['photo']
+            ? BASE_URL . '/uploads/profile/' . $s['photo']
+            : 'https://placehold.co/40x40',
+        'product_count' => $s['product_count']
+    ];
+}
+
+    header('Content-Type: application/json');
+    echo json_encode($results);
+}
 }

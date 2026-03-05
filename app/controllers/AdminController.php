@@ -115,7 +115,14 @@ class AdminController
     /* ===================== CUSTOMER ===================== */
     public function customer()
     {
-        $customers = $this->userModel->getAllCustomer();
+        $query = trim($_GET['q'] ?? '');
+
+        if ($query !== '') {
+            $customers = $this->userModel->searchCustomer($query);
+        } else {
+            $customers = $this->userModel->getAllCustomer();
+        }
+
         require APP_PATH . '/views/admin/customer_acc.php';
     }
 
@@ -206,7 +213,14 @@ class AdminController
     /* ===================== SELLER ===================== */
     public function seller()
     {
-        $sellers = $this->userModel->getAllSeller(); // sudah termasuk product_count
+        $query = trim($_GET['q'] ?? '');
+
+        if ($query !== '') {
+            $sellers = $this->userModel->searchSeller($query);
+        } else {
+            $sellers = $this->userModel->getAllSeller();
+        }
+
         require APP_PATH . '/views/admin/seller_acc.php';
     }
 

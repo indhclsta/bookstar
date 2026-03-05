@@ -273,15 +273,48 @@ class CategoryModel
     }
 
     public function getActiveCategoriesForCustomer()
-{
-    $stmt = $this->db->prepare("
+    {
+        $stmt = $this->db->prepare("
         SELECT DISTINCT c.*
         FROM categories c
         WHERE c.is_active = 1
         ORDER BY c.name ASC
     ");
-    $stmt->execute();
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function searchAdmin($q)
+    {
+        $stmt = $this->db->prepare("
+        SELECT * 
+        FROM categories 
+        WHERE name LIKE :q 
+          AND owner_role = 'admin'
+          AND is_active = 1
+        ORDER BY name ASC
+    ");
+        $stmt->execute(['q' => "%$q%"]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function searchSellerCategories($sellerId, $q)
+{
+    $stmt = $this->db->prepare("
+        SELECT *
+        FROM categories
+        WHERE is_active = 1
+        AND name LIKE :q
+        AND (
+            owner_role = 'admin'
+            OR (owner_role = 'seller' AND created_by = :seller_id)
+        )
+        ORDER BY name ASC
+    ");
+
+    $stmt->execute([
+        ':seller_id' => $sellerId,
+        ':q' => "%$q%"
+    ]);
+
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
 }

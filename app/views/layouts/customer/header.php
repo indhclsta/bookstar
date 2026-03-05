@@ -86,35 +86,15 @@ $photo = !empty($user['photo'])
         </div>
         <div class="search-bar flex-grow-1">
           <div class="position-relative">
-            <input class="form-control rounded-5 px-5 search-control d-lg-block d-none" type="text" placeholder="Search">
-            <span class="material-icons-outlined position-absolute d-lg-block d-none ms-3 translate-middle-y start-0 top-50">search</span>
-            <span class="material-icons-outlined position-absolute me-3 translate-middle-y end-0 top-50 search-close">close</span>
             <div class="search-popup p-3">
               <div class="card rounded-4 overflow-hidden">
                 <div class="card-header d-lg-none">
                   <div class="position-relative">
-                    <input class="form-control rounded-5 px-5 mobile-search-control" type="text" placeholder="Search">
-                    <span class="material-icons-outlined position-absolute ms-3 translate-middle-y start-0 top-50">search</span>
-                    <span class="material-icons-outlined position-absolute me-3 translate-middle-y end-0 top-50 mobile-search-close">close</span>
+                   
                   </div>
                 </div>
                 <div class="card-body search-content">
-                  <p class="search-title">Recent Searches</p>
                   <div class="d-flex align-items-start flex-wrap gap-2 kewords-wrapper">
-                    <a href="javascript:;" class="kewords"><span>Angular Template</span><i
-                        class="material-icons-outlined fs-6">search</i></a>
-                    <a href="javascript:;" class="kewords"><span>Dashboard</span><i
-                        class="material-icons-outlined fs-6">search</i></a>
-                    <a href="javascript:;" class="kewords"><span>Admin Template</span><i
-                        class="material-icons-outlined fs-6">search</i></a>
-                    <a href="javascript:;" class="kewords"><span>Bootstrap 5 Admin</span><i
-                        class="material-icons-outlined fs-6">search</i></a>
-                    <a href="javascript:;" class="kewords"><span>Html eCommerce</span><i
-                        class="material-icons-outlined fs-6">search</i></a>
-                    <a href="javascript:;" class="kewords"><span>Sass</span><i
-                        class="material-icons-outlined fs-6">search</i></a>
-                    <a href="javascript:;" class="kewords"><span>laravel 9</span><i
-                        class="material-icons-outlined fs-6">search</i></a>
                   </div>
                   <hr>
                   <p class="search-title">Tutorials</p>

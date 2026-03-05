@@ -20,7 +20,14 @@ class SellerCategoryController
     // 🔹 Tampilkan kategori admin + kategori seller login
     public function index()
     {
-        $categories = $this->model->getSellerCategories($this->sellerId);
+        $q = $_GET['q'] ?? '';
+
+        if (!empty($q)) {
+            $categories = $this->model->searchSellerCategories($this->sellerId, $q);
+        } else {
+            $categories = $this->model->getSellerCategories($this->sellerId);
+        }
+
         require APP_PATH . '/views/seller/category.php';
     }
 
