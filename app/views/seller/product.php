@@ -300,7 +300,7 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label small fw-semibold text-secondary">Stock</label>
+          <label class="form-label small fw-semibold text-secondary">Add Stock</label>
           <input type="number" name="stock" id="editStock" class="form-control" required>
         </div>
 

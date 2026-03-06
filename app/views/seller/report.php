@@ -116,7 +116,7 @@
 <div class="card border-0 shadow-sm rounded-3 mb-5">
     <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="fw-semibold mb-0 text-light">Grafik Keuntungan Bulanan</h5>
+            <h5 class="fw-semibold mb-0 text-light">Grafik Keuntungan</h5>
             <span class="badge bg-light text-light border">
                 <i class="bi bi-bar-chart me-1"></i> Bar Chart
             </span>

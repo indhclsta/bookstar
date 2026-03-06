@@ -24,34 +24,54 @@ class SellerReportController
         $month    = $_GET['month'] ?? null;
         $year     = $_GET['year'] ?? null;
 
-        // Tahun untuk grafik
         $chartYear = $year ?? date('Y');
 
-        // DATA GRAFIK
-        $profitChartRaw = $this->reportModel
-            ->getMonthlyProfitBySeller($sellerId, $chartYear);
+        // ==============================
+        // DATA CHART SESUAI FILTER
+        // ==============================
 
         $months  = [];
         $profits = [];
 
-        foreach ($profitChartRaw as $row) {
-            // asumsi query: month = angka (1-12)
-            $months[]  = date('F', mktime(0, 0, 0, $row['month'], 1));
-            $profits[] = (int) $row['profit'];
+        if ($month) {
+
+            // Jika filter bulan dipilih
+            $profit = $this->reportModel->getProfitByMonth(
+                $sellerId,
+                $month,
+                $chartYear
+            );
+
+            $months[]  = date('F', mktime(0, 0, 0, $month, 1));
+            $profits[] = (int) ($profit['profit'] ?? 0);
+        } else {
+
+            // Jika hanya filter tahun / tanpa filter
+            $profitChartRaw = $this->reportModel
+                ->getMonthlyProfitBySeller($sellerId, $chartYear);
+
+            foreach ($profitChartRaw as $row) {
+
+                $months[]  = date('F', mktime(0, 0, 0, $row['month'], 1));
+                $profits[] = (int) $row['profit'];
+            }
         }
 
+        // ==============================
         // DATA TABEL
+        // ==============================
+
         $reports = $this->reportModel->getSalesReportBySeller(
             $sellerId,
             $month,
             $year
         );
 
-        $totalIncome = $this->reportModel->getTotalIncome($sellerId);
+        // Total income mengikuti filter juga
+        $totalIncome = array_sum(array_column($reports, 'total_penjualan'));
 
         require APP_PATH . '/views/seller/report.php';
     }
-
 
     public function exportPdf()
     {
@@ -60,7 +80,11 @@ class SellerReportController
         $year  = $_POST['year'] ?? null;
 
         $reports = $this->reportModel->getSalesReportBySeller($sellerId, $month, $year);
-        $totalIncome = $this->reportModel->getTotalIncome($sellerId);
+        $totalIncome = $this->reportModel->getTotalIncome(
+            $sellerId,
+            $month,
+            $year
+        );
 
         $chartBase64 = $_POST['chart_image'] ?? null;
         $chartImgHtml = '';

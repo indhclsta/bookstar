@@ -119,20 +119,39 @@ class ReportModel
     }
 
 
-    public function getTotalIncome($sellerId)
+    public function getTotalIncome($sellerId, $month = null, $year = null)
     {
-        $stmt = $this->db->prepare("
-        SELECT 
-            SUM((oi.quantity * oi.price) - (oi.quantity * p.cost_price)) AS total_profit
-        FROM orders o
-        JOIN order_items oi ON oi.order_id = o.id
-        JOIN products p ON oi.product_id = p.id
-        WHERE 
-            o.seller_id = :seller_id
-            AND o.approval_status = 'approved'
-    ");
+        $sql = "
+    SELECT 
+        SUM((oi.quantity * oi.price) - (oi.quantity * p.cost_price)) AS total_profit
+    FROM orders o
+    JOIN order_items oi ON oi.order_id = o.id
+    JOIN products p ON oi.product_id = p.id
+    WHERE 
+        o.seller_id = :seller_id
+        AND o.approval_status = 'approved'
+    ";
+
+        if ($month) {
+            $sql .= " AND MONTH(o.created_at) = :month";
+        }
+
+        if ($year) {
+            $sql .= " AND YEAR(o.created_at) = :year";
+        }
+
+        $stmt = $this->db->prepare($sql);
 
         $stmt->bindParam(':seller_id', $sellerId);
+
+        if ($month) {
+            $stmt->bindParam(':month', $month);
+        }
+
+        if ($year) {
+            $stmt->bindParam(':year', $year);
+        }
+
         $stmt->execute();
 
         return $stmt->fetch(PDO::FETCH_ASSOC)['total_profit'] ?? 0;
@@ -157,5 +176,25 @@ class ReportModel
 
         $stmt->execute([$sellerId, $year]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getProfitByMonth($sellerId, $month, $year)
+    {
+        $stmt = $this->db->prepare("
+        SELECT 
+            SUM((oi.quantity * oi.price) - (oi.quantity * p.cost_price)) AS profit
+        FROM orders o
+        JOIN order_items oi ON oi.order_id = o.id
+        JOIN products p ON oi.product_id = p.id
+        WHERE 
+            o.seller_id = ?
+            AND o.approval_status = 'approved'
+            AND MONTH(o.created_at) = ?
+            AND YEAR(o.created_at) = ?
+    ");
+
+        $stmt->execute([$sellerId, $month, $year]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }

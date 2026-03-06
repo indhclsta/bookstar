@@ -90,44 +90,48 @@ class SellerProductController
         header('Location: ' . BASE_URL . '/?c=sellerProduct&m=index');
         exit;
     }
+
     public function update()
-    {
-        $sellerId = $_SESSION['user']['id'];
+{
+    $sellerId = $_SESSION['user']['id'];
 
-        $data = [
-            'id'          => (int)$_POST['id'],
-            'seller_id'   => $sellerId,
-            'category_id' => (int)$_POST['category_id'],
-            'name'        => trim($_POST['name']),
-            'description' => trim($_POST['description']),
-            'cost_price'  => (float)$_POST['cost_price'],
-            'price'       => (float)$_POST['price'],
-            'stock'       => (int)$_POST['stock'],
-            'image'       => null
-        ];
+    $id = (int)$_POST['id'];
+    $inputStock = (int)$_POST['stock'];
 
-        $product = $this->productModel->findForSeller($data['id'], $sellerId);
-        if (!$product) die('Produk tidak ditemukan');
+    // ambil produk dulu
+    $product = $this->productModel->findForSeller($id, $sellerId);
+    if (!$product) die('Produk tidak ditemukan');
 
-        $data['image'] = $product['image'];
+    $data = [
+        'id'          => $id,
+        'seller_id'   => $sellerId,
+        'category_id' => (int)$_POST['category_id'],
+        'name'        => trim($_POST['name']),
+        'description' => trim($_POST['description']),
+        'cost_price'  => (float)$_POST['cost_price'],
+        'price'       => (float)$_POST['price'],
+        'stock'       => $product['stock'] + $inputStock, // ✅ stok akumulasi
+        'image'       => $product['image']
+    ];
 
-        if (!empty($_FILES['image']['name'])) {
-            $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-            $dir = APP_PATH . '/../public/uploads/products/';
-            $new = 'prod_' . $sellerId . '_' . time() . '.' . $ext;
+    // upload image jika ada
+    if (!empty($_FILES['image']['name'])) {
+        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+        $dir = APP_PATH . '/../public/uploads/products/';
+        $new = 'prod_' . $sellerId . '_' . time() . '.' . $ext;
 
-            move_uploaded_file($_FILES['image']['tmp_name'], $dir . $new);
+        move_uploaded_file($_FILES['image']['tmp_name'], $dir . $new);
 
-            if ($product['image']) unlink($dir . $product['image']);
-            $data['image'] = $new;
-        }
-
-        $this->productModel->update($data);
-
-        $_SESSION['success'] = 'Produk berhasil diupdate';
-        header('Location: ' . BASE_URL . '/?c=sellerProduct&m=index');
-        exit;
+        if ($product['image']) unlink($dir . $product['image']);
+        $data['image'] = $new;
     }
+
+    $this->productModel->update($data);
+
+    $_SESSION['success'] = 'Produk berhasil diupdate';
+    header('Location: ' . BASE_URL . '/?c=sellerProduct&m=index');
+    exit;
+}
     // DELETE PRODUCT
     public function delete()
     {

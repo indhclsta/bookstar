@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 26, 2026 at 04:32 AM
+-- Generation Time: Mar 06, 2026 at 06:56 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -34,13 +34,6 @@ CREATE TABLE `carts` (
   `quantity` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `carts`
---
-
-INSERT INTO `carts` (`id`, `user_id`, `product_id`, `quantity`, `created_at`) VALUES
-(47, 4, 4, 1, '2026-01-29 05:44:43');
 
 -- --------------------------------------------------------
 
@@ -86,6 +79,7 @@ CREATE TABLE `chats` (
   `sender_id` int(11) NOT NULL,
   `receiver_id` int(11) NOT NULL,
   `message` text NOT NULL,
+  `is_read` tinyint(1) DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -93,18 +87,34 @@ CREATE TABLE `chats` (
 -- Dumping data for table `chats`
 --
 
-INSERT INTO `chats` (`id`, `sender_id`, `receiver_id`, `message`, `created_at`) VALUES
-(1, 7, 9, 'hai', '2026-02-08 03:27:03'),
-(2, 7, 9, 'apa kabar', '2026-02-08 03:27:11'),
-(3, 7, 8, 'p ', '2026-02-08 03:37:10'),
-(4, 7, 9, 'p', '2026-02-08 03:51:15'),
-(5, 8, 7, 'oke', '2026-02-08 04:10:32'),
-(6, 7, 9, 'hai', '2026-02-09 01:30:32'),
-(7, 7, 8, 'oke', '2026-02-09 01:30:50'),
-(8, 7, 9, 'asalamualikum', '2026-02-10 01:07:04'),
-(9, 8, 7, 'hai', '2026-02-10 01:15:13'),
-(10, 7, 9, 'hai', '2026-02-21 08:19:57'),
-(11, 7, 8, 'ppppp', '2026-02-21 08:33:47');
+INSERT INTO `chats` (`id`, `sender_id`, `receiver_id`, `message`, `is_read`, `created_at`) VALUES
+(1, 7, 9, 'hai', 0, '2026-02-08 03:27:03'),
+(2, 7, 9, 'apa kabar', 0, '2026-02-08 03:27:11'),
+(3, 7, 8, 'p ', 1, '2026-02-08 03:37:10'),
+(4, 7, 9, 'p', 0, '2026-02-08 03:51:15'),
+(5, 8, 7, 'oke', 1, '2026-02-08 04:10:32'),
+(6, 7, 9, 'hai', 0, '2026-02-09 01:30:32'),
+(7, 7, 8, 'oke', 1, '2026-02-09 01:30:50'),
+(8, 7, 9, 'asalamualikum', 0, '2026-02-10 01:07:04'),
+(9, 8, 7, 'hai', 1, '2026-02-10 01:15:13'),
+(10, 7, 9, 'hai', 0, '2026-02-21 08:19:57'),
+(11, 7, 8, 'ppppp', 1, '2026-02-21 08:33:47'),
+(12, 8, 7, 'hai', 1, '2026-03-04 22:20:08'),
+(13, 7, 8, 'p', 1, '2026-03-05 00:55:23'),
+(14, 8, 7, 'p', 1, '2026-03-05 01:14:36'),
+(15, 8, 7, 'oke', 1, '2026-03-05 01:14:44'),
+(16, 8, 7, 'beik', 1, '2026-03-05 01:14:49'),
+(17, 7, 8, 'eh', 1, '2026-03-05 01:17:39'),
+(18, 8, 7, 'eh', 1, '2026-03-05 01:25:12'),
+(19, 8, 7, 'ia', 1, '2026-03-05 01:25:17'),
+(20, 7, 8, 'asalamualikum', 1, '2026-03-05 01:33:56'),
+(21, 7, 8, 'p', 1, '2026-03-05 01:34:02'),
+(22, 8, 7, 'okkay', 1, '2026-03-05 03:53:49'),
+(23, 8, 7, 'ping', 1, '2026-03-05 03:54:15'),
+(24, 7, 8, 'eh', 1, '2026-03-05 03:54:41'),
+(25, 7, 8, 'kokkk', 1, '2026-03-05 03:54:48'),
+(26, 8, 7, 'ehiya', 1, '2026-03-05 04:07:09'),
+(27, 8, 7, 'okey', 1, '2026-03-05 04:07:14');
 
 -- --------------------------------------------------------
 
@@ -131,7 +141,26 @@ INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `link`, `is_re
 (2, 13, 'Pesanan Baru', 'Ada pesanan baru dari customer #8', 'http://localhost/bookstar/public/?c=sellerOrder&m=index', 0, '2026-02-10 04:26:04'),
 (3, 8, 'Pesanan Berhasil', 'Pesanan kamu berhasil dibuat dengan kode CHK-698AB35CCBDBA', 'http://localhost/bookstar/public/?c=invoice&m=show&id=CHK-698AB35CCBDBA', 1, '2026-02-10 04:26:04'),
 (4, 11, 'Pesanan Baru', 'Ada pesanan baru dari customer #8', 'http://localhost/bookstar/public/?c=sellerOrder&m=index', 0, '2026-02-21 08:51:34'),
-(5, 8, 'Pesanan Berhasil', 'Pesanan kamu berhasil dibuat dengan kode CHK-69997216A9EEB', 'http://localhost/bookstar/public/?c=invoice&m=show&id=CHK-69997216A9EEB', 1, '2026-02-21 08:51:34');
+(5, 8, 'Pesanan Berhasil', 'Pesanan kamu berhasil dibuat dengan kode CHK-69997216A9EEB', 'http://localhost/bookstar/public/?c=invoice&m=show&id=CHK-69997216A9EEB', 1, '2026-02-21 08:51:34'),
+(6, 7, 'Pesanan Baru', 'Ada pesanan baru dari customer #4', 'http://localhost/bookstar/public/?c=sellerOrder&m=index', 1, '2026-03-02 05:03:11'),
+(7, 4, 'Pesanan Berhasil', 'Pesanan kamu berhasil dibuat dengan kode CHK-69A51A0F36672', 'http://localhost/bookstar/public/?c=invoice&m=show&id=CHK-69A51A0F36672', 0, '2026-03-02 05:03:11'),
+(8, 7, 'Pesanan Baru', 'Ada pesanan baru dari customer #8', 'http://localhost/bookstar/public/?c=sellerOrder&m=index', 1, '2026-03-04 21:30:26'),
+(9, 8, 'Pesanan Berhasil', 'Pesanan kamu berhasil dibuat dengan kode CHK-69A8A47248989', 'http://localhost/bookstar/public/?c=invoice&m=show&id=CHK-69A8A47248989', 1, '2026-03-04 21:30:26'),
+(10, 8, 'Pesanan Disetujui', 'Pesanan dengan kode ORD-69A8A4724C297 telah disetujui oleh penjual.', 'http://localhost/bookstar/public/?c=customerOrder&m=index', 1, '2026-03-04 21:31:05'),
+(11, 7, 'Pesanan Baru', 'Ada pesanan baru dari customer #8', 'http://localhost/bookstar/public/?c=sellerOrder&m=index', 0, '2026-03-04 21:38:03'),
+(12, 8, 'Pesanan Berhasil', 'Pesanan kamu berhasil dibuat dengan kode CHK-69A8A63B40A2D', 'http://localhost/bookstar/public/?c=invoice&m=show&id=CHK-69A8A63B40A2D', 1, '2026-03-04 21:38:03'),
+(13, 7, 'Pesanan Baru', 'Ada pesanan baru dari customer #8', 'http://localhost/bookstar/public/?c=sellerOrder&m=index', 1, '2026-03-04 21:41:44'),
+(14, 8, 'Pesanan Berhasil', 'Pesanan kamu berhasil dibuat dengan kode CHK-69A8A7187D593', 'http://localhost/bookstar/public/?c=invoice&m=show&id=CHK-69A8A7187D593', 1, '2026-03-04 21:41:44'),
+(15, 7, 'Pesanan Baru', 'Ada pesanan baru dari customer #8', 'http://localhost/bookstar/public/?c=sellerOrder&m=index', 1, '2026-03-05 01:37:15'),
+(16, 11, 'Pesanan Baru', 'Ada pesanan baru dari customer #8', 'http://localhost/bookstar/public/?c=sellerOrder&m=index', 0, '2026-03-05 01:37:15'),
+(17, 8, 'Pesanan Berhasil', 'Pesanan kamu berhasil dibuat dengan kode CHK-69A8DE4B3CA2B', 'http://localhost/bookstar/public/?c=invoice&m=show&id=CHK-69A8DE4B3CA2B', 1, '2026-03-05 01:37:15'),
+(18, 8, 'Pesanan Disetujui', 'Pesanan dengan kode ORD-69A8DE4B6ACF3 telah disetujui oleh penjual.', 'http://localhost/bookstar/public/?c=customerOrder&m=index', 0, '2026-03-05 01:45:35'),
+(19, 8, 'Pesanan Disetujui', 'Pesanan dengan kode ORD-69A8A7188166A telah disetujui oleh penjual.', 'http://localhost/bookstar/public/?c=customerOrder&m=index', 1, '2026-03-05 01:46:07'),
+(20, 7, 'Pesanan Baru', 'Ada pesanan baru dari customer #8', 'http://localhost/bookstar/public/?c=sellerOrder&m=index', 0, '2026-03-05 02:10:46'),
+(21, 13, 'Pesanan Baru', 'Ada pesanan baru dari customer #8', 'http://localhost/bookstar/public/?c=sellerOrder&m=index', 1, '2026-03-05 02:10:46'),
+(22, 8, 'Pesanan Berhasil', 'Pesanan kamu berhasil dibuat dengan kode CHK-69A8E6266E24D', 'http://localhost/bookstar/public/?c=invoice&m=show&id=CHK-69A8E6266E24D', 1, '2026-03-05 02:10:46'),
+(23, 8, 'Pesanan Disetujui', 'Pesanan dengan kode ORD-69A8E6266F372 telah disetujui oleh penjual.', 'http://localhost/bookstar/public/?c=customerOrder&m=index', 0, '2026-03-05 02:15:20'),
+(24, 8, 'Pesanan Ditolak', 'Pesanan dengan kode ORD-69A8A63B428B4 ditolak oleh penjual. Alasan: uang kurang', 'http://localhost/bookstar/public/?c=customerOrder&m=index', 0, '2026-03-05 02:19:08');
 
 -- --------------------------------------------------------
 
@@ -202,7 +231,15 @@ INSERT INTO `orders` (`id`, `order_code`, `checkout_code`, `customer_id`, `selle
 (49, 'ORD-698AA9D916348', 'CHK-698AA9D913EF6', 8, 7, 100000.00, 'transfer', 'payment_698aa9d91408a_1770695129.jpg', 'rejected', 'refund', 'bandung', NULL, NULL, '2026-02-10 03:45:29', '2026-02-23 14:44:38', 'tolak', '2026-02-23 21:44:38'),
 (53, 'ORD-698AB02C0C688', 'CHK-698AB02C0A050', 8, 7, 20000.00, 'transfer', 'payment_698ab02c0a25c_1770696748.jpg', 'approved', 'shipped', 'bandung', 'okeiejriej', '9898989', '2026-02-10 04:12:28', '2026-02-21 07:39:36', NULL, '0000-00-00 00:00:00'),
 (54, 'ORD-698AB35CCE619', 'CHK-698AB35CCBDBA', 8, 13, 70000.00, 'transfer', 'payment_698ab35ccc058_1770697564.jpg', 'pending', 'pending', 'bandung', NULL, NULL, '2026-02-10 04:26:04', '2026-02-10 04:26:04', NULL, '0000-00-00 00:00:00'),
-(55, 'ORD-69997216C5F04', 'CHK-69997216A9EEB', 8, 11, 17000.00, 'transfer', 'payment_69997216b0fc3_1771663894.jpg', 'pending', 'pending', 'bandung', NULL, NULL, '2026-02-21 08:51:34', '2026-02-21 08:51:34', NULL, '0000-00-00 00:00:00');
+(55, 'ORD-69997216C5F04', 'CHK-69997216A9EEB', 8, 11, 17000.00, 'transfer', 'payment_69997216b0fc3_1771663894.jpg', 'pending', 'pending', 'bandung', NULL, NULL, '2026-02-21 08:51:34', '2026-02-21 08:51:34', NULL, '0000-00-00 00:00:00'),
+(56, 'ORD-69A51A0F434FE', 'CHK-69A51A0F36672', 4, 7, 20000.00, 'transfer', 'payment_69a51a0f36f14_1772427791.jpg', 'approved', 'paid', 'Jakarta', NULL, NULL, '2026-03-02 05:03:11', '2026-03-02 05:07:55', NULL, '0000-00-00 00:00:00'),
+(57, 'ORD-69A8A4724C297', 'CHK-69A8A47248989', 8, 7, 100000.00, 'transfer', 'payment_69a8a47248ffb_1772659826.jpg', 'approved', 'shipped', 'bandung', 'ansabda', '9183929372', '2026-03-04 21:30:26', '2026-03-04 21:31:28', NULL, '0000-00-00 00:00:00'),
+(58, 'ORD-69A8A63B428B4', 'CHK-69A8A63B40A2D', 8, 7, 20000.00, 'transfer', 'payment_69a8a63b41532_1772660283.jpg', 'rejected', 'refund', 'bandung', NULL, NULL, '2026-03-04 21:38:03', '2026-03-05 02:19:08', 'uang kurang', '2026-03-05 09:19:08'),
+(59, 'ORD-69A8A7188166A', 'CHK-69A8A7187D593', 8, 7, 20000.00, 'transfer', 'payment_69a8a7187d8ab_1772660504.jpg', 'approved', 'paid', 'bandung', NULL, NULL, '2026-03-04 21:41:44', '2026-03-05 01:46:07', NULL, '0000-00-00 00:00:00'),
+(60, 'ORD-69A8DE4B6ACF3', 'CHK-69A8DE4B3CA2B', 8, 7, 20000.00, 'transfer', 'payment_69a8de4b3f11c_1772674635.jpg', 'approved', 'shipped', 'bandung', 'abc', '9743857845', '2026-03-05 01:37:15', '2026-03-05 01:46:40', NULL, '0000-00-00 00:00:00'),
+(61, 'ORD-69A8DE4BAA966', 'CHK-69A8DE4B3CA2B', 8, 11, 17000.00, 'transfer', 'payment_69a8de4ba99b7_1772674635.jpg', 'pending', 'pending', 'bandung', NULL, NULL, '2026-03-05 01:37:15', '2026-03-05 01:37:15', NULL, '0000-00-00 00:00:00'),
+(62, 'ORD-69A8E6266F372', 'CHK-69A8E6266E24D', 8, 7, 100000.00, 'transfer', 'payment_69a8e6266e58f_1772676646.jpg', 'approved', 'shipped', 'bandung', 'https://jne.co.id/tracking-package', '0988776666', '2026-03-05 02:10:46', '2026-03-05 02:18:24', NULL, '0000-00-00 00:00:00'),
+(63, 'ORD-69A8E6267628E', 'CHK-69A8E6266E24D', 8, 13, 70000.00, 'qris', 'payment_69a8e6267399f_1772676646.jpg', 'pending', 'pending', 'bandung', NULL, NULL, '2026-03-05 02:10:46', '2026-03-05 02:10:46', NULL, '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -261,7 +298,15 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `product_title`, `qua
 (43, 49, 9, 'Perahu Kertas', 1, 100000.00),
 (45, 53, 8, 'Buku Belajar', 1, 20000.00),
 (46, 54, 6, 'Perahu Kertas', 1, 70000.00),
-(47, 55, 4, 'coba', 1, 17000.00);
+(47, 55, 4, 'coba', 1, 17000.00),
+(48, 56, 8, 'Matematika', 1, 20000.00),
+(49, 57, 9, 'Perahu Kertas', 1, 100000.00),
+(50, 58, 8, 'Matematika', 1, 20000.00),
+(51, 59, 8, 'Matematika', 1, 20000.00),
+(52, 60, 8, 'Matematika', 1, 20000.00),
+(53, 61, 4, 'English', 1, 17000.00),
+(54, 62, 9, 'Perahu Kertas', 1, 100000.00),
+(55, 63, 6, 'Perahu Kertas', 1, 70000.00);
 
 -- --------------------------------------------------------
 
@@ -321,10 +366,10 @@ INSERT INTO `products` (`id`, `seller_id`, `category_id`, `name`, `description`,
 (3, 7, 12, 'Nihongo', 'iya', 1213.00, 1212.00, 0, 'prod_7_1769164811.jpg', '2026-01-23 10:40:11', 0),
 (4, 11, 3, 'English', 'tst', 17000.00, 13000.00, 12, 'prod_11_1769394766.jpg', '2026-01-26 02:32:46', 1),
 (5, 7, 12, 'Jepang', 'vht', 2000.00, 1000.00, 0, 'prod_7_1769677609.jpg', '2026-01-29 09:06:49', 0),
-(6, 13, 3, 'Perahu Kertas', 'Karya Dee', 70000.00, 50000.00, 5, 'prod_13_1769747818.jpg', '2026-01-30 04:36:58', 1),
+(6, 13, 3, 'Perahu Kertas', 'Karya Dee', 70000.00, 50000.00, 3, 'prod_13_1769747818.jpg', '2026-01-30 04:36:58', 1),
 (7, 7, 9, 'Buku', 'novel', 8000.00, 5000.00, 0, 'prod_7_1769752488.jpg', '2026-01-30 05:54:48', 0),
-(8, 7, 19, 'Matematika', 'Buku', 20000.00, 10000.00, 11, 'prod_7_1770685299.jpg', '2026-02-10 01:01:39', 1),
-(9, 7, 15, 'Perahu Kertas', 'Indah', 100000.00, 90999.00, 11, 'prod_7_1770691085.jpg', '2026-02-10 02:38:05', 1);
+(8, 7, 19, 'Matematika', 'Buku', 20000.00, 10000.00, 14, 'prod_7_1770685299.jpg', '2026-02-10 01:01:39', 1),
+(9, 7, 15, 'Perahu Kertas', 'Indah', 100000.00, 90999.00, 9, 'prod_7_1770691085.jpg', '2026-02-10 02:38:05', 1);
 
 -- --------------------------------------------------------
 
@@ -379,14 +424,14 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `role_id`, `name`, `email`, `no_tlp`, `password`, `nik`, `address`, `no_rekening`, `qris_image`, `is_online`, `created_at`, `updated_at`, `reset_token`, `reset_expired`, `photo`, `status`, `last_activity`, `is_deleted`) VALUES
-(1, 1, 'Indah Callista Ex', 'indahcalistaexcella@gmail.com', NULL, '$2y$10$LNlITW0uDQLG3Lw53S5wVOdbkfNtSoc/ZO2sWrRE4A5DFSy5Jgxbu', '12345678', 'jakarta', NULL, NULL, 0, '2026-01-18 09:35:48', '2026-02-21 06:50:27', NULL, NULL, 'user_1.png', 'aktif', '2026-02-21 13:50:27', 0),
-(4, 3, 'Calandra', 'indah.callista26@smk.belajar.id', '12345566785', '$2y$10$iGurJVkR5sm1seubALIdke4iF.MQz5/6LXwxbeR5e9bdNG687EqX2', '1234567854', 'Jakarta', NULL, NULL, 0, '2026-01-18 11:55:19', '2026-02-21 08:32:31', '800e30fba66fa65abeb4e2f55102c0a08360e44c56e472255e33b656a204e3a0', '2026-02-21 13:57:06', '696eec8736d00.jpeg', 'aktif', '2026-02-21 15:32:31', 0),
-(7, 2, 'AccSellerr', 'seller@gmail.com', '08127613761', '$2y$10$CPmfeGT2lIT57rMa/eFg4uoZEg9b8X8d6FF6dVoAxnbNM1Jjvw/Jy', '123123123', 'sukabumi', '123', 'qris_7_1770689953.png', 0, '2026-01-22 04:58:08', '2026-02-24 02:22:26', NULL, NULL, 'seller_7_1769168799.png', 'aktif', '2026-02-24 09:22:26', 0),
-(8, 3, 'Customeraccount', 'customer@gmail.com', '12345451321', '$2y$10$Q4EfscRcRV8h1oNCRxFiSumqK3uyEvNVzlejvOCINI62IwM7ZGRmC', '12345566785', 'bandung', NULL, NULL, 0, '2026-01-24 02:59:34', '2026-02-24 02:20:50', NULL, NULL, 'customer_8_1769225739.jpg', 'aktif', '2026-02-24 09:20:50', 0),
+(1, 1, 'Indah Callista Ex', 'indahcalistaexcella@gmail.com', NULL, '$2y$10$LNlITW0uDQLG3Lw53S5wVOdbkfNtSoc/ZO2sWrRE4A5DFSy5Jgxbu', '12345678', 'jakarta', NULL, NULL, 0, '2026-01-18 09:35:48', '2026-03-05 14:49:41', NULL, NULL, 'user_1.png', 'aktif', '2026-03-05 21:49:41', 0),
+(4, 3, 'Calandra', 'indah.callista26@smk.belajar.id', '12345566785', '$2y$10$iGurJVkR5sm1seubALIdke4iF.MQz5/6LXwxbeR5e9bdNG687EqX2', '1234567854', 'Jakarta', NULL, NULL, 0, '2026-01-18 11:55:19', '2026-03-02 05:03:11', '800e30fba66fa65abeb4e2f55102c0a08360e44c56e472255e33b656a204e3a0', '2026-02-21 13:57:06', '696eec8736d00.jpeg', 'aktif', '2026-03-02 12:03:11', 0),
+(7, 2, 'AccSellerr', 'seller@gmail.com', '08127613761', '$2y$10$CPmfeGT2lIT57rMa/eFg4uoZEg9b8X8d6FF6dVoAxnbNM1Jjvw/Jy', '123123123', 'sukabumi', '123', 'qris_7_1770689953.png', 0, '2026-01-22 04:58:08', '2026-03-05 14:48:55', NULL, NULL, 'seller_7_1769168799.png', 'aktif', '2026-03-05 21:48:55', 0),
+(8, 3, 'Customeraccount', 'customer@gmail.com', '12345451321', '$2y$10$Q4EfscRcRV8h1oNCRxFiSumqK3uyEvNVzlejvOCINI62IwM7ZGRmC', '12345566785', 'bandung', NULL, NULL, 0, '2026-01-24 02:59:34', '2026-03-05 14:48:33', NULL, NULL, 'customer_8_1769225739.jpg', 'aktif', '2026-03-05 21:48:33', 0),
 (9, 3, 'customer', 'csr@gmail.com', '2345654323543', '$2y$10$.6DaVqGfsCuM.Qm4Dn.9QO.wIc.qBuH3SjdsWZLeBo8r1wFEHZZCS', '12345432345', 'jkt', NULL, NULL, 0, '2026-01-24 03:48:05', '2026-01-29 05:43:42', NULL, NULL, 'customer_9_1769228311.jpg', 'aktif', '2026-01-29 12:23:13', 1),
-(10, 2, 'OkeSeller', 'okeseller@gmail.com', NULL, '$2y$10$bygwnB2XLEVYhIRVYIw8POfDK15.Qq0u215NA1lA/2T43.eXAZEP2', '9090909090', 'Surabaya', '', NULL, 0, '2026-01-24 12:45:35', '2026-01-30 04:54:34', NULL, NULL, NULL, 'aktif', '2026-01-30 11:54:34', 0),
+(10, 2, 'OkeSeller', 'okeseller@gmail.com', NULL, '$2y$10$bygwnB2XLEVYhIRVYIw8POfDK15.Qq0u215NA1lA/2T43.eXAZEP2', '9090909090', 'Surabaya', '', NULL, 0, '2026-01-24 12:45:35', '2026-03-05 01:52:06', NULL, NULL, NULL, 'aktif', '2026-01-30 11:54:34', 1),
 (11, 2, 'sellera', 'dummy@gmail.com', '13221323', '$2y$10$LUY.0HxS4gMDvjYT.ClGwe8YD.aOVAy2Ee2obU.owjr1AmgKfak3.', '', '', '1234567890', 'qris_11_1769400089.jpg', 0, '2026-01-24 13:44:24', '2026-01-29 03:26:18', NULL, NULL, NULL, 'aktif', '2026-01-28 21:40:18', 0),
-(13, 2, 'penerbit kece', 'penerbitk3c3@gmail.com', '081284421151', '$2y$10$vQYWsk3E7WmgAXG/v/jcnumWubHnSvAjittRHJVwDa0WrxOkQMfn6', '12434353434', 'Swiss', '673172618312', 'qris_1769654499.png', 0, '2026-01-29 02:41:39', '2026-02-21 06:12:49', NULL, NULL, 'seller_697ac8e33dc25.jpg', 'aktif', '2026-02-21 13:12:49', 0),
+(13, 2, 'penerbit kece', 'penerbitk3c3@gmail.com', '081284421151', '$2y$10$vQYWsk3E7WmgAXG/v/jcnumWubHnSvAjittRHJVwDa0WrxOkQMfn6', '12434353434', 'Swiss', '673172618312', 'qris_1769654499.png', 0, '2026-01-29 02:41:39', '2026-03-05 05:13:53', NULL, NULL, 'seller_697ac8e33dc25.jpg', 'aktif', '2026-03-05 12:13:53', 0),
 (20, 3, 'myname', 'name@gmail.com', '121212112', '$2y$10$pFKxcbCVXvV.zJTmSYdXRepFiaW96UKAzq3YbncRvJjN/nM/X9qo6', '121212112', 'jkt', NULL, NULL, 0, '2026-02-10 02:50:34', '2026-02-21 06:27:41', NULL, NULL, NULL, 'aktif', NULL, 1),
 (21, 3, 'Khansa', 'khansaafifah58@gmail.com', '085717277864', '$2y$10$n0SZH6LRLeOAoPsSHqQ0O.g5ON6KSpvyLTEspZIbOwdU3VGJLc48u', '3190923881621', 'Jakarta', NULL, NULL, 0, '2026-02-21 05:36:25', '2026-02-21 05:37:11', NULL, NULL, NULL, 'aktif', '2026-02-21 12:37:11', 0);
 
@@ -486,7 +531,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -498,25 +543,25 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `chats`
 --
 ALTER TABLE `chats`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT for table `order_logs`
