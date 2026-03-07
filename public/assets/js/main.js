@@ -36,6 +36,12 @@ $(function () {
   $(".sidebar-close").on("click", function () {
     $("body").removeClass("toggled")
   })
+  if ($("#sidenav").length) {
+    $("#sidenav").metisMenu({
+      toggle: true,
+      triggerElement: '.has-arrow'
+    });
+  }
 
 
 

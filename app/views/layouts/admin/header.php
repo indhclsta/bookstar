@@ -103,15 +103,11 @@ if ($showSearch) {
         <?php if ($showSearch): ?>
           <div class="flex-grow-1 ms-3">
             <form method="GET" action="<?= $searchAction ?>" class="d-flex gap-2">
-              <!-- pastikan selalu ikut controller & method -->
               <input type="hidden" name="c" value="<?= $curController ?>">
               <input type="hidden" name="m" value="<?= $curMethod ?>">
-
               <input type="text" name="q" class="form-control" placeholder="Search..."
                 value="<?= htmlspecialchars($_GET['q'] ?? '') ?>">
-
               <button type="submit" class="btn btn-primary">Search</button>
-
               <?php if (!empty($_GET['q'])): ?>
                 <a href="<?= $searchAction ?>" class="btn btn-secondary">Reset</a>
               <?php endif; ?>
@@ -119,8 +115,19 @@ if ($showSearch) {
           </div>
         <?php endif; ?>
 
-        <!-- ================= USER DROPDOWN ================= -->
+        <!-- ================= RIGHT MENU ================= -->
         <ul class="navbar-nav ms-auto align-items-center">
+          
+          <!-- NOTIFICATIONS DROPDOWN (TAMBAHKAN INI) -->
+          <li class="nav-item dropdown">
+            <div class="dropdown-menu dropdown-notify dropdown-menu-end shadow">
+              
+              <div class="notify-list"> 
+              </div>
+            </div>
+          </li>
+
+          <!-- USER DROPDOWN (HANYA SATU) -->
           <li class="nav-item dropdown">
             <a href="javascript:;" class="dropdown-toggle dropdown-toggle-nocaret" data-bs-toggle="dropdown">
               <img src="<?= $photo ?>" class="rounded-circle p-1 border" width="45" height="45" alt="User">
@@ -147,3 +154,4 @@ if ($showSearch) {
 
       </nav>
     </header>
+    

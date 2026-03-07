@@ -26,9 +26,6 @@
       </h5>
     </div>
 
-    <div class="sidebar-close">
-      <span class="material-icons-outlined">close</span>
-    </div>
   </div>
   <div class="sidebar-nav">
     <!--navigation-->
