@@ -1,6 +1,30 @@
 <?php require APP_PATH . '/views/layouts/customer/header.php'; ?>
 <?php require APP_PATH . '/views/layouts/customer/sidebar.php'; ?>
+<!-- ALERTS -->
+<?php if (!empty($_SESSION['success'])): ?>
+  <script>
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil',
+      text: '<?= $_SESSION['success']; ?>',
+      timer: 2500,
+      timerProgressBar: true,
+      showConfirmButton: false
+    });
+  </script>
+<?php unset($_SESSION['success']);
+endif; ?>
 
+<?php if (!empty($_SESSION['error'])): ?>
+  <script>
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal',
+      text: '<?= $_SESSION['error']; ?>'
+    });
+  </script>
+<?php unset($_SESSION['error']);
+endif; ?>
 <?php
 $cart = $cart ?? [];
 $total = 0;

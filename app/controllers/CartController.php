@@ -35,11 +35,12 @@ class CartController
         // Ambil item di cart sebelumnya
         $cartItem = $this->cartModel->getItem($userId, $productId);
         $existingQty = $cartItem['quantity'] ?? 0;
-
-        // total quantity baru
         $totalQty = $existingQty + $qty;
 
-        if ($totalQty > $product['stock']) {
+        // total quantity baru
+        $availableStock = $this->productModel->getAvailableStock($productId);
+
+        if ($totalQty > $availableStock) {
             $_SESSION['error'] = 'Jumlah melebihi stok tersedia';
             header('Location: ' . BASE_URL . '/?c=customer&m=order');
             exit;
@@ -88,7 +89,9 @@ class CartController
         if (!$product) return;
 
         // ❌ kalau sudah sama dengan stok
-        if ($item['quantity'] >= $product['stock']) {
+        $availableStock = $this->productModel->getAvailableStock($productId);
+
+        if ($item['quantity'] >= $availableStock) {
             $_SESSION['error'] = 'Stok produk tidak mencukupi';
             header('Location: ' . BASE_URL . '/?c=cart&m=index');
             return;

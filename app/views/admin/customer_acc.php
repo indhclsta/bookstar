@@ -137,7 +137,7 @@
 
                     <div class="col-md-6">
                         <label class="form-label">NIK</label>
-                        <input type="text" name="nik" id="edit-nik" class="form-control" disabled>
+                        <input type="text" name="nik" id="edit-nik" class="form-control" >
                     </div>
 
                     <div class="col-md-6">

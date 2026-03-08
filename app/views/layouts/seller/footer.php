@@ -44,31 +44,6 @@ $(document).ready(function() {
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<!-- PERBAIKI FUNGSI CHAT BADGE -->
-<script>
-function updateChatBadge() {
-    fetch('<?= BASE_URL ?>/?c=sellerChat&m=getTotalUnread')  // GANTI dari customerChat ke sellerChat
-        .then(res => res.json())
-        .then(data => {
-            const badge = document.querySelector('.badge-notify');  // PAKAI querySelector
-            if (badge) {
-                if (data.total > 0) {
-                    badge.textContent = data.total;
-                    badge.style.display = 'inline-block';
-                } else {
-                    badge.style.display = 'none';
-                }
-            }
-        });
-}
-
-// Jalankan jika ada element chat
-if (document.querySelector('.badge-notify')) {
-    updateChatBadge();
-    setInterval(updateChatBadge, 5000);
-}
-</script>
 <script>
 $(document).ready(function() {
     // Inisialisasi MetisMenu

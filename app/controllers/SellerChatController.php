@@ -17,12 +17,10 @@ class SellerChatController
     {
         $sellerId = $_SESSION['user']['id'];
 
-        // Ambil semua chat yang melibatkan seller
-        $chats = $this->chatModel->getChatsBySeller($sellerId);
+        // Ambil semua customer yang pernah chat dengan seller (unique, tanpa seller sendiri)
+        $chatUsers = $this->chatModel->getChatUsersBySeller($sellerId);
 
-        // Ambil customer yang pernah beli produk seller
-        $chatUsers = $this->chatModel->getCustomersByOrders($sellerId);
-        // Tambahkan last message ke setiap user
+        // Tambahkan info pesan terakhir ke setiap user
         foreach ($chatUsers as &$user) {
             $last = $this->chatModel->getLastMessage($sellerId, $user['id']);
 
@@ -32,8 +30,11 @@ class SellerChatController
                 $user['last_time'] = $last['created_at'];
             } else {
                 $user['last_message'] = null;
+                $user['last_sender_id'] = null;
+                $user['last_time'] = null;
             }
         }
+        unset($user); // agar reference tidak ikut
 
         // Tentukan chat dengan siapa (default)
         $chatWith = ['name' => 'Select a chat', 'id' => '', 'photo' => '', 'status' => 'Offline'];
@@ -46,8 +47,8 @@ class SellerChatController
             if ($chatWithUser) {
                 $chatWith = array_values($chatWithUser)[0];
                 $messages = $this->chatModel->getChatWithUser($sellerId, $chatWith['id']);
-            }
-            if ($selectedUserId) {
+
+                // Tandai pesan sudah dibaca
                 $this->chatModel->markAsRead($selectedUserId, $sellerId);
             }
         }
@@ -83,9 +84,10 @@ class SellerChatController
     }
     public function getUnreadPerUser()
     {
-        $customerId = $_SESSION['user']['id'];
+        $userId = $_SESSION['user']['id']; // seller atau customer tergantung role
 
-        $data = $this->chatModel->getUnreadCountPerUser($customerId);
+        // Ambil jumlah unread per sender
+        $data = $this->chatModel->getUnreadCountPerUser($userId);
 
         header('Content-Type: application/json');
         echo json_encode($data);

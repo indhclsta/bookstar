@@ -171,16 +171,68 @@ class ProductModel
     ");
         return $stmt->execute([$qty, $productId, $qty]);
     }
+    public function returnStock($productId, $qty)
+    {
+        $stmt = $this->db->prepare("
+        UPDATE products
+        SET stock = stock + ?
+        WHERE id = ?
+    ");
+
+        return $stmt->execute([$qty, $productId]);
+    }
+
+    public function getPendingQty($productId)
+    {
+        $stmt = $this->db->prepare("
+        SELECT COALESCE(SUM(oi.quantity),0) AS pending_qty
+        FROM order_items oi
+        JOIN orders o ON o.id = oi.order_id
+        WHERE oi.product_id = ?
+        AND o.approval_status = 'pending'
+    ");
+        $stmt->execute([$productId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['pending_qty'] ?? 0;
+    }
+
+    public function getAvailableStock($productId)
+    {
+        $product = $this->findById($productId);
+
+        if (!$product) {
+            return 0;
+        }
+
+        $pendingQty = $this->getPendingQty($productId);
+
+        return max(0, $product['stock'] - $pendingQty);
+    }
+
+    public function getProductsWithAvailableStock($search = null, $categoryId = null)
+    {
+        $products = $this->getFilteredProducts($search, $categoryId);
+
+        foreach ($products as &$p) {
+            $p['available_stock'] = $this->getAvailableStock($p['id']);
+        }
+
+        return $products;
+    }
 
     // FILTER + SEARCH PRODUK (UNTUK CUSTOMER)
     public function getFilteredProducts($search = null, $categoryId = null)
     {
         $sql = "
-        SELECT p.*, c.name AS category_name
-        FROM products p
-        JOIN categories c ON c.id = p.category_id
-        WHERE p.is_active = 1
-    ";
+    SELECT 
+        p.*,
+        c.name AS category_name,
+        u.name AS seller_name
+    FROM products p
+    JOIN categories c ON c.id = p.category_id
+    JOIN users u ON u.id = p.seller_id
+    WHERE p.is_active = 1
+";
 
         $params = [];
 

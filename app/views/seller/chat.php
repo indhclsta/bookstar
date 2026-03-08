@@ -386,14 +386,28 @@
       });
   }
 
-  updateSidebarBadges();
-  setInterval(updateSidebarBadges, 5000);
-
   // Jalankan pertama kali
   updateSidebarBadges();
 
   // Update tiap 5 detik
   setInterval(updateSidebarBadges, 5000);
+  // =====================
+  // Sidebar Chat Search
+  // =====================
+  const chatSearchInput = document.querySelector('input[placeholder="Search chats..."]');
+  if (chatSearchInput) {
+    chatSearchInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      const chatItems = document.querySelectorAll('.col-12.col-md-4 a');
+
+      chatItems.forEach(item => {
+        const nameElem = item.querySelector('h6');
+        const name = nameElem ? nameElem.textContent.toLowerCase() : '';
+        item.style.display = name.includes(searchTerm) ? 'block' : 'none';
+      });
+    });
+  }
 </script>
+
 
 <?php require APP_PATH . '/views/layouts/seller/footer.php'; ?>

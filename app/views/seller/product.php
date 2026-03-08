@@ -346,7 +346,7 @@
       document.getElementById('editCategory').value = this.dataset.category;
       document.getElementById('editPrice').value = this.dataset.price;
       document.getElementById('editCost').value = this.dataset.cost;
-      document.getElementById('editStock').value = this.dataset.stock;
+      document.getElementById('editStock').value = 0;
       document.getElementById('editDescription').value = this.dataset.description;
     });
   });

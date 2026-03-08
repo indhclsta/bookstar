@@ -276,7 +276,7 @@ class AdminController
             die('Invalid request');
         }
 
-        $id     = $_POST['id'];
+        $id     = $_POST['id'] ?? null;
         $seller = $this->userModel->findById($id);
 
         if (!$seller || $seller['role_id'] != 2) {
@@ -287,7 +287,6 @@ class AdminController
 
         /* ================= FOTO ================= */
         $photoName = $seller['photo'];
-
         if (!empty($_FILES['photo']['name'])) {
             $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
             $photoName = uniqid('seller_') . '.' . $ext;
@@ -305,7 +304,6 @@ class AdminController
 
         /* ================= QRIS ================= */
         $qrisName = $_POST['old_qris'] ?? $seller['qris_image'];
-
         if (!empty($_FILES['qris_image']['name'])) {
             $ext = strtolower(pathinfo($_FILES['qris_image']['name'], PATHINFO_EXTENSION));
             $qrisName = 'qris_' . time() . '.' . $ext;
@@ -324,12 +322,12 @@ class AdminController
         /* ================= DATA ================= */
         $data = [
             'id'          => $id,
-            'name'        => trim($_POST['name']),
-            'email'       => trim($_POST['email']),
-            'no_tlp'   => trim($_POST['no_tlp']),
-            'nik'         => trim($_POST['nik']),
-            'address'     => trim($_POST['address']),
-            'no_rekening' => trim($_POST['no_rekening']),
+            'name'        => trim($_POST['name'] ?? ''),
+            'email'       => trim($_POST['email'] ?? ''),
+            'no_tlp'      => trim($_POST['no_tlp'] ?? ''),
+            'nik'         => !empty($_POST['nik']) ? trim($_POST['nik']) : null,
+            'address'     => trim($_POST['address'] ?? ''),
+            'no_rekening' => !empty($_POST['no_rekening']) ? trim($_POST['no_rekening']) : null,
             'qris_image'  => $qrisName,
             'photo'       => $photoName
         ];
@@ -338,10 +336,17 @@ class AdminController
             $data['password'] = $_POST['password'];
         }
 
+        $updated = $this->userModel->updateSeller($data);
 
-        $this->userModel->updateSeller($data);
+        if ($updated) {
+            $_SESSION['success'] = 'Data seller berhasil diperbarui';
+        } else {
+            // Ambil error dari session jika ada
+            if (!isset($_SESSION['error'])) {
+                $_SESSION['error'] = 'Gagal memperbarui data seller';
+            }
+        }
 
-        $_SESSION['success'] = 'Data seller berhasil diperbarui';
         header('Location: ' . BASE_URL . '/?c=admin&m=seller');
         exit;
     }
@@ -415,13 +420,30 @@ class AdminController
             die('Invalid request');
         }
 
-        if ($this->userModel->emailExists($_POST['email'])) {
+        // Validasi wajib
+        $name       = trim($_POST['name'] ?? '');
+        $email      = trim($_POST['email'] ?? '');
+        $no_tlp     = trim($_POST['no_tlp'] ?? '');
+        $password   = $_POST['password'] ?? '';
+        $nik        = !empty($_POST['nik']) ? trim($_POST['nik']) : null;
+        $address    = trim($_POST['address'] ?? '');
+        $no_rekening = !empty($_POST['no_rekening']) ? trim($_POST['no_rekening']) : null;
+
+        // Cek duplikat email
+        if ($this->userModel->emailExists($email)) {
             $_SESSION['error'] = 'Email sudah terdaftar';
             header('Location: ' . BASE_URL . '/?c=admin&m=seller');
             exit;
         }
 
-        /* Upload FOTO */
+        // Cek duplikat NIK
+        if ($nik && $this->userModel->findByNik($nik)) {
+            $_SESSION['error'] = 'NIK sudah digunakan';
+            header('Location: ' . BASE_URL . '/?c=admin&m=seller');
+            exit;
+        }
+
+        /* ================= FOTO ================= */
         $photoName = null;
         if (!empty($_FILES['photo']['name'])) {
             $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
@@ -432,7 +454,7 @@ class AdminController
             );
         }
 
-        /* Upload QRIS */
+        /* ================= QRIS ================= */
         $qrisName = null;
         if (!empty($_FILES['qris_image']['name'])) {
             $ext = strtolower(pathinfo($_FILES['qris_image']['name'], PATHINFO_EXTENSION));
@@ -443,20 +465,20 @@ class AdminController
             );
         }
 
+        /* ================= SIMPAN DATA ================= */
         $this->userModel->createSeller([
-            'name'        => trim($_POST['name']),
-            'email'       => trim($_POST['email']),
-            'no_tlp'      => trim($_POST['no_tlp']),
-            'password'    => password_hash($_POST['password'], PASSWORD_DEFAULT),
-            'nik'         => trim($_POST['nik']),
-            'address'     => trim($_POST['address']),
-            'no_rekening' => trim($_POST['no_rekening']),
+            'name'        => $name,
+            'email'       => $email,
+            'no_tlp'      => $no_tlp,
+            'password'    => password_hash($password, PASSWORD_DEFAULT),
+            'nik'         => $nik,
+            'address'     => $address,
+            'no_rekening' => $no_rekening,
             'qris_image'  => $qrisName,
             'photo'       => $photoName,
-            'role_id'     => 2,        // penting!
-            'is_online'   => 0          // tambahkan kalau di DB ada kolom NOT NULL
+            'role_id'     => 2,        // seller
+            'is_online'   => 0          // default offline
         ]);
-
 
         $_SESSION['success'] = 'Seller berhasil ditambahkan';
         header('Location: ' . BASE_URL . '/?c=admin&m=seller');

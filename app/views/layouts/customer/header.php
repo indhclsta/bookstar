@@ -22,7 +22,7 @@ $unreadCount  = 0;
 
 if (isset($_SESSION['user'])) {
   $notificationModel = new NotificationModel();
-  $notifications = $notificationModel->getByUser($_SESSION['user']['id'], 5);
+  $notifications = $notificationModel->getByUser($_SESSION['user']['id']);
   $unreadCount  = $notificationModel->countUnread($_SESSION['user']['id']);
 }
 

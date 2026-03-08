@@ -44,13 +44,13 @@
           <div class="menu-title">Seller</div>
         </a>
       </li>
-      <li>
+      <!-- <li>
         <a href="<?= BASE_URL ?>/?c=sellerCategory&m=index">
           <div class="parent-icon"><i class="material-icons-outlined">category</i>
           </div>
           <div class="menu-title">Manage Category</div>
         </a>
-      </li>
+      </li> -->
       <li>
       <li>
         <a href="javascript:;" class="has-arrow">
@@ -63,7 +63,7 @@
           </li>
           <li><a href="<?= BASE_URL ?>/?c=sellerProduct&m=index"><i class="material-icons-outlined">arrow_right</i>Products</a>
           </li>
-          <li><a href="<?= BASE_URL ?>/?c=sellerOrder&m=index"><i class="material-icons-outlined">arrow_right</i>Approve</a>
+          <li><a href="<?= BASE_URL ?>/?c=sellerOrder&m=index"><i class="material-icons-outlined">arrow_right</i>Order Verification</a>
           </li>
         </ul>
       </li>

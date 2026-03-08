@@ -20,11 +20,10 @@
             <div class="flex-grow-1 overflow-auto" style="background-color: #141B2B;">
               <?php if (!empty($sellers)): ?>
                 <?php foreach ($sellers as $s): ?>
-                  <a href="<?= BASE_URL ?>/?c=customerChat&m=index&userId=<?= $s['id'] ?>" class="text-decoration-none">
-
+                  <a href="<?= BASE_URL ?>/?c=customerChat&m=index&userId=<?= $s['id'] ?>" class="text-decoration-none chat-link">
                     <div class="p-3"
                       style="border-bottom: 1px solid #1E2A3A;
-          <?= ($chatWith['id'] == $s['id']) ? 'background-color: #1E3A5F;' : 'background-color: #141B2B;' ?>">
+      <?= ($chatWith['id'] == $s['id']) ? 'background-color: #1E3A5F;' : 'background-color: #141B2B;' ?>">
 
                       <div class="d-flex align-items-center">
 
@@ -342,90 +341,73 @@
     document.querySelector('.col-md-4').classList.toggle('show');
   }
 
-  // Scroll to bottom function
   function scrollToBottom() {
     const chatBox = document.getElementById('chatBox');
-    if (chatBox) {
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+    if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
   }
 
-  // Scroll to bottom on page load
   document.addEventListener('DOMContentLoaded', function() {
     setTimeout(scrollToBottom, 200);
+
+    // Search chat
+    const chatSearchInput = document.querySelector('input[placeholder="Search chats..."]');
+    if (chatSearchInput) {
+      chatSearchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const chatItems = document.querySelectorAll('.chat-link');
+        chatItems.forEach(item => {
+          const nameElem = item.querySelector('h6');
+          const name = nameElem ? nameElem.textContent.toLowerCase() : '';
+          item.style.display = name.includes(searchTerm) ? '' : 'none';
+        });
+      });
+    }
   });
 
   // Auto refresh messages
   <?php if (!empty($chatWith['id'])): ?>
-    let lastMessageCount = <?= count($messages) ?>;
     setInterval(function() {
       fetch('<?= BASE_URL ?>/?c=customerChat&m=getMessages&userId=<?= $chatWith['id'] ?>')
-        .then(response => response.text())
+        .then(r => r.text())
         .then(html => {
-          const tempDiv = document.createElement('div');
-          tempDiv.innerHTML = html;
-          const newMessages = tempDiv.querySelector('#chatBox')?.innerHTML;
+          const temp = document.createElement('div');
+          temp.innerHTML = html;
+          const newMessages = temp.querySelector('#chatBox')?.innerHTML;
           const chatBox = document.getElementById('chatBox');
-
           if (newMessages && chatBox && chatBox.innerHTML !== newMessages) {
-            const wasAtBottom = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 100;
+            const atBottom = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 100;
             chatBox.innerHTML = newMessages;
-            if (wasAtBottom) {
-              setTimeout(scrollToBottom, 100);
-            }
+            if (atBottom) setTimeout(scrollToBottom, 100);
           }
         });
     }, 5000);
   <?php endif; ?>
 
+  // Update unread badge
   function updateSidebarBadges() {
     fetch('<?= BASE_URL ?>/?c=customerChat&m=getUnreadPerUser')
       .then(res => res.json())
       .then(data => {
-
-        // Reset semua badge dulu
         document.querySelectorAll('.unread-badge').forEach(b => {
           b.style.display = 'none';
+          const name = b.closest('.ms-3').querySelector('h6');
+          if (name) name.classList.remove('fw-bold');
         });
-
         data.forEach(item => {
-          const badge = document.querySelector(
-            `.unread-badge[data-user-id="${item.sender_id}"]`
-          );
-
+          const badge = document.querySelector(`.unread-badge[data-user-id="${item.sender_id}"]`);
           if (badge) {
             badge.textContent = item.total;
             badge.style.display = 'inline-block';
+            const name = badge.closest('.ms-3').querySelector('h6');
+            if (name) name.classList.add('fw-bold');
           }
         });
       });
   }
 
-  // Jalankan pertama kali
+  // Jalankan pertama kali + interval
   updateSidebarBadges();
-
-  // Update tiap 5 detik
   setInterval(updateSidebarBadges, 5000);
-
-  document.querySelectorAll('.unread-badge').forEach(b => {
-    b.style.display = 'none';
-    const name = b.closest('.ms-3').querySelector('h6');
-    name.classList.remove('fw-bold');
-  });
-
-  data.forEach(item => {
-    const badge = document.querySelector(
-      `.unread-badge[data-user-id="${item.sender_id}"]`
-    );
-
-    if (badge) {
-      badge.textContent = item.total;
-      badge.style.display = 'inline-block';
-
-      const name = badge.closest('.ms-3').querySelector('h6');
-      name.classList.add('fw-bold');
-    }
-  });
 </script>
 
 <?php require APP_PATH . '/views/layouts/customer/footer.php'; ?>

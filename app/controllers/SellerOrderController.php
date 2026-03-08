@@ -4,7 +4,7 @@ require_once APP_PATH . '/core/auth.php';
 require_once APP_PATH . '/models/OrderModel.php';
 require_once APP_PATH . '/models/OrderItemModel.php';
 require_once APP_PATH . '/models/ProductModel.php';
-require_once APP_PATH . '/models/NotificationModel.php'; 
+require_once APP_PATH . '/models/NotificationModel.php';
 
 class SellerOrderController
 {
@@ -48,6 +48,14 @@ class SellerOrderController
                 );
             }
 
+            $availableStock = $productModel->getAvailableStock($item['product_id']);
+
+            if ($item['quantity'] > $availableStock) {
+                $_SESSION['error'] = "Stok tidak mencukupi";
+                header("Location: " . BASE_URL . "/?c=sellerOrder&m=index");
+                return;
+            }
+
             // update status
             $this->orderModel->updateApproval($orderId, 'approved');
 
@@ -69,20 +77,35 @@ class SellerOrderController
     public function reject()
     {
         if (isset($_GET['id'])) {
+
             $orderId = $_GET['id'];
             $reason  = $_GET['reason'] ?? null;
 
+            $orderItemModel = new OrderItemModel();
+            $productModel   = new ProductModel();
+
+            // ambil data order
+            $order = $this->orderModel->findById($orderId);
+
+            // ambil semua item order
+            $items = $orderItemModel->getByOrderId($orderId);
+
+            // 🔹 kembalikan stok untuk semua item
+            foreach ($items as $item) {
+                $productModel->returnStock($item['product_id'], $item['quantity']);
+            }
+
+            // update status ke rejected
             $this->orderModel->updateApproval($orderId, 'rejected', $reason);
 
             // 🔔 NOTIFIKASI KE CUSTOMER
-            $order = $this->orderModel->findById($orderId);
             $notificationModel = new NotificationModel();
             $notificationModel->create([
                 'user_id' => $order['customer_id'],
                 'title'   => 'Pesanan Ditolak',
                 'message' => 'Pesanan dengan kode ' . $order['order_code'] .
-                             ' ditolak oleh penjual.' .
-                             ($reason ? ' Alasan: ' . $reason : ''),
+                    ' ditolak oleh penjual.' .
+                    ($reason ? ' Alasan: ' . $reason : ''),
                 'link'    => BASE_URL . '/?c=customerOrder&m=index'
             ]);
 

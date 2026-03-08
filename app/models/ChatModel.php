@@ -69,22 +69,33 @@ class ChatModel
         return $result['total'] ?? 0;
     }
 
+    public function getChatUsersBySeller($sellerId)
+    {
+        $stmt = $this->db->prepare("
+            SELECT DISTINCT u.id, u.name, u.photo
+            FROM users u
+            JOIN chats c
+              ON (c.sender_id = u.id AND c.receiver_id = :seller_id)
+              OR (c.receiver_id = u.id AND c.sender_id = :seller_id)
+            WHERE u.id != :seller_id
+            ORDER BY c.created_at DESC
+        ");
+
+        $stmt->execute([':seller_id' => $sellerId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function getLastMessage($userId, $otherUserId)
     {
-        $sql = "SELECT 
-                id,
-                sender_id,
-                receiver_id,
-                message,
-                is_read,
-                created_at
-            FROM chats 
+        $stmt = $this->db->prepare("
+            SELECT *
+            FROM chats
             WHERE (sender_id = :userId AND receiver_id = :otherUserId)
                OR (sender_id = :otherUserId AND receiver_id = :userId)
             ORDER BY created_at DESC
-            LIMIT 1";
+            LIMIT 1
+        ");
 
-        $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':userId' => $userId,
             ':otherUserId' => $otherUserId
@@ -172,12 +183,12 @@ class ChatModel
         SELECT sender_id, COUNT(*) as total
         FROM chats
         WHERE receiver_id = :userId
-        AND is_read = 0
+          AND sender_id != :userId
+          AND is_read = 0
         GROUP BY sender_id
     ");
 
         $stmt->execute([':userId' => $userId]);
-
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     public function getUnreadCount($userId)
@@ -194,16 +205,16 @@ class ChatModel
         return $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
     }
     public function getTotalUnread($userId)
-{
-    $stmt = $this->db->prepare("
+    {
+        $stmt = $this->db->prepare("
         SELECT COUNT(*) 
         FROM chats 
         WHERE receiver_id = :userId
         AND is_read = 0
     ");
 
-    $stmt->execute([':userId' => $userId]);
+        $stmt->execute([':userId' => $userId]);
 
-    return $stmt->fetchColumn();
-}
+        return $stmt->fetchColumn();
+    }
 }

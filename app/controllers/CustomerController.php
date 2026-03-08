@@ -28,10 +28,10 @@ class CustomerController
     }
 
     public function dashboard()
-{
-    $stats = $this->userModel->getCustomerDashboardStats($this->customerId);
-    require APP_PATH . '/views/customer/dashboard.php';
-}
+    {
+        $stats = $this->userModel->getCustomerDashboardStats($this->customerId);
+        require APP_PATH . '/views/customer/dashboard.php';
+    }
 
 
     public function profile()
@@ -107,7 +107,13 @@ class CustomerController
         $search   = $_GET['search'] ?? null;
         $category = $_GET['category'] ?? null;
 
-        $products   = $this->productModel->getFilteredProducts($search, $category);
+        $products = $this->productModel->getFilteredProducts($search, $category);
+
+        // ✅ Tambahkan ini supaya stok UI update
+        foreach ($products as &$p) {
+            $p['available_stock'] = $this->productModel->getAvailableStock($p['id']);
+        }
+
         $categories = $this->categoryModel->getActiveCategoriesForCustomer();
 
         require APP_PATH . '/views/customer/order.php';
