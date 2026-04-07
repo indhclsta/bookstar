@@ -6,8 +6,8 @@ error_reporting(E_ALL);
 
 require_once '../config/config.php';
 
-$controller = $_GET['c'] ?? 'auth';
-$method     = $_GET['m'] ?? 'login';
+$controller = $_GET['c'] ?? 'home';
+$method     = $_GET['m'] ?? 'index';
 
 $controller = preg_replace('/[^a-zA-Z]/', '', $controller);
 $method     = preg_replace('/[^a-zA-Z_]/', '', $method);

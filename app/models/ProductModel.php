@@ -307,4 +307,18 @@ class ProductModel
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function getPopularProducts()
+{
+    $stmt = $this->db->prepare("
+        SELECT p.*, u.name as seller_name, c.name as category_name
+        FROM products p
+        JOIN users u ON p.seller_id = u.id
+        JOIN categories c ON p.category_id = c.id
+        WHERE p.is_active = 1
+        ORDER BY p.id DESC
+        LIMIT 8
+    ");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }
