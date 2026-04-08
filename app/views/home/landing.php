@@ -463,10 +463,6 @@
     
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mx-auto">
-        <li class="nav-item"><a class="nav-link" href="#home">Beranda</a></li>
-        <li class="nav-item"><a class="nav-link" href="#categories">Kategori</a></li>
-        <li class="nav-item"><a class="nav-link" href="#products">Buku</a></li>
-        <li class="nav-item"><a class="nav-link" href="#features">Fitur</a></li>
       </ul>
       <div>
         <a href="<?= BASE_URL ?>/?c=auth&m=login" class="btn btn-outline-light me-2">Login</a>
@@ -481,7 +477,7 @@
   <div class="container">
     <div class="row align-items-center">
       <div class="col-lg-6">
-        <span class="hero-badge">✨ #1 Toko Buku Online Terpercaya</span>
+        <span class="hero-badge"> #1 Toko Buku Online Terpercaya</span>
         <h1 class="hero-title">
           Dunia Buku dalam<br>
           Genggamanmu
@@ -499,20 +495,6 @@
           </a>
         </div>
         
-        <div class="hero-stats">
-          <div class="stat-item">
-            <h3>10K+</h3>
-            <p>Buku Tersedia</p>
-          </div>
-          <div class="stat-item">
-            <h3>5K+</h3>
-            <p>Member Aktif</p>
-          </div>
-          <div class="stat-item">
-            <h3>100%</h3>
-            <p>Kepuasan</p>
-          </div>
-        </div>
       </div>
 
       <div class="col-lg-6 text-center hero-image">
@@ -532,21 +514,21 @@
   <div class="row g-4">
     <div class="col-md-4">
       <div class="feature-card">
-        <div class="feature-icon">🚀</div>
+        <div class="feature-icon"></div>
         <h5 class="feature-title">Cepat & Mudah</h5>
         <p class="feature-desc">Proses belanja simpel tanpa ribet, pesanan diproses cepat</p>
       </div>
     </div>
     <div class="col-md-4">
       <div class="feature-card">
-        <div class="feature-icon">📚</div>
+        <div class="feature-icon"></div>
         <h5 class="feature-title">Koleksi Lengkap</h5>
         <p class="feature-desc">Ribuan judul buku dari berbagai kategori tersedia</p>
       </div>
     </div>
     <div class="col-md-4">
       <div class="feature-card">
-        <div class="feature-icon">🔒</div>
+        <div class="feature-icon"></div>
         <h5 class="feature-title">Aman & Terpercaya</h5>
         <p class="feature-desc">Transaksi aman dengan sistem pembayaran terenkripsi</p>
       </div>
@@ -554,71 +536,11 @@
   </div>
 </section>
 
-<!-- KATEGORI SECTION -->
-<section id="categories" class="container py-5">
-  <div class="section-header">
-    <h4 class="section-title">Kategori Populer</h4>
-    <p class="section-subtitle">Temukan buku favoritmu berdasarkan kategori</p>
-  </div>
-
-  <div class="row g-4">
-    <?php foreach ($categories as $index => $cat): ?>
-      <div class="col-md-3 col-6 category-wrapper">
-        <div class="category-card">
-          <div class="category-icon">
-            <?php 
-              $icons = ['📖', '📘', '📚', '📗', '📕', '📙', '📓', '📔'];
-              echo $icons[$index % count($icons)];
-            ?>
-          </div>
-          <div class="category-name"><?= htmlspecialchars($cat['name']) ?></div>
-          <div class="category-count"><?= isset($cat['count']) ? $cat['count'] . ' Buku' : 'Tersedia' ?></div>
-        </div>
-      </div>
-    <?php endforeach; ?>
-  </div>
-</section>
-
-<!-- PRODUK SECTION -->
-<section id="products" class="container py-5">
-  <div class="section-header">
-    <h4 class="section-title">Buku Terbaru 🔥</h4>
-    <p class="section-subtitle">Rekomendasi buku terbaik untuk para pecinta buku</p>
-  </div>
-
-  <div class="row g-4">
-    <?php foreach ($products as $p): ?>
-      <div class="col-md-3 col-6">
-        <div class="product-card">
-          <div class="product-img-wrapper">
-            <?php if (!empty($p['image'])): ?>
-              <img src="<?= BASE_URL ?>/uploads/products/<?= $p['image'] ?>" class="product-img" alt="<?= htmlspecialchars($p['name']) ?>">
-            <?php else: ?>
-              <div class="d-flex align-items-center justify-content-center h-100" style="background: linear-gradient(135deg, #334155, #1e293b);">
-                <span style="font-size: 3rem;">📘</span>
-              </div>
-            <?php endif; ?>
-            <span class="product-badge">New</span>
-          </div>
-          
-          <div class="product-body">
-            <div class="product-category"><?= htmlspecialchars($p['category_name'] ?? 'Buku') ?></div>
-            <h6 class="product-title"><?= htmlspecialchars($p['name']) ?></h6>
-            <div class="product-price">Rp <?= number_format($p['price'], 0, ',', '.') ?></div>
-            <a href="<?= BASE_URL ?>/?c=auth&m=login" class="btn btn-detail">
-              Lihat Detail →
-            </a>
-          </div>
-        </div>
-      </div>
-    <?php endforeach; ?>
-  </div>
-</section>
 
 <!-- CTA SECTION -->
 <section class="container">
   <div class="cta-section text-center">
-    <h2 class="cta-title">Mulai Perjalanan Membaca Kamu 🚀</h2>
+    <h2 class="cta-title">Mulai Perjalanan Membaca Kamu</h2>
     <p class="hero-subtitle mb-4" style="max-width: 600px; margin: 0 auto 30px;">
       Ribuan buku menunggu untuk kamu jelajahi. Daftar sekarang!
     </p>
@@ -633,7 +555,7 @@
   <div class="container">
     <div class="row">
       <div class="col-md-4 mb-4">
-        <div class="footer-brand">📚 BookStar</div>
+        <div class="footer-brand">BookStar</div>
         <p class="footer-text">
           Toko Buku Online Modern dengan koleksi terlengkap dan pelayanan terbaik untuk para pecinta buku di Indonesia.
         </p>
